@@ -308,7 +308,7 @@ const UserProfileScreen = ({ navigation }) => {
                         broad={false}
                         title="Your Productivity Analytics"
                         icon="Productivity"
-                        navTo={() => { comingSoonSheetRef.current?.show() }}
+                        navTo={() => { navigation.navigate("ProductivityAnalytics") }}
                     />
                 </View>
                 {/* Theme and Reminders Settings */}

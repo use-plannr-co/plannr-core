@@ -102,14 +102,14 @@
   - show success/failure messages
 
 ## Phase 4 — Feature gating rollout
-- [ ] Add `ProGate` component and `requirePro` helper.
-- [ ] Gate at least:
+- [x] Add `ProGate` component and `requirePro` helper.
+- [x] Gate at least:
   - `ProductivityAnalyticsScreen` entry (currently effectively placeholder/coming-soon target)
   - any advanced strategy/AI/integration features designated as Pro
-- [ ] UX for locked features:
+- [x] UX for locked features:
   - show upsell state with “Unlock Pro” button
   - route to paywall screen/modal with context payload (`source`, `featureKey`)
-- [ ] Keep non-Pro flows functional and navigation-safe.
+- [x] Keep non-Pro flows functional and navigation-safe.
 
 ## Phase 5 — Backend/DB sync and webhooks
 
