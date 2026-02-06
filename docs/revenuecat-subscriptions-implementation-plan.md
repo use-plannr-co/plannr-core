@@ -86,18 +86,18 @@
 - [x] Wire provider into `App.js` provider tree (near `AppStateProvider`).
 
 ## Phase 3 — Paywall + purchase flows
-- [ ] Add `ProPaywallScreen` under `src/screens/`.
-- [ ] Fetch offering `default`; map packages `$rc_monthly` and `$rc_annual`.
-- [ ] UI:
+- [x] Add `ProPaywallScreen` under `src/screens/`.
+- [x] Fetch offering `default`; map packages `$rc_monthly` and `$rc_annual`.
+- [x] UI:
   - monthly + annual options
   - annual highlighted as “Best value”
   - purchase CTA, restore CTA
   - legal/terms copy + manage subscription link
-- [ ] Purchase flow:
+- [x] Purchase flow:
   - call `purchasePackage`
   - handle user-cancel distinctly (no scary error)
   - on success, refresh customer info and dismiss paywall if `isPro=true`
-- [ ] Restore flow:
+- [x] Restore flow:
   - call `restorePurchases`
   - show success/failure messages
 

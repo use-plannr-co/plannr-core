@@ -195,18 +195,31 @@ class SubscriptionService {
 
         console.log('👂 SubscriptionService: Adding customer info listener');
 
-        // Add to internal tracking
-        this._customerInfoListeners.push(callback);
+        try {
+            // Add to internal tracking
+            this._customerInfoListeners.push(callback);
 
-        // Subscribe to RevenueCat updates
-        Purchases.addCustomerInfoUpdateListener(callback);
+            // Subscribe to RevenueCat updates
+            Purchases.addCustomerInfoUpdateListener(callback);
 
-        // Return unsubscribe function
-        return () => {
-            console.log('🔇 SubscriptionService: Removing customer info listener');
-            this._customerInfoListeners = this._customerInfoListeners.filter(cb => cb !== callback);
-            Purchases.removeCustomerInfoUpdateListener(callback);
-        };
+            // Return unsubscribe function
+            return () => {
+                console.log('🔇 SubscriptionService: Removing customer info listener');
+                this._customerInfoListeners = this._customerInfoListeners.filter(cb => cb !== callback);
+                
+                try {
+                    Purchases.removeCustomerInfoUpdateListener(callback);
+                } catch (error) {
+                    console.warn('⚠️ Error removing listener:', error.message);
+                }
+            };
+        } catch (error) {
+            console.error('❌ Failed to add customer info listener:', error);
+            // Return a no-op unsubscribe function
+            return () => {
+                this._customerInfoListeners = this._customerInfoListeners.filter(cb => cb !== callback);
+            };
+        }
     }
 
     /**

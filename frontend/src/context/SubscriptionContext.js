@@ -104,11 +104,17 @@ export const SubscriptionProvider = ({ children }) => {
                 }
 
                 // Setup listener for customer info updates
-                unsubscribe = SubscriptionService.addCustomerInfoListener((updatedCustomerInfo) => {
-                    console.log('📱 SubscriptionProvider: Customer info updated');
-                    setCustomerInfo(updatedCustomerInfo);
-                    setSubscriptionState(deriveSubscriptionState(updatedCustomerInfo));
-                });
+                // Wrap in try-catch to handle potential NativeEventEmitter errors
+                try {
+                    unsubscribe = SubscriptionService.addCustomerInfoListener((updatedCustomerInfo) => {
+                        console.log('📱 SubscriptionProvider: Customer info updated');
+                        setCustomerInfo(updatedCustomerInfo);
+                        setSubscriptionState(deriveSubscriptionState(updatedCustomerInfo));
+                    });
+                } catch (listenerError) {
+                    console.warn('⚠️ SubscriptionProvider: Could not set up listener:', listenerError.message);
+                    // Continue without listener - state updates will happen on manual refresh
+                }
 
                 console.log('✅ SubscriptionProvider: Initialization complete');
                 setIsReady(true);

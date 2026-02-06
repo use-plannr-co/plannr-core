@@ -308,7 +308,7 @@ export const useAuthenticatedAPI = () => {
         // Days-based schedule saving (new architecture)
         saveScheduleWithDays: async (scheduleObject, scheduleName, strategy = 'earliest-fit', startTime = 900, endTime = 1700) => {
             try {
-                console.log('📤 Saving schedule with days-based architecture...');
+                // console.log('📤 Saving schedule with days-based architecture...');
                 
                 // 1. Convert schedule to backend format and create the schedule
                 const scheduleData = {
@@ -555,7 +555,7 @@ export const useAuthenticatedAPI = () => {
                     const dependenciesResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/dependencies`);
                     if (dependenciesResponse.success && dependenciesResponse.data) {
                         dependenciesMap = dependenciesResponse.data.dependenciesMap;
-                        console.log('✅ Retrieved dependencies for schedule:', scheduleId);
+                        // console.log('✅ Retrieved dependencies for schedule:', scheduleId);
                     }
                 } catch (depError) {
                     console.warn('Failed to retrieve dependencies for schedule:', scheduleId, depError);
@@ -740,8 +740,8 @@ export const useAuthenticatedAPI = () => {
                                         const dependenciesResponse = await makeAuthenticatedRequest(`/api/schedules/${savedSchedule.backendId}/dependencies`);
                                         if (dependenciesResponse.success && dependenciesResponse.data) {
                                             dependenciesMap = dependenciesResponse.data.dependenciesMap;
-                                            console.log('✅ Retrieved dependencies for schedule:', savedSchedule.backendId);
-                                            console.log('Dependencies Map:', dependenciesMap);
+                                            // console.log('✅ Retrieved dependencies for schedule:', savedSchedule.backendId);
+                                            // console.log('Dependencies Map:', dependenciesMap);
                                         }
                                     } catch (depError) {
                                         console.warn('Failed to retrieve dependencies for schedule:', savedSchedule.backendId, depError);
@@ -864,7 +864,7 @@ export const useAuthenticatedAPI = () => {
                     const dependenciesResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/dependencies`);
                     if (dependenciesResponse.success && dependenciesResponse.data) {
                         dependenciesMap = dependenciesResponse.data.dependenciesMap;
-                        console.log('✅ Retrieved dependencies for schedule:', scheduleId);
+                        // console.log('✅ Retrieved dependencies for schedule:', scheduleId);
                     }
                 } catch (depError) {
                     console.warn('Failed to retrieve dependencies for schedule:', scheduleId, depError);
@@ -942,7 +942,7 @@ export const useAuthenticatedAPI = () => {
                     throw new Error('Failed to parse reconstructed schedule');
                 }
 
-                console.log(`✅ Successfully loaded Schedule object for ID: ${scheduleId}`);
+                // console.log(`✅ Successfully loaded Schedule object for ID: ${scheduleId}`);
                 return reconstructedSchedule;
 
             } catch (error) {
