@@ -7,6 +7,7 @@ import {
 import { serializeTimeBlock, parseTimeBlock } from '../persistence/TimeBlockHandler';
 import { serializeScheduleDate } from '../persistence/ScheduleDateHandler';
 import ScheduleDate from '../model/ScheduleDate';
+import FlexibleEvent from '../model/FlexibleEvent.js';
 import { apiClient } from './apiClient';
 
 // Global update handler - will be set by the context
@@ -1121,8 +1122,6 @@ export const useAuthenticatedAPI = () => {
                 console.log(`✅ Parse successful: ${drafts.length} tasks parsed from ${meta?.inputStats?.itemsDetected || 'unknown'} detected items`);
 
                 // Step 2: Convert drafts to FlexibleEvent instances
-                const { default: FlexibleEvent } = await import('../model/FlexibleEvent.js');
-                const { default: ScheduleDate } = await import('../model/ScheduleDate.js');
                 
                 const flexibleEvents = drafts.map(draft => {
                     // Handle deadline conversion from backend format to ScheduleDate
