@@ -61,29 +61,29 @@
 - [ ] Decide webhook-first vs app-sync-first for this PR based on backend deployment readiness.
 
 ## Phase 1 — SDK installation & config (Expo + iOS)
-- [ ] Add dependency: `react-native-purchases`.
-- [ ] Ensure Expo prebuild compatibility (already uses custom dev client/native folders, so native module integration is expected).
-- [ ] Add public SDK key env var: `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY`.
-- [ ] Add backend env vars for webhook verification (if webhook path included): `REVENUECAT_WEBHOOK_SECRET`.
-- [ ] Initialize RevenueCat once after auth/bootstrap:
+- [x] Add dependency: `react-native-purchases`.
+- [x] Ensure Expo prebuild compatibility (already uses custom dev client/native folders, so native module integration is expected).
+- [x] Add public SDK key env var: `EXPO_PUBLIC_REVENUECAT_IOS_API_KEY`.
+- [x] Add backend env vars for webhook verification (if webhook path included): `REVENUECAT_WEBHOOK_SECRET`.
+- [x] Initialize RevenueCat once after auth/bootstrap:
   - configure with iOS API key
   - set log level in dev
   - log in with Clerk user id
   - fetch initial `CustomerInfo`
 
 ## Phase 2 — Subscription state layer
-- [ ] Create `SubscriptionService` (frontend `src/services/subscription/`) with methods:
+- [x] Create `SubscriptionService` (frontend `src/services/subscription/`) with methods:
   - `init(appUserId)`
   - `fetchOfferings()`
   - `purchasePackage(pkg)`
   - `restorePurchases()`
   - `refreshCustomerInfo()`
-- [ ] Implement `SubscriptionProvider` with:
+- [x] Implement `SubscriptionProvider` with:
   - cached `customerInfo`, `isPro`, `activeEntitlements`, `activeProductIds`, `managementURL`
   - loading/error state
   - listener registration via RevenueCat customer info update listener
-- [ ] Implement derived entitlement check only on `entitlements.active['plannr_pro']`.
-- [ ] Wire provider into `App.js` provider tree (near `AppStateProvider`).
+- [x] Implement derived entitlement check only on `entitlements.active['plannr_pro']`.
+- [x] Wire provider into `App.js` provider tree (near `AppStateProvider`).
 
 ## Phase 3 — Paywall + purchase flows
 - [ ] Add `ProPaywallScreen` under `src/screens/`.

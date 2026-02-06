@@ -2,6 +2,7 @@ import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppStateProvider } from './src/context/AppStateContext.js';
 import { AppUpdateProvider, useAppUpdate } from './src/context/AppUpdateContext.js';
+import { SubscriptionProvider } from './src/context/SubscriptionContext.js';
 import TaskCompletionChecker from './src/notifications/TaskCompletionChecker.js';
 import NotificationService from './src/notifications/NotificationService.js';
 import 'react-native-gesture-handler';
@@ -65,12 +66,14 @@ const AppContent = () => {
 
     return (
         <View style={{ flex: 1 }}>
-            <AppStateProvider>
-                <TaskCompletionChecker />
-                <SafeAreaProvider>
-                    <RootNavigator />
-                </SafeAreaProvider>
-            </AppStateProvider>
+            <SubscriptionProvider>
+                <AppStateProvider>
+                    <TaskCompletionChecker />
+                    <SafeAreaProvider>
+                        <RootNavigator />
+                    </SafeAreaProvider>
+                </AppStateProvider>
+            </SubscriptionProvider>
         </View>
     );
 };
