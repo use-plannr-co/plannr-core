@@ -287,16 +287,20 @@ const UserProfileScreen = ({ navigation }) => {
                 </View>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND, marginBottom: 4 }}>
                     <MenuButton
-                        broad={true}
                         title="Manage Your Account"
                         icon="Profile"
                         navTo={() => { navigation.navigate("ManageAccount") }}
+                    />
+                    <MenuButton
+                        title="Plannr Pro"
+                        icon="Pro"
+                        navTo={() => { navigation.navigate("ProPaywall") }}
                     />
                 </View>
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}>
                     <MenuButton
                         broad={false}
-                        title="Archived Schedules"
+                        title="Saved Schedules"
                         icon="Saved"
                         navTo={() => { navigation.navigate("SavedSchedules") }}
                     />
@@ -304,7 +308,7 @@ const UserProfileScreen = ({ navigation }) => {
                         broad={false}
                         title="Your Productivity Analytics"
                         icon="Productivity"
-                        navTo={() => { comingSoonSheetRef.current?.show() }}
+                        navTo={() => { navigation.navigate("ProductivityAnalytics") }}
                     />
                 </View>
                 {/* Theme and Reminders Settings */}

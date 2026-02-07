@@ -147,7 +147,7 @@ export const AppStateProvider = ({ children }) => {
                         // Full loading with Schedule objects 
                         const databaseState = await loadCompleteAppStateWithSchedules();
                         
-                        console.log('Loaded from database:', databaseState);
+                        // console.log('Loaded from database:', databaseState);
                         setAppState(prevState => ({
                             ...prevState,
                             ...databaseState
