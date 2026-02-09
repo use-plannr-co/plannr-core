@@ -1,4 +1,4 @@
-import { db } from '../../db/index.js';
+import { db } from '../../config/db.js';
 import { subscriptions, users } from '../../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 
