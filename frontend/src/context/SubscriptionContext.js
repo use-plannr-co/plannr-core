@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Platform } from 'react-native';
-import { useUser } from '@clerk/clerk-expo';
+import { useUser, useAuth } from '@clerk/clerk-expo';
 import SubscriptionService from '../services/subscription/SubscriptionService';
+import { apiClient } from '../utils/apiClient';
 
 export const SubscriptionContext = createContext();
 
@@ -36,6 +37,7 @@ const deriveSubscriptionState = (customerInfo) => {
 
 export const SubscriptionProvider = ({ children }) => {
     const { isSignedIn, user } = useUser();
+    const { getToken, userId } = useAuth();
     
     // Subscription state
     const [subscriptionState, setSubscriptionState] = useState({
@@ -52,6 +54,60 @@ export const SubscriptionProvider = ({ children }) => {
     const [isReady, setIsReady] = useState(false);
     const [error, setError] = useState(null);
     const [customerInfo, setCustomerInfo] = useState(null);
+
+    /**
+     * Sync subscription state with backend
+     * Called after purchase, restore, and initialization
+     */
+    const syncSubscriptionWithBackend = async (subscriptionData) => {
+        // Only sync on iOS where RevenueCat is enabled
+        if (Platform.OS !== 'ios') {
+            return;
+        }
+
+        // Ensure we have required data
+        if (!userId || !subscriptionData) {
+            console.log('⚠️ Cannot sync: missing userId or subscription data');
+            return;
+        }
+
+        try {
+            console.log('🔄 Syncing subscription with backend...');
+
+            const token = await getToken();
+            const payload = {
+                rc_app_user_id: userId,
+                is_pro: subscriptionData.isPro || false,
+                entitlement_active: subscriptionData.isPro || false,
+                expiration_at: subscriptionData.expirationAt ? new Date(subscriptionData.expirationAt).toISOString() : null,
+                product_id: subscriptionData.productId || null,
+                store: 'app_store',
+                metadata: {
+                    last_app_sync: new Date().toISOString()
+                }
+            };
+
+            const response = await apiClient.makeRequest('/api/subscriptions/sync', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-clerk-user-id': userId,
+                },
+                body: JSON.stringify(payload),
+            }, token);
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('✅ Subscription synced with backend:', result.data);
+            } else {
+                const errorText = await response.text();
+                console.error('❌ Backend sync failed:', errorText);
+            }
+        } catch (err) {
+            console.error('❌ Error syncing subscription with backend:', err);
+            // Don't throw - backend sync is not critical to app functionality
+        }
+    };
 
     /**
      * Initialize RevenueCat when user is authenticated
@@ -99,8 +155,12 @@ export const SubscriptionProvider = ({ children }) => {
 
                 // Set initial state
                 if (initialCustomerInfo) {
+                    const derivedState = deriveSubscriptionState(initialCustomerInfo);
                     setCustomerInfo(initialCustomerInfo);
-                    setSubscriptionState(deriveSubscriptionState(initialCustomerInfo));
+                    setSubscriptionState(derivedState);
+
+                    // Sync with backend after initialization
+                    syncSubscriptionWithBackend(derivedState);
                 }
 
                 // Setup listener for customer info updates
@@ -108,8 +168,12 @@ export const SubscriptionProvider = ({ children }) => {
                 try {
                     unsubscribe = SubscriptionService.addCustomerInfoListener((updatedCustomerInfo) => {
                         console.log('📱 SubscriptionProvider: Customer info updated');
+                        const derivedState = deriveSubscriptionState(updatedCustomerInfo);
                         setCustomerInfo(updatedCustomerInfo);
-                        setSubscriptionState(deriveSubscriptionState(updatedCustomerInfo));
+                        setSubscriptionState(derivedState);
+
+                        // Sync with backend when subscription changes
+                        syncSubscriptionWithBackend(derivedState);
                     });
                 } catch (listenerError) {
                     console.warn('⚠️ SubscriptionProvider: Could not set up listener:', listenerError.message);
@@ -154,8 +218,13 @@ export const SubscriptionProvider = ({ children }) => {
         try {
             console.log('🔄 SubscriptionProvider: Refreshing subscription...');
             const updatedCustomerInfo = await SubscriptionService.refreshCustomerInfo();
+            const derivedState = deriveSubscriptionState(updatedCustomerInfo);
             setCustomerInfo(updatedCustomerInfo);
-            setSubscriptionState(deriveSubscriptionState(updatedCustomerInfo));
+            setSubscriptionState(derivedState);
+
+            // Sync with backend after refresh
+            syncSubscriptionWithBackend(derivedState);
+
             return updatedCustomerInfo;
         } catch (err) {
             console.error('❌ SubscriptionProvider: Refresh failed:', err);

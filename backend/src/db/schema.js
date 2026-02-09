@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   displayName: text("display_name"),
   avatarName: text("avatar_name"),
   onboarded: boolean("onboarded").notNull().default(false),
+  isPro: boolean("is_pro").notNull().default(false), // Convenience field for quick Pro status checks
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
@@ -171,4 +172,25 @@ export const textToTasksDrafts = pgTable("text_to_tasks_drafts", {
 }, (table) => ({
   sessionIdx: index("text_to_tasks_drafts_session_idx").on(table.sessionId),
   orderIdx: index("text_to_tasks_drafts_order_idx").on(table.sessionId, table.orderIndex),
+}));
+
+// Subscriptions (RevenueCat integration)
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  rcAppUserId: text("rc_app_user_id").notNull(), // RevenueCat App User ID (same as Clerk user ID)
+  isPro: boolean("is_pro").notNull().default(false), // Convenience flag - true if any Pro entitlement is active
+  entitlementActive: boolean("entitlement_active").notNull().default(false), // Whether 'plannr_pro' entitlement is active
+  expirationAt: timestamp("expiration_at", { withTimezone: true }), // When the current subscription expires
+  productId: text("product_id"), // RevenueCat product identifier (e.g., 'plannr_pro_monthly')
+  store: text("store"), // 'app_store', 'play_store', 'stripe', etc.
+  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }).defaultNow(), // Last time subscription was synced
+  // Additional metadata for debugging and auditing
+  metadata: jsonb("metadata"), // Store additional RevenueCat data if needed
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  userIdx: index("subscriptions_user_idx").on(table.userId),
+  rcAppUserIdx: index("subscriptions_rc_app_user_idx").on(table.rcAppUserId),
+  expirationIdx: index("subscriptions_expiration_idx").on(table.expirationAt),
 }));
