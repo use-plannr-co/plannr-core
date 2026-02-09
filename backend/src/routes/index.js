@@ -4,6 +4,7 @@ import usersRoutes from '../modules/users/users.routes.js';
 import preferencesRoutes from '../modules/preferences/preferences.routes.js';
 import integrationsRoutes from '../modules/integrations/integrations.routes.js';
 import textToTasksRoutes from '../modules/textToTasks/textToTasks.routes.js';
+import subscriptionsRoutes from '../modules/subscriptions/subscriptions.routes.js';
 import { getMinVersion, getUpdateUrl } from '../config/versionPolicy.js';
 
 const router = express.Router();
@@ -30,5 +31,6 @@ router.use('/users', usersRoutes);
 router.use('/preferences', preferencesRoutes);
 router.use('/integrations', integrationsRoutes);
 router.use('/text-to-tasks', textToTasksRoutes);
+router.use('/subscriptions', subscriptionsRoutes);
 
 export default router;
