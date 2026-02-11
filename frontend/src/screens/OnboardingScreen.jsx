@@ -7,7 +7,7 @@ import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import LottieView from 'lottie-react-native';
 
 import { useAppState } from '../context/AppStateContext.js';
-import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
+import { useAuthenticatedAPI } from '../api/index.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 import { padding } from '../design/spacing.js';
 import LoadingScreen from './LoadingScreen.jsx';

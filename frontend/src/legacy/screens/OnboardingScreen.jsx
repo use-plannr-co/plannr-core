@@ -9,7 +9,7 @@ import { lightColor, darkColor } from '../../design/colors.js'
 import { spacing, padding } from '../../design/spacing.js'
 import { typography  } from '../../design/typography.js'
 import { getAvatarList, getRandomAvatar } from '../../utils/avatarUtils.js'
-import { useAuthenticatedAPI } from '../../utils/authenticatedAPI.js'
+import { useAuthenticatedAPI } from '../api/index.js'
 const { width, height } = Dimensions.get('window');
 const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
-import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
+import { useAuthenticatedAPI } from '../api/index.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 import { useSSO } from '@clerk/clerk-expo';
 import * as WebBrowser from 'expo-web-browser';

@@ -2,7 +2,7 @@ import { useSignIn, useClerk, useSSO } from "@clerk/clerk-expo";
 import React, { useState, useEffect, useCallback } from "react";
 import { View, TextInput, Text, StyleSheet, Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Dimensions, TouchableOpacity } from "react-native";
 import { TokenCacheUtils } from '../../cache.js';
-import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
+import { useAuthenticatedAPI } from '../api/index.js';
 import { spacing, padding } from "../design/spacing.js";
 import { typography } from "../design/typography.js";
 import { lightColor } from "../design/colors.js";

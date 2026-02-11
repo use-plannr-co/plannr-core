@@ -5,7 +5,7 @@ import { useAppState } from '../context/AppStateContext.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 import { useUser } from '@clerk/clerk-expo';
 import { useAuth } from '@clerk/clerk-expo';
-import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
+import { useAuthenticatedAPI } from '../api/index.js';
 import { getAvatarImageSource } from '../utils/avatarUtils.js';
 import AvatarPickerBottomSheet from '../components/AvatarPickerBottomSheet.jsx';
 import LoadingScreen from './LoadingScreen.jsx';
