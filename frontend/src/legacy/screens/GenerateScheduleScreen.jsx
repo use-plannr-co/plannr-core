@@ -4,7 +4,7 @@ import { useAppState } from '../../context/AppStateContext.js'
 import { useActionLogger } from '../../hooks/useActionLogger.js'
 import { lightColor, darkColor } from '../../design/colors.js'
 import { typography } from '../../design/typography.js'
-import { useAuthenticatedAPI } from '../../utils/authenticatedAPI.js'
+import { useAuthenticatedAPI } from '../api/index.js'
 
 import ScheduleDate from '../../model/ScheduleDate.js';
 import InfoView from '../scheduling-logic-views/InfoView.jsx'

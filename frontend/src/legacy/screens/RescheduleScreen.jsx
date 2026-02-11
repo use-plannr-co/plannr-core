@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { useAppState } from '../../context/AppStateContext.js';
 import { useActionLogger } from '../../hooks/useActionLogger.js';
-import { useAuthenticatedAPI } from '../../utils/authenticatedAPI.js';
+import { useAuthenticatedAPI } from '../api/index.js';
 import { lightColor, darkColor } from '../../design/colors.js';
 import { spacing, padding } from '../../design/spacing.js';
 import { typography } from '../../design/typography.js';

@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 
 import { useAppState } from '../context/AppStateContext.js';
-import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js';
+import { useAuthenticatedAPI } from '../api/index.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 import { TokenCacheUtils } from '../../cache.js';
 

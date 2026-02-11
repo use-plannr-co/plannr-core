@@ -5,7 +5,7 @@ import Modal from 'react-native-modal'
 import { useAppState } from '../context/AppStateContext'
 import { useActionLogger } from '../hooks/useActionLogger.js'
 import { useNavigation } from '@react-navigation/native'
-import { useAuthenticatedAPI } from '../utils/authenticatedAPI.js'
+import { useAuthenticatedAPI } from '../api/index.js'
 
 import { typography } from '../design/typography.js'
 
