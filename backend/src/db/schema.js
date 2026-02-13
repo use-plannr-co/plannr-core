@@ -194,3 +194,40 @@ export const subscriptions = pgTable("subscriptions", {
   rcAppUserIdx: index("subscriptions_rc_app_user_idx").on(table.rcAppUserId),
   expirationIdx: index("subscriptions_expiration_idx").on(table.expirationAt),
 }));
+
+// ─── Chat ─────────────────────────────────────────────────────────────────────
+
+export const chats = pgTable("chats", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: text("title"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (t) => [
+  index("chats_user_idx").on(t.userId),
+  index("chats_user_updated_idx").on(t.userId, t.updatedAt),
+]);
+
+export const chatMessages = pgTable("chat_messages", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  chatId: uuid("chat_id").notNull().references(() => chats.id, { onDelete: "cascade" }),
+  role: text("role").notNull(),              // 'user' | 'assistant'
+  content: text("content").notNull(),
+  toolCalls: jsonb("tool_calls"),            // Claude tool_use blocks (assistant turns with tool calls)
+  toolResults: jsonb("tool_results"),        // tool_result blocks (user turns returning tool output)
+  inputTokens: integer("input_tokens"),
+  outputTokens: integer("output_tokens"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (t) => [
+  index("chat_messages_chat_idx").on(t.chatId),
+  index("chat_messages_chat_created_idx").on(t.chatId, t.createdAt),
+]);
+
+export const chatDailyUsage = pgTable("chat_daily_usage", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  date: date("date").notNull(),
+  messageCount: integer("message_count").notNull().default(0),
+}, (t) => [
+  uniqueIndex("chat_daily_usage_user_date_idx").on(t.userId, t.date),
+]);

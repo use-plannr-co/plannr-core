@@ -16,6 +16,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.74.0",
     "@clerk/backend": "^2.29.0",
     "@google/generative-ai": "^0.21.0",
     "@neondatabase/serverless": "^1.0.0",

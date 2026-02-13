@@ -1,5 +1,9 @@
 import { useAuth, useUser } from '@clerk/clerk-expo';
-import { makeAuthenticatedRequest as _makeAuthenticatedRequest, setGlobalUpdateHandler } from './apiCore.js';
+import {
+    makeAuthenticatedRequest as _makeAuthenticatedRequest,
+    makeStreamingRequest as _makeStreamingRequest,
+    setGlobalUpdateHandler,
+} from './apiCore.js';
 
 /**
  * useApiCore
@@ -16,8 +20,12 @@ export const useApiCore = () => {
     const makeAuthenticatedRequest = (endpoint, options = {}) =>
         _makeAuthenticatedRequest(getToken, userId, endpoint, options);
 
+    const makeStreamingRequest = (endpoint, options, onEvent, onDone, onError) =>
+        _makeStreamingRequest(getToken, userId, endpoint, options, onEvent, onDone, onError);
+
     return {
         makeAuthenticatedRequest,
+        makeStreamingRequest,
         getToken,
         userId,
         user,

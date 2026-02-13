@@ -13,11 +13,37 @@ import { z } from 'zod';
 const validate = (schema) => {
     return (req, res, next) => {
         try {
+            // Handle undefined req.body (e.g., GET requests or missing body parser)
+            if (req.body === undefined) {
+                console.error('[Validator] req.body is undefined for:', {
+                    method: req.method,
+                    path: req.path,
+                    url: req.url,
+                });
+                return res.status(400).json({
+                    success: false,
+                    message: 'Request body is required',
+                });
+            }
+            
+            console.log('[Validator] Validating request:', {
+                method: req.method,
+                path: req.path,
+                bodyKeys: Object.keys(req.body || {}),
+                body: req.body,
+            });
+            
             const validated = schema.parse(req.body);
             req.validatedData = validated;
             next();
         } catch (error) {
             if (error instanceof z.ZodError) {
+                console.error('[Validator] Zod validation failed:', {
+                    method: req.method,
+                    path: req.path,
+                    body: req.body,
+                    errors: error.errors,
+                });
                 return res.status(400).json({
                     success: false,
                     message: 'Validation error',
@@ -27,6 +53,13 @@ const validate = (schema) => {
                     }))
                 });
             }
+            console.error('[Validator] Unexpected error:', {
+                method: req.method,
+                path: req.path,
+                body: req.body,
+                error: error.message,
+                stack: error.stack,
+            });
             next(error);
         }
     };
@@ -43,7 +76,7 @@ const syncSubscriptionSchema = z.object({
     expiration_at: z.string().datetime().nullable().optional(),
     product_id: z.string().nullable().optional(),
     store: z.string().nullable().optional(),
-    metadata: z.record(z.any()).nullable().optional(),
+    metadata: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
 /**
