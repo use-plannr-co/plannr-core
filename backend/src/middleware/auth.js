@@ -16,6 +16,14 @@ export async function requireAuth(req, res, next) {
   try {
     const authHeader = req.get("authorization") || "";
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+    
+    console.log('[Auth] Request:', {
+      path: req.path,
+      hasAuthHeader: !!authHeader,
+      tokenPrefix: token ? token.substring(0, 20) + '...' : 'none',
+      isDev: ENV.AUTH_DEV,
+    });
+    
     if (!token) return res.status(401).json({ error: "Missing bearer token" });
 
     // Dev fallback: allow tokens like "dev:<userId>:<email>"
@@ -28,13 +36,21 @@ export async function requireAuth(req, res, next) {
     }
 
     // 1) Verify Clerk token using the standard method
-    const { payload } = await verifyToken(token, {
+    const payload = await verifyToken(token, {
       secretKey: ENV.CLERK_SECRET_KEY,
       // Let Clerk handle JWT key resolution automatically
     });
 
-    const clerkUserId = payload.sub;
-    if (!clerkUserId) return res.status(401).json({ error: "Invalid token (no sub)" });
+    console.log('[Auth] Token verification result:', {
+      hasSub: !!payload?.sub,
+      sub: payload?.sub,
+    });
+
+    const clerkUserId = payload?.sub;
+    if (!clerkUserId) {
+      console.error('[Auth] No clerkUserId found in token payload');
+      return res.status(401).json({ error: "Invalid token (no sub)" });
+    }
 
     // 2) Optionally fetch email/displayName once (Clerk user lookup)
     const clerk = createClerkClient({ secretKey: ENV.CLERK_SECRET_KEY });
@@ -70,7 +86,7 @@ export async function requireAuth(req, res, next) {
     
     if (err.reason === 'token-invalid') {
       console.error("❌ Invalid token format. Token preview:", 
-        authHeader ? authHeader.substring(0, 20) + '...' : 'No token provided'
+        token ? token.substring(0, 20) + '...' : 'No token provided'
       );
     }
     

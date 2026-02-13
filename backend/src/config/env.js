@@ -25,6 +25,9 @@ export const ENV = {
     // RevenueCat webhook configuration
     REVENUECAT_WEBHOOK_SECRET: process.env.REVENUECAT_WEBHOOK_SECRET,
     
+    // Anthropic / Claude
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+
     // Rate limiting configuration
     SKIP_RATE_LIMITS: process.env.SKIP_RATE_LIMITS === 'true',
     TEXT_TO_TASKS_RATE_LIMIT: parseInt(process.env.TEXT_TO_TASKS_RATE_LIMIT) || 10, // per hour

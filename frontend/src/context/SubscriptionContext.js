@@ -71,6 +71,13 @@ export const SubscriptionProvider = ({ children }) => {
             return;
         }
 
+        // Only sync when there is an active entitlement — avoids overwriting
+        // manually-set Pro accounts with a RevenueCat "not subscribed" response.
+        if (!subscriptionData.isPro) {
+            console.log('⏭️ Skipping backend sync: no active RevenueCat entitlement');
+            return;
+        }
+
         try {
             console.log('🔄 Syncing subscription with backend...');
 
