@@ -165,9 +165,7 @@ function ChatBubble({ message }) {
             <Text style={[styles.roleLabel, { color: isDark ? '#888' : '#777' }]}>Planova</Text>
 
             {showTypingDots ? (
-                <View style={styles.typingWrap}>
-                    <ChatTypingIndicator color={isDark ? '#888' : '#777'} />
-                </View>
+                <ChatTypingIndicator color={isDark ? '#888' : '#777'} />
             ) : isStreaming ? (
                 /*
                  * While streaming: plain Text to avoid Markdown re-parsing on every token.
@@ -217,9 +215,6 @@ const styles = StyleSheet.create({
     streamingText: {
         fontSize: 16,
         lineHeight: 26,
-    },
-    typingWrap: {
-        marginTop: 6,
     },
 
     // ── Shared label ──────────────────────────────────────────────────────────

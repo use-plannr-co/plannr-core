@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Line, Path } from 'react-native-svg';
 import { lightColor, darkColor } from '../../design/colors.js';
 import { useAppState } from '../../context/AppStateContext.js';
+import ChatIcon from '../../../assets/system-icons/ChatIcon.svg';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DRAWER_WIDTH = Math.round(SCREEN_WIDTH * 0.78);
@@ -90,11 +91,14 @@ export default function ChatDrawer({ isOpen, onClose, chats, activeChat, onSelec
             >
                 {/* Drawer header */}
                 <View style={styles.drawerHeader}>
-                    <Text style={[styles.drawerTitle, { color: theme.FOREGROUND }]}>Plannr AI</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Text style={[styles.drawerTitle, { color: theme.FOREGROUND }]}>Planova</Text>
+                        <ChatIcon width={24} height={24} color={theme.FOREGROUND} style={{ marginBottom: 2 }} />
+                    </View>
                     <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                         <CloseIcon color={theme.FOREGROUND} />
                     </TouchableOpacity>
-                </View>
+                    </View>
 
                 {/* New chat button */}
                 <TouchableOpacity
@@ -161,28 +165,29 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 8,
         elevation: 16,
+
     },
     drawerHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
-        marginBottom: 12,
+        marginBottom: 16,
     },
     drawerTitle: {
-        fontSize: 18,
-        fontWeight: '700',
+        fontSize: 32,
+        fontFamily: 'Pink Sunset',
     },
     newChatBtn: {
         marginHorizontal: 16,
         borderRadius: 10,
         paddingVertical: 10,
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 24,
     },
     newChatText: {
         fontSize: 15,
-        fontWeight: '600',
+        fontFamily: 'Albert Sans',
     },
     list: {
         flex: 1,
@@ -203,7 +208,7 @@ const styles = StyleSheet.create({
     chatTitle: {
         flex: 1,
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Albert Sans',
     },
     chatDate: {
         fontSize: 12,
@@ -213,5 +218,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 32,
         fontSize: 14,
+        fontFamily: 'Albert Sans',
     },
 });

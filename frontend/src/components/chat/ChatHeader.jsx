@@ -41,20 +41,19 @@ export default function ChatHeader({ onOpenDrawer, onNewChat, onBack }) {
         <View style={[
             styles.container,
             {
-                backgroundColor: theme.COMP_COLOR,
+                backgroundColor: theme.BACKGROUND,
                 paddingTop: insets.top + 8,
-                borderBottomColor: isDark ? '#333' : '#E0E0E0',
             }
         ]}>
-            <TouchableOpacity onPress={onBack} style={styles.iconBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <BackIcon color={theme.FOREGROUND} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity onPress={onBack} style={styles.iconBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <BackIcon color={theme.FOREGROUND} />
+                </TouchableOpacity>
 
-            <TouchableOpacity onPress={onOpenDrawer} style={styles.iconBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <HamburgerIcon color={theme.FOREGROUND} />
-            </TouchableOpacity>
-
-            <Text style={[styles.title, { color: theme.FOREGROUND }]}>Planova</Text>
+                <TouchableOpacity onPress={onOpenDrawer} style={styles.iconBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <HamburgerIcon color={theme.FOREGROUND} />
+                </TouchableOpacity>
+            </View>
 
             <TouchableOpacity onPress={onNewChat} style={styles.iconBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <NewChatIcon color={theme.FOREGROUND} />
@@ -66,10 +65,10 @@ export default function ChatHeader({ onOpenDrawer, onNewChat, onBack }) {
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingBottom: 12,
-        borderBottomWidth: StyleSheet.hairlineWidth,
     },
     iconBtn: {
         padding: 4,

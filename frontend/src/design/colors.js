@@ -24,7 +24,7 @@ export const darkColor = {
     FOREGROUND: '#FFFFFF',
     ACCENT: '#000000',
     NAVBAR: '#171717',
-    INPUT: '#282828',
+    INPUT: '#2e2e2eff',
     SELECTION: '#808080',
     BUTTON: '#171717',
     SELECTED_TEXT: '#FFFFFF',

@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import NavigationBar from '../components/NavigationBar.jsx';
 import FABChatButton from '../components/chat/FABChatButton.jsx';
 
-import LoadingScreen from '../screens/LoadingScreen.jsx'
 import HomeScreen from '../screens/HomeScreen';
 import TodaysTasksScreen from '../screens/TodaysTasksScreen';
 import UserProfileStack from './UserProfileStack.jsx';

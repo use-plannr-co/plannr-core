@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-    View, TextInput, TouchableOpacity, Text, StyleSheet, Platform, Animated,
+    View, TextInput, TouchableOpacity, Text, StyleSheet, Platform, Animated, Easing,
 } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import { lightColor, darkColor } from '../../design/colors.js';
@@ -22,13 +22,15 @@ function CancelIcon({ color }) {
 
 export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage }) {
     const [text, setText] = useState('');
+    const [isVoiceActive, setIsVoiceActive] = useState(false);
+    const [rowWidth, setRowWidth] = useState(0);
     const { appState } = useAppState();
     const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const isDark = appState.userPreferences.theme !== 'light';
 
     const hasText = text.trim().length > 0;
 
-    // 0 = voice centred (no text), 1 = send centred (has text)
+    // ── Icon swap animation (voice ↔ send) ────────────────────────────────────
     const iconProgress = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -38,9 +40,14 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
             tension: 200,
             friction: 12,
         }).start();
+        // Auto-deactivate voice fill when user starts typing
+        if (hasText && isVoiceActive) {
+            animateFill(false);
+            setIsVoiceActive(false);
+        }
     }, [hasText]);
 
-    // Voice: centred → slides up & fades out as text is typed
+    // Voice: slides up and fades out when text appears
     const voiceTranslateY = iconProgress.interpolate({
         inputRange: [0, 1],
         outputRange: [0, -36],
@@ -51,7 +58,7 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
         extrapolate: 'clamp',
     });
 
-    // Send: slides up from below → centred as text is typed
+    // Send: slides up from below and fades in when text appears
     const sendTranslateY = iconProgress.interpolate({
         inputRange: [0, 1],
         outputRange: [36, 0],
@@ -62,6 +69,55 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
         extrapolate: 'clamp',
     });
 
+    // ── Voice press animation ─────────────────────────────────────────────────
+    // fillAnim:     0 = fill fully off-screen right, 1 = fill covering row
+    // rotationAnim: 0 → 1 one-shot counterclockwise spin on every voice press
+    const fillAnim     = useRef(new Animated.Value(0)).current;
+    const rotationAnim = useRef(new Animated.Value(0)).current;
+
+    const animateFill = (activate) => {
+        Animated.timing(fillAnim, {
+            toValue: activate ? 1 : 0,
+            duration: activate ? 600 : 450,
+            // Activate: ease-out (rushes in from the right, decelerates)
+            // Deactivate: ease-in (accelerates out to the right)
+            easing: activate
+                ? Easing.bezier(0.25, 0.46, 0.45, 0.94)
+                : Easing.bezier(0.55, 0.06, 0.68, 0.19),
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const spinButton = () => {
+        rotationAnim.setValue(0);
+        Animated.timing(rotationAnim, {
+            toValue: 0.5,
+            duration: 1000,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handleVoicePress = () => {
+        spinButton();
+        const next = !isVoiceActive;
+        setIsVoiceActive(next);
+        animateFill(next);
+    };
+
+    // Fill slides from the right: starts at +rowWidth (off-screen), ends at 0
+    const fillTranslateX = fillAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: [rowWidth, 0],
+    });
+
+    // VoiceIcon rotates counterclockwise on each press
+    const voiceRotate = rotationAnim.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '-360deg'],
+    });
+
+    // ── Send / cancel ─────────────────────────────────────────────────────────
     const canSend = hasText && !isStreaming;
 
     const handleSend = () => {
@@ -71,21 +127,47 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
         onSend(msg);
     };
 
+    const handlePress = isStreaming
+        ? onCancel
+        : hasText
+            ? handleSend
+            : handleVoicePress;
+
     const remaining = dailyUsage
         ? Math.max(0, FREE_LIMIT - (dailyUsage.messageCount || 0))
         : null;
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.COMP_COLOR, borderTopColor: isDark ? '#333' : '#E0E0E0' }]}>
+        <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
             {remaining !== null && remaining <= FREE_LIMIT && (
                 <Text style={[styles.limitText, { color: remaining <= 1 ? theme.ORANGE : theme.SELECTION }]}>
                     {remaining} of {FREE_LIMIT} messages left today
                 </Text>
             )}
-            <View style={[styles.row, { backgroundColor: theme.INPUT }]}>
+            <View
+                style={[styles.row, { backgroundColor: theme.INPUT }]}
+                onLayout={e => setRowWidth(e.nativeEvent.layout.width)}
+            >
+                {/* ── Voice fill layer ─────────────────────────────────────────
+                    Absolutely fills the row, slides in from the right.
+                    borderTopLeftRadius + borderBottomLeftRadius give the wave-
+                    front a soft rounded edge as it sweeps left.             */}
+                <Animated.View
+                    pointerEvents="none"
+                    style={[
+                        StyleSheet.absoluteFill,
+                        {
+                            backgroundColor: theme.GRADIENT_END,
+                            borderTopLeftRadius: 48,
+                            borderBottomLeftRadius: 48,
+                            transform: [{ translateX: fillTranslateX }],
+                        },
+                    ]}
+                />
+
                 <TextInput
                     style={[styles.input, { color: theme.FOREGROUND }]}
-                    placeholder="Ask about your schedule..."
+                    placeholder={!isVoiceActive ? "Ask about your schedule..." : ""}
                     placeholderTextColor={isDark ? '#666' : '#999'}
                     value={text}
                     onChangeText={setText}
@@ -95,13 +177,14 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
                     returnKeyType="send"
                     onSubmitEditing={Platform.OS === 'ios' ? undefined : handleSend}
                 />
+
                 <TouchableOpacity
-                    style={[styles.actionBtn, { backgroundColor: isStreaming ? theme.SELECTION : theme.BUTTON }]}
-                    onPress={isStreaming ? onCancel : handleSend}
-                    disabled={!isStreaming && !canSend}
+                    style={styles.actionBtn}
+                    onPress={handlePress}
+                    activeOpacity={0.85}
                 >
                     <LinearGradient
-                        colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
+                        colors={[theme.GRADIENT_END, theme.GRADIENT_END]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
                         style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}
@@ -112,7 +195,13 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
                             <View style={styles.iconStack}>
                                 <Animated.View style={[
                                     styles.iconAbsolute,
-                                    { opacity: voiceOpacity, transform: [{ translateY: voiceTranslateY }] },
+                                    {
+                                        opacity: voiceOpacity,
+                                        transform: [
+                                            { translateY: voiceTranslateY },
+                                            { rotate: voiceRotate },
+                                        ],
+                                    },
                                 ]}>
                                     <VoiceIcon color={theme.SELECTED_TEXT} width={24} height={24} />
                                 </Animated.View>
@@ -136,7 +225,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingTop: 8,
         paddingBottom: 12,
-        borderTopWidth: StyleSheet.hairlineWidth,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
     },
     limitText: {
         fontSize: 12,
@@ -150,6 +242,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         paddingVertical: 8,
         gap: 8,
+        overflow: 'hidden',
     },
     input: {
         flex: 1,
@@ -157,6 +250,7 @@ const styles = StyleSheet.create({
         lineHeight: 22,
         minHeight: 36,
         marginLeft: 8,
+        backgroundColor: 'transparent',
     },
     actionBtn: {
         width: 48,

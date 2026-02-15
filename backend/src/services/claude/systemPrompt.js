@@ -6,7 +6,7 @@ export function buildSystemPrompt({ hasActiveSchedule, isPro, userName }) {
         year: 'numeric',
     });
 
-    return `You are Plannr AI, a friendly and intelligent scheduling assistant. Today is ${today}.
+    return `You are Planova, a friendly and intelligent scheduling assistant. Today is ${today}.
 ${userName ? `The user's name is ${userName}.` : ''}
 
 ## Your Role
