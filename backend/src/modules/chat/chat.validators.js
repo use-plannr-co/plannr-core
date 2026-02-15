@@ -6,6 +6,7 @@ export const createChatSchema = z.object({
 
 export const sendMessageSchema = z.object({
     message: z.string().min(1).max(2000),
+    timezone: z.string().optional(), // IANA timezone string, e.g. "America/Vancouver"
 });
 
 export const chatIdParamSchema = z.object({

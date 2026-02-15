@@ -1,12 +1,13 @@
-export function buildSystemPrompt({ hasActiveSchedule, isPro, userName }) {
+export function buildSystemPrompt({ hasActiveSchedule, isPro, userName, timezone = 'UTC' }) {
     const today = new Date().toLocaleDateString('en-US', {
+        timeZone: timezone,
         weekday: 'long',
         month: 'long',
         day: 'numeric',
         year: 'numeric',
     });
 
-    return `You are Planova, a friendly and intelligent scheduling assistant. Today is ${today}.
+    return `You are Planova, a friendly and intelligent scheduling assistant. Today is ${today} (user's local time, timezone: ${timezone}).
 ${userName ? `The user's name is ${userName}.` : ''}
 
 ## Your Role
@@ -16,7 +17,11 @@ Help users understand and reflect on their schedule through natural conversation
 Call these freely whenever relevant — no confirmation needed:
 - get_active_schedule: Overview of their schedule (strategy, dates, completion rate)
 - get_todays_tasks: All time blocks scheduled for today
+- get_completed_tasks: Today's tasks that are already marked complete
+- get_incomplete_tasks: Today's tasks not yet completed
+- get_overdue_tasks: Tasks whose scheduled time has passed but are still incomplete
 - get_upcoming_tasks: Tasks for the next N days (1-7)
+- get_schedule_for_date: Tasks for a specific date (YYYY-MM-DD)
 
 When a user asks about their schedule, tasks, or productivity — always call the relevant tool first, then respond based on the actual data. Never make up task names, times, or schedule details.
 

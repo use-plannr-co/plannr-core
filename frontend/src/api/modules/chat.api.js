@@ -21,11 +21,13 @@ export const deleteChat = (makeAuthenticatedRequest, chatId) =>
  * Send a message (SSE stream).
  * Returns a Promise<abortFn>.
  */
-export const sendMessage = (makeStreamingRequest, chatId, message, onEvent, onDone, onError) =>
-    makeStreamingRequest(
+export const sendMessage = (makeStreamingRequest, chatId, message, onEvent, onDone, onError) => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return makeStreamingRequest(
         `/api/chat/chats/${chatId}/messages`,
-        { method: 'POST', body: JSON.stringify({ message }) },
+        { method: 'POST', body: JSON.stringify({ message, timezone }) },
         onEvent,
         onDone,
         onError,
     );
+};

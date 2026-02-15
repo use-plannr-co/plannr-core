@@ -75,7 +75,8 @@ export async function sendMessage(req, res, next) {
     try {
         const { userId } = req.auth;
         const { chatId } = req.validated?.params || req.params;
-        const { message } = req.validated?.body || req.body;
+        const { message, timezone } = req.validated?.body || req.body;
+        const tz = timezone || 'UTC';
 
         console.log('[Chat] sendMessage called - userId:', userId, 'chatId:', chatId);
 
@@ -121,6 +122,7 @@ export async function sendMessage(req, res, next) {
             hasActiveSchedule: true, // optimistic; tools will handle the no-schedule case
             isPro,
             userName: userRow?.displayName || null,
+            timezone: tz,
         });
 
         // 8. Set SSE headers
@@ -130,7 +132,7 @@ export async function sendMessage(req, res, next) {
         res.flushHeaders();
 
         // 9. Run streaming loop
-        await runStreamingLoop(res, claudeMessages, systemPrompt, userId, chatId);
+        await runStreamingLoop(res, claudeMessages, systemPrompt, userId, chatId, tz);
     } catch (err) {
         next(err);
     }
@@ -138,7 +140,7 @@ export async function sendMessage(req, res, next) {
 
 // ─── Streaming Loop ───────────────────────────────────────────────────────────
 
-async function runStreamingLoop(res, messages, systemPrompt, userId, chatId) {
+async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, timezone) {
     try {
         const stream = claudeClient.createStreamingMessage(messages, tools, systemPrompt);
 
@@ -206,7 +208,7 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId) {
             for (const toolBlock of toolUseBlocks) {
                 writeSSE(res, 'tool_executing', { toolName: toolBlock.name });
 
-                const result = await executeTool(toolBlock.name, toolBlock.input, userId);
+                const result = await executeTool(toolBlock.name, toolBlock.input, userId, timezone);
 
                 writeSSE(res, 'tool_result', {
                     toolUseId: toolBlock.id,
@@ -244,7 +246,7 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId) {
                 content: toolResultContents,
             };
             const nextClaudeMessages = [...messages, assistantTurn, toolResultTurn];
-            await runStreamingLoop(res, nextClaudeMessages, systemPrompt, userId, chatId);
+            await runStreamingLoop(res, nextClaudeMessages, systemPrompt, userId, chatId, timezone);
         } else {
             // end_turn — save final message and close
             await repo.insertMessage({
