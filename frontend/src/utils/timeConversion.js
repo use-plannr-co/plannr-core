@@ -6,11 +6,10 @@ import Time24 from '../model/Time24';
  * @returns {number} time in 24-hour HHMM format
  */
 const convertTimeToTime24 = (dateObj) => {
-    const hours = dateObj.getHours();       // 0–23
-    const minutes = dateObj.getMinutes();   // 0–59
-  
+    const hours = dateObj.getHours(); // 0–23
+    const minutes = dateObj.getMinutes(); // 0–59
+
     return new Time24(hours * 100 + minutes);
-  };
-  
-  export default convertTimeToTime24;
-  
+};
+
+export default convertTimeToTime24;

@@ -14,9 +14,9 @@ export const lightColor = {
     GRADIENT_END: '#B79FFF',
     PURPLE: '#8800FF',
     GREEN: '#00CC00',
-    RED:'#FF0000',
-    ORANGE:'#FF9000',
-}
+    RED: '#FF0000',
+    ORANGE: '#FF9000',
+};
 
 export const darkColor = {
     BACKGROUND: '#222222',
@@ -32,6 +32,6 @@ export const darkColor = {
     GRADIENT_END: '#cc41fbff',
     PURPLE: '#AA00FF',
     GREEN: '#00FF00',
-    RED:'#FF0000',
-    ORANGE:'#FF9000',
-}
+    RED: '#FF0000',
+    ORANGE: '#FF9000',
+};

@@ -7,9 +7,10 @@ import { useAppState } from '../../context/AppStateContext.js';
 
 const TimePicker = ({ value, onChange }) => {
     const { appState } = useAppState();
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
-    const initialHour = value.getHour() === 0 ? 12 : (value.getHour() > 12 ? value.getHour() - 12 : value.getHour());
+    const initialHour =
+        value.getHour() === 0 ? 12 : value.getHour() > 12 ? value.getHour() - 12 : value.getHour();
     const initialMinute = value.getMinute();
     const initialMeridian = value.getHour() >= 12 ? 'PM' : 'AM';
 
@@ -21,7 +22,8 @@ const TimePicker = ({ value, onChange }) => {
     const convertTo24Hour = (hour12, meridian) => {
         if (meridian === 'AM') {
             return hour12 === 12 ? 0 : hour12;
-        } else { // PM
+        } else {
+            // PM
             return hour12 === 12 ? 12 : hour12 + 12;
         }
     };
@@ -45,7 +47,7 @@ const TimePicker = ({ value, onChange }) => {
                 themeVariant={appState.userPreferences.theme}
                 height={60}
             >
-                {Array.from({ length: 12 }, (_, i) => i + 1).map(hour => (
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
                     <Picker.Item key={hour} label={hour.toString()} value={hour} />
                 ))}
             </Picker>
@@ -61,8 +63,12 @@ const TimePicker = ({ value, onChange }) => {
                 themeVariant={appState.userPreferences.theme}
                 height={60}
             >
-                {Array.from({ length: 60 }, (_, i) => i).map(minute => (
-                    <Picker.Item key={minute} label={minute.toString().padStart(2, '0')} value={minute} />
+                {Array.from({ length: 60 }, (_, i) => i).map((minute) => (
+                    <Picker.Item
+                        key={minute}
+                        label={minute.toString().padStart(2, '0')}
+                        value={minute}
+                    />
                 ))}
             </Picker>
 

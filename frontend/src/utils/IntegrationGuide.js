@@ -1,12 +1,12 @@
 /**
  * Integration Helper Functions
- * 
+ *
  * Helper functions for integrating action logging and crash reporting
  */
 
 export const IntegrationHelpers = {
-  // Setup function for App.js
-  setupApp: `
+    // Setup function for App.js
+    setupApp: `
 // Add these imports to App.js:
 import { setupCrashReporting, ErrorBoundary } from './src/utils/CrashReporter';
 import { ActionLogger, ActionTypes } from './src/utils/ActionLogger';
@@ -31,8 +31,8 @@ useEffect(() => {
 // Wrap your app with ErrorBoundary
 `,
 
-  // Component integration example
-  componentUsage: `
+    // Component integration example
+    componentUsage: `
 // In your React components:
 import { useActionLogger } from '../hooks/useActionLogger';
 
@@ -47,23 +47,23 @@ const YourScreen = () => {
 };
 `,
 
-  // Privacy info
-  privacyInfo: {
-    whatIsLogged: [
-      'Button presses and screen navigation',
-      'API calls and responses (not content)',
-      'Device info and app version',
-      'Error messages and stack traces',
-      'Anonymous usage patterns'
-    ],
-    whatIsNotLogged: [
-      'Personal data or schedule content',
-      'Passwords or authentication tokens',
-      'User names or contact information',
-      'Location data',
-      'Any sensitive user content'
-    ]
-  }
+    // Privacy info
+    privacyInfo: {
+        whatIsLogged: [
+            'Button presses and screen navigation',
+            'API calls and responses (not content)',
+            'Device info and app version',
+            'Error messages and stack traces',
+            'Anonymous usage patterns',
+        ],
+        whatIsNotLogged: [
+            'Personal data or schedule content',
+            'Passwords or authentication tokens',
+            'User names or contact information',
+            'Location data',
+            'Any sensitive user content',
+        ],
+    },
 };
 
 export default IntegrationHelpers;

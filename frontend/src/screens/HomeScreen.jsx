@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { Text, View, StyleSheet, ScrollView } from 'react-native'
+import React, { useEffect } from 'react';
+import { Text, View, StyleSheet, ScrollView } from 'react-native';
 import * as Font from 'expo-font';
 
 import LoadingScreen from './LoadingScreen.jsx';
@@ -8,62 +8,68 @@ import UpcomingTasks from '../components/UpcomingTasks.jsx';
 import Progress from '../components/Progress.jsx';
 import MenuButton from '../components/MenuButton.jsx';
 
-import { useAppState } from '../context/AppStateContext.js'
-import convertDateToScheduleDate from '../utils/dateConversion.js'
-import useCurrentTime from '../utils/useCurrentTime.js'
+import { useAppState } from '../context/AppStateContext.js';
+import convertDateToScheduleDate from '../utils/dateConversion.js';
+import useCurrentTime from '../utils/useCurrentTime.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 
-import { lightColor, darkColor } from '../design/colors.js'
-import { spacing, padding } from '../design/spacing.js'
-import { typography  } from '../design/typography.js';
+import { lightColor, darkColor } from '../design/colors.js';
+import { spacing, padding } from '../design/spacing.js';
+import { typography } from '../design/typography.js';
 import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
-
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const HomeScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();
     const currentTime = useCurrentTime();
     const { logUserAction } = useActionLogger('Home');
-    
+
     const [fontsLoaded] = Font.useFonts({
-        'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
-        'AlbertSans': require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
+        PinkSunset: require('../../assets/fonts/PinkSunset-Regular.ttf'),
+        AlbertSans: require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
     });
 
     // Early returns after all hooks have been called
-    if (!storageLoaded) { return (<LoadingScreen/>) }
+    if (!storageLoaded) {
+        return <LoadingScreen />;
+    }
     if (!fontsLoaded) return null;
 
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const todaysDate = convertDateToScheduleDate(currentTime);
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Hello {appState.name}</Text>
-            <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Here's your day for {todaysDate.getDateString()}</Text>
-                <TimeOfDay/>
-                <UpcomingTasks onClick={() => { 
-                    logUserAction('upcoming_tasks_clicked');
-                    navigation.navigate("Tasks");
-                }}/>
-                <Progress/>
+            <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND }}>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                    Here's your day for {todaysDate.getDateString()}
+                </Text>
+                <TimeOfDay />
+                <UpcomingTasks
+                    onClick={() => {
+                        logUserAction('upcoming_tasks_clicked');
+                        navigation.navigate('Tasks');
+                    }}
+                />
+                <Progress />
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}>
                     <MenuButton
                         broad={true}
                         title="Plannr Center"
                         icon="Center"
-                        navTo={() => { 
+                        navTo={() => {
                             logUserAction('plannr_center_clicked');
-                            navigation.navigate("Center");
+                            navigation.navigate('Center');
                         }}
                     />
                 </View>
             </ScrollView>
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -93,7 +99,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
-    }
-})
+    },
+});
 
 export default HomeScreen;

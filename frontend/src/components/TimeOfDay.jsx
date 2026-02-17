@@ -7,52 +7,53 @@ import { spacing, padding } from '../design/spacing.js';
 import useCurrentTime from '../utils/useCurrentTime.js';
 
 const { width, height } = Dimensions.get('window');
-const WIDTH = width - (padding.SCREEN_PADDING * 2);
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const WIDTH = width - padding.SCREEN_PADDING * 2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const TimeOfDay = () => {
     const { appState } = useAppState();
-    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const currentTime = useCurrentTime();
-    
+
     // Get current hour (0-23)
     const currentHour = currentTime.getHours();
-    
+
     // Determine time of day and corresponding message
     const getTimeOfDayInfo = () => {
         if (currentHour >= 5 && currentHour < 12) {
             // Morning: 5 AM - 11:59 AM
             return {
-                greeting: "Good Morning!",
-                message: "All the best for your day ahead.",
-                backgroundImage: require('../../assets/time-of-day/day.png')
+                greeting: 'Good Morning!',
+                message: 'All the best for your day ahead.',
+                backgroundImage: require('../../assets/time-of-day/day.png'),
             };
         } else if (currentHour >= 12 && currentHour < 17) {
             // Afternoon: 12 PM - 4:59 PM
             return {
-                greeting: "Good Afternoon!",
-                message: "You got this. Keep on going!",
-                backgroundImage: require('../../assets/time-of-day/day.png')
+                greeting: 'Good Afternoon!',
+                message: 'You got this. Keep on going!',
+                backgroundImage: require('../../assets/time-of-day/day.png'),
             };
         } else if (currentHour >= 17 && currentHour < 21) {
             // Evening: 5 PM - 8:59 PM
             return {
-                greeting: "Good Evening!",
-                message: "Keep going, one last stretch!",
-                backgroundImage: require('../../assets/time-of-day/evening.png')
+                greeting: 'Good Evening!',
+                message: 'Keep going, one last stretch!',
+                backgroundImage: require('../../assets/time-of-day/evening.png'),
             };
         } else {
             // Night: 9 PM - 4:59 AM
             return {
-                greeting: "Good Night!",
-                message: "You did amazing today.",
-                backgroundImage: require('../../assets/time-of-day/night.png')
+                greeting: 'Good Night!',
+                message: 'You did amazing today.',
+                backgroundImage: require('../../assets/time-of-day/night.png'),
             };
         }
     };
-    
+
     const timeInfo = getTimeOfDayInfo();
-    
+
     return (
         <View style={styles.container}>
             <ImageBackground

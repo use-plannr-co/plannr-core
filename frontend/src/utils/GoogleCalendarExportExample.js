@@ -1,6 +1,6 @@
 /**
  * Google Calendar Integration Usage Example
- * 
+ *
  * This example shows how to use the Google Calendar export functionality
  * in a React Native component with the authenticatedAPI hook.
  */
@@ -19,20 +19,23 @@ const GoogleCalendarExportExample = ({ schedule, userTimezone = 'America/Vancouv
         try {
             const connected = await checkGoogleCalendarStatus();
             setIsConnected(connected);
-            
+
             if (connected) {
                 Alert.alert('Connected', 'Google Calendar is connected and ready to use!');
             } else {
                 Alert.alert(
-                    'Not Connected', 
+                    'Not Connected',
                     'Please connect your Google Calendar in the app settings first.',
                     [
                         { text: 'OK' },
-                        { text: 'Open Settings', onPress: () => {
-                            // Navigate to settings or open Google OAuth flow
-                            console.log('Navigate to Google Calendar connection settings');
-                        }}
-                    ]
+                        {
+                            text: 'Open Settings',
+                            onPress: () => {
+                                // Navigate to settings or open Google OAuth flow
+                                console.log('Navigate to Google Calendar connection settings');
+                            },
+                        },
+                    ],
                 );
             }
         } catch (error) {
@@ -59,37 +62,41 @@ const GoogleCalendarExportExample = ({ schedule, userTimezone = 'America/Vancouv
                     'Please connect your Google Calendar account first.',
                     [
                         { text: 'Cancel' },
-                        { text: 'Connect', onPress: () => {
-                            // Navigate to Google Calendar connection flow
-                            console.log('Navigate to Google Calendar connection');
-                        }}
-                    ]
+                        {
+                            text: 'Connect',
+                            onPress: () => {
+                                // Navigate to Google Calendar connection flow
+                                console.log('Navigate to Google Calendar connection');
+                            },
+                        },
+                    ],
                 );
                 return;
             }
 
             // Export the schedule
             const result = await exportScheduleToGoogleCalendar(schedule, userTimezone);
-            
+
             Alert.alert(
                 'Export Successful!',
                 `Successfully exported ${result.inserted} events to your "Plannr" calendar in Google Calendar.`,
-                [{ text: 'Great!' }]
+                [{ text: 'Great!' }],
             );
-
         } catch (error) {
             console.error('Google Calendar export failed:', error);
-            
+
             let errorMessage = 'Failed to export to Google Calendar. Please try again.';
-            
+
             if (error.message?.includes('GOOGLE_CALENDAR_NOT_CONNECTED')) {
-                errorMessage = 'Google Calendar is not connected. Please connect your account in settings.';
+                errorMessage =
+                    'Google Calendar is not connected. Please connect your account in settings.';
             } else if (error.message?.includes('GOOGLE_CALENDAR_REAUTH_REQUIRED')) {
-                errorMessage = 'Google Calendar access has expired. Please reconnect your account in settings.';
+                errorMessage =
+                    'Google Calendar access has expired. Please reconnect your account in settings.';
             } else if (error.message?.includes('No events found')) {
                 errorMessage = 'No events found in your schedule to export.';
             }
-            
+
             Alert.alert('Export Failed', errorMessage);
         } finally {
             setIsExporting(false);
@@ -104,16 +111,15 @@ const GoogleCalendarExportExample = ({ schedule, userTimezone = 'America/Vancouv
 
             {/* Connection Status */}
             <View style={{ marginBottom: 15 }}>
-                <Button
-                    title="Check Google Calendar Connection"
-                    onPress={handleCheckConnection}
-                />
+                <Button title="Check Google Calendar Connection" onPress={handleCheckConnection} />
                 {isConnected !== null && (
-                    <Text style={{ 
-                        marginTop: 5, 
-                        color: isConnected ? 'green' : 'red',
-                        fontWeight: 'bold'
-                    }}>
+                    <Text
+                        style={{
+                            marginTop: 5,
+                            color: isConnected ? 'green' : 'red',
+                            fontWeight: 'bold',
+                        }}
+                    >
                         Status: {isConnected ? 'Connected ✅' : 'Not Connected ❌'}
                     </Text>
                 )}
@@ -122,7 +128,7 @@ const GoogleCalendarExportExample = ({ schedule, userTimezone = 'America/Vancouv
             {/* Export Button */}
             <View style={{ marginBottom: 15 }}>
                 <Button
-                    title={isExporting ? "Exporting..." : "Export Schedule to Google Calendar"}
+                    title={isExporting ? 'Exporting...' : 'Export Schedule to Google Calendar'}
                     onPress={handleExportToGoogleCalendar}
                     disabled={isExporting || !schedule}
                 />
@@ -136,7 +142,7 @@ const GoogleCalendarExportExample = ({ schedule, userTimezone = 'America/Vancouv
             {/* Instructions */}
             <View style={{ backgroundColor: '#f0f0f0', padding: 10, borderRadius: 5 }}>
                 <Text style={{ fontSize: 14, color: '#666' }}>
-                    💡 Tip: This will create a dedicated "Plannr" calendar in your Google Calendar 
+                    💡 Tip: This will create a dedicated "Plannr" calendar in your Google Calendar
                     and export all your scheduled events there. Breaks are not exported.
                 </Text>
             </View>

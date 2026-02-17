@@ -1,10 +1,10 @@
-import Schedule from "./Schedule.js";
-import EarliestFitStrategy from "./EarliestFitStrategy.js";
-import BalancedWorkStrategy from "./BalancedWorkStrategy.js";
-import DeadlineOrientedStrategy from "./DeadlineOrientedStrategy.js";
-import convertDateToScheduleDate from "../utils/dateConversion.js";
-import Time24 from "./Time24.js";
-import Break from "./Break.js";
+import Schedule from './Schedule.js';
+import EarliestFitStrategy from './EarliestFitStrategy.js';
+import BalancedWorkStrategy from './BalancedWorkStrategy.js';
+import DeadlineOrientedStrategy from './DeadlineOrientedStrategy.js';
+import convertDateToScheduleDate from '../utils/dateConversion.js';
+import Time24 from './Time24.js';
+import Break from './Break.js';
 
 /**
  * Manages the rescheduling of tasks on user request.
@@ -29,14 +29,14 @@ class Rescheduler {
     }
 
     /**
-     * @param {Schedule} schedule 
+     * @param {Schedule} schedule
      */
     _extractBreaks(schedule) {
         this.breaks = [];
-        schedule.getAllDatesInOrder().forEach(date => {
+        schedule.getAllDatesInOrder().forEach((date) => {
             const day = schedule.getScheduleForDate(date);
             if (day) {
-                day.getBreaks().forEach(breakTime => {
+                day.getBreaks().forEach((breakTime) => {
                     this.breaks.push({ date: date, breakTime: breakTime });
                 });
             }
@@ -48,10 +48,10 @@ class Rescheduler {
      */
     _extractRigidEvents(schedule) {
         this.rigidEvents = [];
-        schedule.getAllDatesInOrder().forEach(date => {
+        schedule.getAllDatesInOrder().forEach((date) => {
             const day = schedule.getScheduleForDate(date);
             if (day) {
-                day.getRigidEvents().forEach(event => {
+                day.getRigidEvents().forEach((event) => {
                     this.rigidEvents.push(event);
                 });
             }
@@ -63,10 +63,10 @@ class Rescheduler {
      */
     _extractFlexibleEvents(schedule) {
         this.flexibleEvents = [];
-        schedule.getAllDatesInOrder().forEach(date => {
+        schedule.getAllDatesInOrder().forEach((date) => {
             const day = schedule.getScheduleForDate(date);
             if (day) {
-                day.getFlexibleEvents().forEach(event => {
+                day.getFlexibleEvents().forEach((event) => {
                     this.flexibleEvents.push(event);
                 });
             }
@@ -95,11 +95,11 @@ class Rescheduler {
 
         const toReschedule = [];
 
-        schedule.getAllDatesInOrder().forEach(id => {
+        schedule.getAllDatesInOrder().forEach((id) => {
             const day = schedule.getScheduleForDate(id);
             if (!day) return;
 
-            day.getFlexibleEvents().forEach(event => {
+            day.getFlexibleEvents().forEach((event) => {
                 const tb = schedule.locateTimeBlockForEvent(event);
                 if (!tb || tb.isCompleted()) return;
 
@@ -114,15 +114,54 @@ class Rescheduler {
         let rescheduled;
         switch (this.strategy) {
             case 'earliest-fit':
-                strat = new EarliestFitStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                strat = new EarliestFitStrategy(
+                    {
+                        numDays: this.numDays,
+                        breaks: [],
+                        repeatedBreaks: [],
+                        rigidEvents: [],
+                        flexibleEvents: [],
+                        eventDependencies: this.dependencies,
+                    },
+                    this.firstDate,
+                    this.firstDay,
+                    this.minGap,
+                    this.workingHoursLimit,
+                );
                 rescheduled = strat.reschedule(schedule, toReschedule, currentDate, currentTime);
                 break;
             case 'balanced-work':
-                strat = new BalancedWorkStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                strat = new BalancedWorkStrategy(
+                    {
+                        numDays: this.numDays,
+                        breaks: [],
+                        repeatedBreaks: [],
+                        rigidEvents: [],
+                        flexibleEvents: [],
+                        eventDependencies: this.dependencies,
+                    },
+                    this.firstDate,
+                    this.firstDay,
+                    this.minGap,
+                    this.workingHoursLimit,
+                );
                 rescheduled = strat.reschedule(schedule, toReschedule, currentDate, currentTime);
                 break;
             case 'deadline-oriented':
-                strat = new DeadlineOrientedStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                strat = new DeadlineOrientedStrategy(
+                    {
+                        numDays: this.numDays,
+                        breaks: [],
+                        repeatedBreaks: [],
+                        rigidEvents: [],
+                        flexibleEvents: [],
+                        eventDependencies: this.dependencies,
+                    },
+                    this.firstDate,
+                    this.firstDay,
+                    this.minGap,
+                    this.workingHoursLimit,
+                );
                 rescheduled = strat.reschedule(schedule, toReschedule, currentDate, currentTime);
                 break;
             default:
@@ -176,13 +215,52 @@ class Rescheduler {
             let strat;
             switch (this.strategy) {
                 case 'earliest-fit':
-                    strat = new EarliestFitStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                    strat = new EarliestFitStrategy(
+                        {
+                            numDays: this.numDays,
+                            breaks: [],
+                            repeatedBreaks: [],
+                            rigidEvents: [],
+                            flexibleEvents: [],
+                            eventDependencies: this.dependencies,
+                        },
+                        this.firstDate,
+                        this.firstDay,
+                        this.minGap,
+                        this.workingHoursLimit,
+                    );
                     break;
                 case 'balanced-work':
-                    strat = new BalancedWorkStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                    strat = new BalancedWorkStrategy(
+                        {
+                            numDays: this.numDays,
+                            breaks: [],
+                            repeatedBreaks: [],
+                            rigidEvents: [],
+                            flexibleEvents: [],
+                            eventDependencies: this.dependencies,
+                        },
+                        this.firstDate,
+                        this.firstDay,
+                        this.minGap,
+                        this.workingHoursLimit,
+                    );
                     break;
                 case 'deadline-oriented':
-                    strat = new DeadlineOrientedStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                    strat = new DeadlineOrientedStrategy(
+                        {
+                            numDays: this.numDays,
+                            breaks: [],
+                            repeatedBreaks: [],
+                            rigidEvents: [],
+                            flexibleEvents: [],
+                            eventDependencies: this.dependencies,
+                        },
+                        this.firstDate,
+                        this.firstDay,
+                        this.minGap,
+                        this.workingHoursLimit,
+                    );
                     break;
                 default:
                     throw new Error(`Unknown strategy: ${this.strategy}`);
@@ -209,11 +287,11 @@ class Rescheduler {
 
         const toReschedule = [];
 
-        schedule.getAllDatesInOrder().forEach(id => {
+        schedule.getAllDatesInOrder().forEach((id) => {
             const day = schedule.getScheduleForDate(id);
             if (!day) return;
 
-            day.getFlexibleEvents().forEach(event => {
+            day.getFlexibleEvents().forEach((event) => {
                 const tb = schedule.locateTimeBlockForEvent(event);
                 if (!tb || tb.isCompleted()) return;
 
@@ -230,13 +308,52 @@ class Rescheduler {
         let strat;
         switch (newStrategy) {
             case 'earliest-fit':
-                strat = new EarliestFitStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                strat = new EarliestFitStrategy(
+                    {
+                        numDays: this.numDays,
+                        breaks: [],
+                        repeatedBreaks: [],
+                        rigidEvents: [],
+                        flexibleEvents: [],
+                        eventDependencies: this.dependencies,
+                    },
+                    this.firstDate,
+                    this.firstDay,
+                    this.minGap,
+                    this.workingHoursLimit,
+                );
                 break;
             case 'balanced-work':
-                strat = new BalancedWorkStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                strat = new BalancedWorkStrategy(
+                    {
+                        numDays: this.numDays,
+                        breaks: [],
+                        repeatedBreaks: [],
+                        rigidEvents: [],
+                        flexibleEvents: [],
+                        eventDependencies: this.dependencies,
+                    },
+                    this.firstDate,
+                    this.firstDay,
+                    this.minGap,
+                    this.workingHoursLimit,
+                );
                 break;
             case 'deadline-oriented':
-                strat = new DeadlineOrientedStrategy({numDays: this.numDays, breaks: [], repeatedBreaks: [], rigidEvents: [], flexibleEvents: [], eventDependencies: this.dependencies}, this.firstDate, this.firstDay, this.minGap, this.workingHoursLimit);
+                strat = new DeadlineOrientedStrategy(
+                    {
+                        numDays: this.numDays,
+                        breaks: [],
+                        repeatedBreaks: [],
+                        rigidEvents: [],
+                        flexibleEvents: [],
+                        eventDependencies: this.dependencies,
+                    },
+                    this.firstDate,
+                    this.firstDay,
+                    this.minGap,
+                    this.workingHoursLimit,
+                );
                 break;
             default:
                 throw new Error(`Unknown strategy: ${newStrategy}`);

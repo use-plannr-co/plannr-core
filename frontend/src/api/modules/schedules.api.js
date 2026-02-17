@@ -41,7 +41,7 @@ export const saveScheduleWithDays = async (
     scheduleName,
     strategy = 'earliest-fit',
     startTime = 900,
-    endTime = 1700
+    endTime = 1700,
 ) => {
     try {
         const scheduleData = {
@@ -57,8 +57,8 @@ export const saveScheduleWithDays = async (
             metadata: {
                 eventDependencies: scheduleObject.eventDependencies,
                 frontendGenerated: true,
-                generatedAt: new Date().toISOString()
-            }
+                generatedAt: new Date().toISOString(),
+            },
         };
 
         const scheduleResponse = await makeAuthenticatedRequest('/api/schedules', {
@@ -95,17 +95,23 @@ export const saveScheduleWithDays = async (
                 minGap: daySchedule.minGap,
                 maxWorkingHours: daySchedule.workingHoursLimit,
                 metadata: {
-                    dayType: (daySchedule.day === 'Saturday' || daySchedule.day === 'Sunday') ? 'weekend' : 'weekday',
+                    dayType:
+                        daySchedule.day === 'Saturday' || daySchedule.day === 'Sunday'
+                            ? 'weekend'
+                            : 'weekday',
                     totalBlocks: daySchedule.timeBlocks.length,
                     events: daySchedule.events.length,
-                    breaks: daySchedule.breaks.length
-                }
+                    breaks: daySchedule.breaks.length,
+                },
             };
 
-            const dayResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days`, {
-                method: 'POST',
-                body: JSON.stringify(dayData),
-            });
+            const dayResponse = await makeAuthenticatedRequest(
+                `/api/schedules/${scheduleId}/days`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(dayData),
+                },
+            );
 
             if (!dayResponse.success) {
                 throw new Error(`Failed to create day ${i + 1}: ${dayResponse.message}`);
@@ -117,7 +123,7 @@ export const saveScheduleWithDays = async (
 
             const timeBlocks = daySchedule.getTimeBlocks();
             if (timeBlocks.length > 0) {
-                const blocksData = timeBlocks.map(block => {
+                const blocksData = timeBlocks.map((block) => {
                     const serialized = serializeTimeBlock(block);
                     return {
                         type: serialized.type,
@@ -128,7 +134,9 @@ export const saveScheduleWithDays = async (
                         dateObject: serializeScheduleDate(date),
                         category: serialized.activityType,
                         priority: serialized.priority,
-                        deadline: serialized.deadline ? `${serialized.deadline.year}-${String(serialized.deadline.month).padStart(2, '0')}-${String(serialized.deadline.date).padStart(2, '0')}` : null,
+                        deadline: serialized.deadline
+                            ? `${serialized.deadline.year}-${String(serialized.deadline.month).padStart(2, '0')}-${String(serialized.deadline.date).padStart(2, '0')}`
+                            : null,
                         deadlineObject: serialized.deadline,
                         duration: serialized.duration,
                         completed: serialized.completed || false,
@@ -136,18 +144,23 @@ export const saveScheduleWithDays = async (
                             activityType: serialized.activityType,
                             priority: serialized.priority,
                             frontendId: `${serialized.type}-${serialized.name?.toLowerCase().replace(/\s+/g, '-')}-${i + 1}`,
-                            originalBlock: true
-                        }
+                            originalBlock: true,
+                        },
                     };
                 });
 
-                const blocksResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}/blocks`, {
-                    method: 'POST',
-                    body: JSON.stringify({ blocks: blocksData }),
-                });
+                const blocksResponse = await makeAuthenticatedRequest(
+                    `/api/schedules/${scheduleId}/days/${dayId}/blocks`,
+                    {
+                        method: 'POST',
+                        body: JSON.stringify({ blocks: blocksData }),
+                    },
+                );
 
                 if (!blocksResponse.success) {
-                    throw new Error(`Failed to add blocks to day ${i + 1}: ${blocksResponse.message}`);
+                    throw new Error(
+                        `Failed to add blocks to day ${i + 1}: ${blocksResponse.message}`,
+                    );
                 }
 
                 const createdBlocks = blocksResponse.data || [];
@@ -163,18 +176,28 @@ export const saveScheduleWithDays = async (
 
         // Save event dependencies if they exist
         let savedDependencies = null;
-        if (scheduleObject.events && scheduleObject.events.length > 0 && convertEventDependenciesToNameMap) {
+        if (
+            scheduleObject.events &&
+            scheduleObject.events.length > 0 &&
+            convertEventDependenciesToNameMap
+        ) {
             try {
                 const dependenciesMap = convertEventDependenciesToNameMap(scheduleObject.events);
                 if (dependenciesMap && Object.keys(dependenciesMap).length > 0) {
-                    const dependenciesResponse = await makeAuthenticatedRequest(`/api/schedules/${scheduleId}/dependencies`, {
-                        method: 'POST',
-                        body: JSON.stringify({ dependenciesMap }),
-                    });
+                    const dependenciesResponse = await makeAuthenticatedRequest(
+                        `/api/schedules/${scheduleId}/dependencies`,
+                        {
+                            method: 'POST',
+                            body: JSON.stringify({ dependenciesMap }),
+                        },
+                    );
                     if (dependenciesResponse.success) {
                         savedDependencies = dependenciesResponse.data;
                     } else {
-                        console.warn('⚠️ Failed to save dependencies, but continuing:', dependenciesResponse.message);
+                        console.warn(
+                            '⚠️ Failed to save dependencies, but continuing:',
+                            dependenciesResponse.message,
+                        );
                     }
                 }
             } catch (depError) {
@@ -188,9 +211,8 @@ export const saveScheduleWithDays = async (
             daysCreated: createdDays.length,
             dependenciesSaved: !!savedDependencies,
             updatedScheduleObject: scheduleObject,
-            success: true
+            success: true,
         };
-
     } catch (error) {
         console.error('❌ Failed to save schedule with days:', error);
         throw error;
@@ -219,12 +241,15 @@ export const convertScheduleToAPIFormat = (scheduleObject) => {
                 minGap: daySchedule.minGap,
                 maxWorkingHours: daySchedule.workingHoursLimit,
                 metadata: {
-                    dayType: (daySchedule.day === 'Saturday' || daySchedule.day === 'Sunday') ? 'weekend' : 'weekday',
+                    dayType:
+                        daySchedule.day === 'Saturday' || daySchedule.day === 'Sunday'
+                            ? 'weekend'
+                            : 'weekday',
                     totalBlocks: timeBlocks.length,
                     events: daySchedule.events.length,
-                    breaks: daySchedule.breaks.length
+                    breaks: daySchedule.breaks.length,
                 },
-                timeBlocks: timeBlocks.map(block => {
+                timeBlocks: timeBlocks.map((block) => {
                     const serialized = serializeTimeBlock(block);
                     return {
                         type: serialized.type,
@@ -235,7 +260,9 @@ export const convertScheduleToAPIFormat = (scheduleObject) => {
                         dateObject: date,
                         category: serialized.activityType,
                         priority: serialized.priority,
-                        deadline: serialized.deadline ? `${serialized.deadline.year}-${String(serialized.deadline.month).padStart(2, '0')}-${String(serialized.deadline.date).padStart(2, '0')}` : null,
+                        deadline: serialized.deadline
+                            ? `${serialized.deadline.year}-${String(serialized.deadline.month).padStart(2, '0')}-${String(serialized.deadline.date).padStart(2, '0')}`
+                            : null,
                         deadlineObject: serialized.deadline,
                         duration: serialized.duration,
                         completed: serialized.completed || false,
@@ -243,10 +270,10 @@ export const convertScheduleToAPIFormat = (scheduleObject) => {
                             activityType: serialized.activityType,
                             priority: serialized.priority,
                             frontendId: `${serialized.type}-${serialized.name?.toLowerCase().replace(/\s+/g, '-')}-${i + 1}`,
-                            originalBlock: true
-                        }
+                            originalBlock: true,
+                        },
                     };
-                })
+                }),
             });
         }
 

@@ -1,6 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-    View, TextInput, TouchableOpacity, Text, StyleSheet, Platform, Animated, Easing,
+    View,
+    TextInput,
+    TouchableOpacity,
+    Text,
+    StyleSheet,
+    Platform,
+    Animated,
+    Easing,
 } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import { lightColor, darkColor } from '../../design/colors.js';
@@ -14,8 +21,24 @@ const FREE_LIMIT = 5;
 function CancelIcon({ color }) {
     return (
         <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Line x1="18" y1="6" x2="6" y2="18" stroke={color} strokeWidth={2} strokeLinecap="round" />
-            <Line x1="6" y1="6" x2="18" y2="18" stroke={color} strokeWidth={2} strokeLinecap="round" />
+            <Line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+            />
+            <Line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+            />
         </Svg>
     );
 }
@@ -72,7 +95,7 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
     // ── Voice press animation ─────────────────────────────────────────────────
     // fillAnim:     0 = fill fully off-screen right, 1 = fill covering row
     // rotationAnim: 0 → 1 one-shot counterclockwise spin on every voice press
-    const fillAnim     = useRef(new Animated.Value(0)).current;
+    const fillAnim = useRef(new Animated.Value(0)).current;
     const rotationAnim = useRef(new Animated.Value(0)).current;
 
     const animateFill = (activate) => {
@@ -127,26 +150,25 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
         onSend(msg);
     };
 
-    const handlePress = isStreaming
-        ? onCancel
-        : hasText
-            ? handleSend
-            : handleVoicePress;
+    const handlePress = isStreaming ? onCancel : hasText ? handleSend : handleVoicePress;
 
-    const remaining = dailyUsage
-        ? Math.max(0, FREE_LIMIT - (dailyUsage.messageCount || 0))
-        : null;
+    const remaining = dailyUsage ? Math.max(0, FREE_LIMIT - (dailyUsage.messageCount || 0)) : null;
 
     return (
         <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
             {remaining !== null && remaining <= FREE_LIMIT && (
-                <Text style={[styles.limitText, { color: remaining <= 1 ? theme.ORANGE : theme.SELECTION }]}>
+                <Text
+                    style={[
+                        styles.limitText,
+                        { color: remaining <= 1 ? theme.ORANGE : theme.SELECTION },
+                    ]}
+                >
                     {remaining} of {FREE_LIMIT} messages left today
                 </Text>
             )}
             <View
                 style={[styles.row, { backgroundColor: theme.INPUT }]}
-                onLayout={e => setRowWidth(e.nativeEvent.layout.width)}
+                onLayout={(e) => setRowWidth(e.nativeEvent.layout.width)}
             >
                 {/* ── Voice fill layer ─────────────────────────────────────────
                     Absolutely fills the row, slides in from the right.
@@ -167,7 +189,7 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
 
                 <TextInput
                     style={[styles.input, { color: theme.FOREGROUND }]}
-                    placeholder={!isVoiceActive ? "Ask about your schedule..." : ""}
+                    placeholder={!isVoiceActive ? 'Ask about your schedule...' : ''}
                     placeholderTextColor={isDark ? '#666' : '#999'}
                     value={text}
                     onChangeText={setText}
@@ -187,28 +209,38 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
                         colors={[theme.GRADIENT_END, theme.GRADIENT_END]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
-                        style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center' }]}
+                        style={[
+                            StyleSheet.absoluteFill,
+                            { alignItems: 'center', justifyContent: 'center' },
+                        ]}
                     >
                         {isStreaming ? (
                             <CancelIcon color={theme.SELECTED_TEXT} />
                         ) : (
                             <View style={styles.iconStack}>
-                                <Animated.View style={[
-                                    styles.iconAbsolute,
-                                    {
-                                        opacity: voiceOpacity,
-                                        transform: [
-                                            { translateY: voiceTranslateY },
-                                            { rotate: voiceRotate },
-                                        ],
-                                    },
-                                ]}>
+                                <Animated.View
+                                    style={[
+                                        styles.iconAbsolute,
+                                        {
+                                            opacity: voiceOpacity,
+                                            transform: [
+                                                { translateY: voiceTranslateY },
+                                                { rotate: voiceRotate },
+                                            ],
+                                        },
+                                    ]}
+                                >
                                     <VoiceIcon color={theme.SELECTED_TEXT} width={24} height={24} />
                                 </Animated.View>
-                                <Animated.View style={[
-                                    styles.iconAbsolute,
-                                    { opacity: sendOpacity, transform: [{ translateY: sendTranslateY }] },
-                                ]}>
+                                <Animated.View
+                                    style={[
+                                        styles.iconAbsolute,
+                                        {
+                                            opacity: sendOpacity,
+                                            transform: [{ translateY: sendTranslateY }],
+                                        },
+                                    ]}
+                                >
                                     <SendIcon color={theme.SELECTED_TEXT} width={24} height={24} />
                                 </Animated.View>
                             </View>

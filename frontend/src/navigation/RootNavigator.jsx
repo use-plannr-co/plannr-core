@@ -10,32 +10,30 @@ import OnboardingStack from './OnboardingStack';
 import AppStack from './AppStack';
 
 export default function RootNavigator() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const { appState, storageLoaded } = useAppState();
+    const { isLoaded, isSignedIn } = useAuth();
+    const { appState, storageLoaded } = useAppState();
 
-  // Monitor authentication and storage state changes
-  useEffect(() => {
-    console.log('🔐 Auth State:', { 
-      isLoaded, 
-      isSignedIn, 
-      storageLoaded, 
-      onboarded: appState?.onboarded 
-    });
-  }, [isLoaded, isSignedIn, storageLoaded, appState?.onboarded]);
+    // Monitor authentication and storage state changes
+    useEffect(() => {
+        console.log('🔐 Auth State:', {
+            isLoaded,
+            isSignedIn,
+            storageLoaded,
+            onboarded: appState?.onboarded,
+        });
+    }, [isLoaded, isSignedIn, storageLoaded, appState?.onboarded]);
 
-
-  return (
-    <NavigationContainer>
-      { (!isLoaded || !storageLoaded) ? (
-        <LoadingScreen />
-      ) : !isSignedIn ? (
-        <AuthStack />
-      ) : !appState?.onboarded ? (
-        <OnboardingStack />
-      ) : (
-        <AppStack />
-      )}
-    </NavigationContainer>
-  );
+    return (
+        <NavigationContainer>
+            {!isLoaded || !storageLoaded ? (
+                <LoadingScreen />
+            ) : !isSignedIn ? (
+                <AuthStack />
+            ) : !appState?.onboarded ? (
+                <OnboardingStack />
+            ) : (
+                <AppStack />
+            )}
+        </NavigationContainer>
+    );
 }
-

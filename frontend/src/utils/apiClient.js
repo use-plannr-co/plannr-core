@@ -10,7 +10,7 @@ const PLATFORM_OS = Platform.OS; // 'ios' or 'android'
  */
 export class ApiClient {
     constructor(baseUrl) {
-        this.baseUrl = baseUrl || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';
+        this.baseUrl = 'http://localhost:5001'; // baseUrl || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';
     }
 
     /**
@@ -47,25 +47,27 @@ export class ApiClient {
      */
     async checkAppCompatibility() {
         try {
-            console.log(`🔍 Checking app compatibility - Version: ${APP_VERSION}, Platform: ${PLATFORM_OS}`);
-            
+            console.log(
+                `🔍 Checking app compatibility - Version: ${APP_VERSION}, Platform: ${PLATFORM_OS}`,
+            );
+
             const response = await this.makeRequest('/api/app/version', {
-                method: 'GET'
+                method: 'GET',
             });
 
             // Handle update required response (426 Upgrade Required)
             if (response.status === 426) {
                 const updateInfo = await response.json();
                 console.warn('⚠️ App update required:', updateInfo);
-                
+
                 return {
                     compatible: false,
                     updateInfo: {
                         minVersion: updateInfo.minVersion,
                         platform: updateInfo.platform,
                         updateUrl: updateInfo.updateUrl,
-                        message: updateInfo.message || 'Please update Plannr to continue.'
-                    }
+                        message: updateInfo.message || 'Please update Plannr to continue.',
+                    },
                 };
             }
 
@@ -89,7 +91,6 @@ export class ApiClient {
             // For other errors, allow app to proceed (could be server issues)
             console.warn('⚠️ Version check failed, allowing app to proceed:', response.status);
             return { compatible: true };
-
         } catch (error) {
             // Network errors - allow app to proceed (offline mode)
             console.warn('⚠️ Version check network error, allowing app to proceed:', error.message);
@@ -113,8 +114,8 @@ export class ApiClient {
                         minVersion: data.minVersion,
                         platform: data.platform,
                         updateUrl: data.updateUrl,
-                        message: data.message || 'Please update Plannr to continue.'
-                    }
+                        message: data.message || 'Please update Plannr to continue.',
+                    },
                 };
             }
 
@@ -128,8 +129,8 @@ export class ApiClient {
                             minVersion: data.minVersion,
                             platform: data.platform,
                             updateUrl: data.updateUrl,
-                            message: data.message || 'Please update Plannr to continue.'
-                        }
+                            message: data.message || 'Please update Plannr to continue.',
+                        },
                     };
                 }
             }

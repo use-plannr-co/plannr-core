@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, TextInput, Platform, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView } from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    TouchableOpacity,
+    TextInput,
+    Platform,
+    Keyboard,
+    TouchableWithoutFeedback,
+    KeyboardAvoidingView,
+} from 'react-native';
 import Modal from 'react-native-modal';
 import { useAppState } from '../context/AppStateContext.js';
 import { lightColor, darkColor } from '../design/colors.js';
@@ -7,7 +17,7 @@ import { typography } from '../design/typography.js';
 
 const AddBusyTimeModal = ({ isVisible, onAdd, onClose }) => {
     const { appState } = useAppState();
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
     const [name, setName] = useState('');
     const [warning, setWarning] = useState('');
@@ -16,9 +26,13 @@ const AddBusyTimeModal = ({ isVisible, onAdd, onClose }) => {
 
     // Keyboard visibility listeners
     useEffect(() => {
-        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
-        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
-        
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () =>
+            setKeyboardVisible(true),
+        );
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () =>
+            setKeyboardVisible(false),
+        );
+
         return () => {
             keyboardDidShowListener?.remove();
             keyboardDidHideListener?.remove();
@@ -43,14 +57,14 @@ const AddBusyTimeModal = ({ isVisible, onAdd, onClose }) => {
 
     const handleAddTimeBlock = () => {
         if (name.trim().length === 0) {
-            setWarning("Time block name cannot be empty");
+            setWarning('Time block name cannot be empty');
             setShowWarning(true);
             return;
         }
 
         // Call the onAdd callback with the name
         onAdd(name.trim());
-        
+
         // Reset and close
         resetToDefaults();
         onClose && onClose();
@@ -58,29 +72,40 @@ const AddBusyTimeModal = ({ isVisible, onAdd, onClose }) => {
 
     return (
         <Modal
-            isVisible={isVisible} 
+            isVisible={isVisible}
             style={{ justifyContent: 'center', alignItems: 'center' }}
             animationInTiming={500}
             animationOutTiming={500}
         >
             <TouchableWithoutFeedback onPress={handleOutsidePress} accessible={false}>
                 <View style={styles.modalOverlay}>
-                    <KeyboardAvoidingView 
+                    <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                         keyboardVerticalOffset={20}
                     >
-                        <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()} accessible={false}>
+                        <TouchableWithoutFeedback
+                            onPress={(e) => e.stopPropagation()}
+                            accessible={false}
+                        >
                             <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
-                                <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Add Busy Time</Text>
-                                
+                                <Text style={{ ...styles.title, color: theme.FOREGROUND }}>
+                                    Add Busy Time
+                                </Text>
+
                                 {/* Name Input */}
                                 <View style={{ marginBottom: 20 }}>
-                                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Name</Text>
+                                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                                        Name
+                                    </Text>
                                     <TextInput
-                                        style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                        style={{
+                                            ...styles.input,
+                                            backgroundColor: theme.INPUT,
+                                            color: theme.FOREGROUND,
+                                        }}
                                         value={name}
                                         autoCorrect={false}
-                                        autoCapitalize='words'
+                                        autoCapitalize="words"
                                         placeholder="e.g., Gym, Class, Meeting"
                                         placeholderTextColor={theme.PLACEHOLDER}
                                         onChangeText={(text) => {
@@ -98,11 +123,19 @@ const AddBusyTimeModal = ({ isVisible, onAdd, onClose }) => {
                                 {showWarning && <Text style={styles.warning}>{warning}</Text>}
 
                                 {/* Add Button */}
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     style={styles.button}
                                     onPress={handleAddTimeBlock}
                                 >
-                                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Add Time Block</Text>
+                                    <Text
+                                        style={{
+                                            color: '#FFF',
+                                            fontFamily: 'AlbertSans',
+                                            alignSelf: 'center',
+                                        }}
+                                    >
+                                        Add Time Block
+                                    </Text>
                                 </TouchableOpacity>
                             </View>
                         </TouchableWithoutFeedback>
@@ -144,11 +177,11 @@ const styles = StyleSheet.create({
     subHeading: {
         fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
-        marginBottom: 8
+        marginBottom: 8,
     },
     input: {
         height: 48,
-        borderRadius: 12, 
+        borderRadius: 12,
         fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
@@ -161,14 +194,14 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 16,
         marginTop: 8,
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
     warning: {
         fontSize: typography.bodySize,
         fontFamily: 'AlbertSans',
         marginBottom: 12,
         color: '#FF0000',
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
 });
 

@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, TextInput, TouchableOpacity, Platform, Image, Alert } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    Dimensions,
+    TextInput,
+    TouchableOpacity,
+    Platform,
+    Image,
+    Alert,
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAppState } from '../context/AppStateContext.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
@@ -17,7 +28,8 @@ import useCurrentTime from '../utils/useCurrentTime.js';
 import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 
 const { width, height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const ManageAccountScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
@@ -25,30 +37,30 @@ const ManageAccountScreen = ({ navigation }) => {
     const { user } = useUser();
     const { getToken } = useAuth();
     const authenticatedAPI = useAuthenticatedAPI();
-    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const avatarPickerRef = useRef();
-    
+
     const [userName, setUserName] = useState(appState.name || '');
     const [userEmail, setUserEmail] = useState(user?.primaryEmailAddress?.emailAddress || '');
-    
+
     // Sync email from Clerk user when it changes
     useEffect(() => {
         if (user?.primaryEmailAddress?.emailAddress) {
             setUserEmail(user.primaryEmailAddress.emailAddress);
         }
     }, [user?.primaryEmailAddress?.emailAddress]);
-    
+
     // Track if name has been changed to show save button
     const [nameChanged, setNameChanged] = useState(false);
     const [isUpdatingName, setIsUpdatingName] = useState(false);
-    
+
     // Track if user is actively editing to prevent backend data from overriding input
     const [isEditingName, setIsEditingName] = useState(false);
-    
+
     // Avatar selection state
     const [selectedAvatar, setSelectedAvatar] = useState('cat'); // Default avatar
     const [userProfile, setUserProfile] = useState(null);
-    
+
     // Load user profile on component mount
     useEffect(() => {
         const loadUserProfile = async () => {
@@ -56,19 +68,19 @@ const ManageAccountScreen = ({ navigation }) => {
                 if (authenticatedAPI?.getUserProfile) {
                     // console.log('🔄 Loading user profile for avatar...');
                     const profileData = await authenticatedAPI.getUserProfile();
-                    
+
                     if (profileData.success && profileData.data) {
                         setUserProfile(profileData.data);
                         if (profileData.data.avatarName) {
                             setSelectedAvatar(profileData.data.avatarName);
                             // console.log('🐾 Loaded current avatar:', profileData.data.avatarName);
                         }
-                        
+
                         // Only update name field if user is not actively editing it
                         if (profileData.data.displayName && !isEditingName && !nameChanged) {
                             setUserName(profileData.data.displayName);
                         }
-                        
+
                         // Note: We don't update email from database since it's encrypted
                         // Email comes from Clerk's useUser hook instead
                     }
@@ -86,40 +98,40 @@ const ManageAccountScreen = ({ navigation }) => {
     // Handle name updates
     const updateUserName = async () => {
         if (!nameChanged) return;
-        
+
         try {
             setIsUpdatingName(true);
-            
+
             const newDisplayName = userName.trim();
-            
+
             console.log('🔄 Updating user name:', { displayName: newDisplayName });
-            
+
             logSettingChange('user_name', newDisplayName, appState.name);
-            
+
             const result = await authenticatedAPI.updateUserProfile({
-                displayName: newDisplayName
+                displayName: newDisplayName,
             });
-            
+
             if (result.success) {
                 console.log('✅ Name updated successfully:', result.data);
-                
+
                 // Update AppState with new name
-                setAppState(prevState => ({
+                setAppState((prevState) => ({
                     ...prevState,
-                    name: newDisplayName
+                    name: newDisplayName,
                 }));
-                
+
                 setNameChanged(false);
                 setIsEditingName(false);
-                logUserAction('name_updated_success', { 
-                    displayName: newDisplayName 
+                logUserAction('name_updated_success', {
+                    displayName: newDisplayName,
                 });
                 Alert.alert('Success', 'Your name has been updated successfully!');
             } else {
                 console.error('❌ Failed to update name:', result);
-                logError('name_update_failed', new Error('API call failed'), { 
-                    displayName: newDisplayName, 
-                    result 
+                logError('name_update_failed', new Error('API call failed'), {
+                    displayName: newDisplayName,
+                    result,
                 });
                 Alert.alert('Error', 'Failed to update your name. Please try again.');
             }
@@ -150,32 +162,35 @@ const ManageAccountScreen = ({ navigation }) => {
         try {
             // Update local state immediately for responsive UI
             setSelectedAvatar(avatarName);
-            
+
             // Update AppState immediately so avatar reflects across all screens
-            setAppState(prevState => ({
+            setAppState((prevState) => ({
                 ...prevState,
-                avatarName: avatarName
+                avatarName: avatarName,
             }));
 
             console.log('🐾 Updating avatar to:', avatarName);
-            
+
             logSettingChange('avatar', avatarName, selectedAvatar);
-            
+
             if (authenticatedAPI?.updateAvatar) {
                 const result = await authenticatedAPI.updateAvatar(avatarName);
-                
+
                 if (result.success) {
                     console.log('✅ Avatar updated successfully:', result.data);
                     logUserAction('avatar_updated_success', { avatarName });
                     Alert.alert('Success', 'Avatar updated successfully!');
                 } else {
                     console.error('❌ Failed to update avatar:', result);
-                    logError('avatar_update_failed', new Error('API call failed'), { avatarName, result });
+                    logError('avatar_update_failed', new Error('API call failed'), {
+                        avatarName,
+                        result,
+                    });
                     Alert.alert('Error', 'Failed to update avatar. Please try again.');
                     // Revert AppState on failure
-                    setAppState(prevState => ({
+                    setAppState((prevState) => ({
                         ...prevState,
-                        avatarName: appState.avatarName || 'cat' // fallback to previous or default
+                        avatarName: appState.avatarName || 'cat', // fallback to previous or default
                     }));
                     setSelectedAvatar(appState.avatarName || 'cat');
                 }
@@ -187,9 +202,9 @@ const ManageAccountScreen = ({ navigation }) => {
             console.error('💥 Error updating avatar:', error);
             Alert.alert('Error', 'Failed to update avatar. Please try again.');
             // Revert AppState on error
-            setAppState(prevState => ({
+            setAppState((prevState) => ({
                 ...prevState,
-                avatarName: appState.avatarName || 'cat'
+                avatarName: appState.avatarName || 'cat',
             }));
             setSelectedAvatar(appState.avatarName || 'cat');
         }
@@ -198,24 +213,29 @@ const ManageAccountScreen = ({ navigation }) => {
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <View style={styles.titleContainer}>
-                <TouchableOpacity 
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                     <GoBackIcon width={24} height={24} color={theme.FOREGROUND} />
                 </TouchableOpacity>
                 <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Your Account</Text>
             </View>
-            <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
+            <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND }}>
                 {/* Avatar Selection */}
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>Your Avatar</Text>
-                <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, alignItems: 'center' }}>
-                    <TouchableOpacity 
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>
+                    Your Avatar
+                </Text>
+                <View
+                    style={{
+                        ...styles.card,
+                        backgroundColor: theme.COMP_COLOR,
+                        alignItems: 'center',
+                    }}
+                >
+                    <TouchableOpacity
                         style={styles.profileImageContainer}
                         onPress={() => avatarPickerRef.current?.show()}
                     >
-                        <Image 
-                            source={getAvatarImageSource(selectedAvatar)} 
+                        <Image
+                            source={getAvatarImageSource(selectedAvatar)}
                             style={styles.profileImage}
                             resizeMode="cover"
                         />
@@ -229,10 +249,17 @@ const ManageAccountScreen = ({ navigation }) => {
                 </View>
 
                 {/* User Name */}
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>Your Name</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0 }}>
+                    Your Name
+                </Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
-                        style={{ ...styles.input, color: theme.FOREGROUND, backgroundColor: theme.INPUT, marginBottom: 12 }}
+                        style={{
+                            ...styles.input,
+                            color: theme.FOREGROUND,
+                            backgroundColor: theme.INPUT,
+                            marginBottom: 12,
+                        }}
                         value={userName}
                         autoCorrect={false}
                         onChangeText={handleNameChange}
@@ -241,15 +268,15 @@ const ManageAccountScreen = ({ navigation }) => {
                         placeholder="Enter your name"
                         placeholderTextColor={theme.FOREGROUND_SECONDARY}
                     />
-                    
+
                     {/* Save Name Button - Always visible */}
-                    <TouchableOpacity 
-                        style={{ 
+                    <TouchableOpacity
+                        style={{
                             ...styles.button,
                             backgroundColor: isUpdatingName ? '#666' : '#000',
                             opacity: isUpdatingName ? 0.6 : 1,
                             marginTop: 4,
-                            marginBottom: 8
+                            marginBottom: 8,
                         }}
                         onPress={updateUserName}
                         disabled={isUpdatingName}
@@ -261,13 +288,22 @@ const ManageAccountScreen = ({ navigation }) => {
                 </View>
 
                 {/* Email */}
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginBottom: 0, marginTop: 16 }}>Your Email</Text>
+                <Text
+                    style={{
+                        ...styles.subHeading,
+                        color: theme.FOREGROUND,
+                        marginBottom: 0,
+                        marginTop: 16,
+                    }}
+                >
+                    Your Email
+                </Text>
                 <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
                     <TextInput
-                        style={{ 
-                            ...styles.input, 
-                            color: theme.FOREGROUND, 
-                            backgroundColor: theme.INPUT 
+                        style={{
+                            ...styles.input,
+                            color: theme.FOREGROUND,
+                            backgroundColor: theme.INPUT,
                         }}
                         value={userEmail}
                         editable={false}
@@ -275,14 +311,14 @@ const ManageAccountScreen = ({ navigation }) => {
                         placeholder="Email address"
                         placeholderTextColor={theme.FOREGROUND_SECONDARY}
                     />
-                    
+
                     <Text style={{ ...styles.disabledText, color: theme.FOREGROUND }}>
                         Emails cannot be changed.
                     </Text>
                 </View>
             </ScrollView>
-            
-            <AvatarPickerBottomSheet 
+
+            <AvatarPickerBottomSheet
                 ref={avatarPickerRef}
                 theme={theme}
                 selectedAvatar={selectedAvatar}
@@ -290,7 +326,7 @@ const ManageAccountScreen = ({ navigation }) => {
             />
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -344,7 +380,7 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 40,
-        borderRadius: 12, 
+        borderRadius: 12,
         fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,

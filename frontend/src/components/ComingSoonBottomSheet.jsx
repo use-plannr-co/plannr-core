@@ -1,12 +1,27 @@
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
-import { Animated, Dimensions, PanResponder, View, Pressable, StyleSheet, TouchableOpacity, Text, Image } from 'react-native';
+import {
+    Animated,
+    Dimensions,
+    PanResponder,
+    View,
+    Pressable,
+    StyleSheet,
+    TouchableOpacity,
+    Text,
+    Image,
+} from 'react-native';
 import { spacing } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const MAX_TRANSLATE_Y = SCREEN_HEIGHT * 0.5;
 
-const SPACE = (SCREEN_HEIGHT > 900) ? spacing.SPACING_4 : (SCREEN_HEIGHT > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const SPACE =
+    SCREEN_HEIGHT > 900
+        ? spacing.SPACING_4
+        : SCREEN_HEIGHT > 800
+          ? spacing.SPACING_3
+          : spacing.SPACING_2;
 
 const ComingSoonBottomSheet = forwardRef(({ theme }, ref) => {
     const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -29,7 +44,7 @@ const ComingSoonBottomSheet = forwardRef(({ theme }, ref) => {
                     }).start();
                 }
             },
-        })
+        }),
     ).current;
 
     const show = () => {
@@ -98,23 +113,22 @@ const ComingSoonBottomSheet = forwardRef(({ theme }, ref) => {
                 {/* Content */}
                 <View style={styles.content}>
                     {/* Planzo Image */}
-                    <Image 
+                    <Image
                         source={require('../../assets/walkthrough/Planzo.png')}
                         style={styles.planzoImage}
                         resizeMode="contain"
                     />
 
                     {/* Coming Soon Text */}
-                    <Text style={[styles.title, { color: theme.FOREGROUND }]}>
-                        Coming Soon!
-                    </Text>
-                    
+                    <Text style={[styles.title, { color: theme.FOREGROUND }]}>Coming Soon!</Text>
+
                     <Text style={[styles.description, { color: theme.FOREGROUND_SECONDARY }]}>
-                        Your productivity analytics are being prepared. Check back soon for detailed insights into your scheduling patterns and task completion rates.
+                        Your productivity analytics are being prepared. Check back soon for detailed
+                        insights into your scheduling patterns and task completion rates.
                     </Text>
 
                     {/* Close Button */}
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={[styles.closeButton, { backgroundColor: theme.ACCENT }]}
                         onPress={hide}
                     >

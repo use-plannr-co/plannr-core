@@ -5,10 +5,9 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 const Stack = createStackNavigator();
 
 export default function OnboardingStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Onboarding">
-      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-    </Stack.Navigator>
-  );
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Onboarding">
+            <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        </Stack.Navigator>
+    );
 }
-

@@ -1,7 +1,7 @@
-import FlexibleEvent from "../model/FlexibleEvent.js";
-import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
-import { serializeActivityType, parseActivityType } from "./ActivityTypeHandler.js";
-import { serializePriority, parsePriority } from "./PriorityHandler.js";
+import FlexibleEvent from '../model/FlexibleEvent.js';
+import { serializeScheduleDate, parseScheduleDate } from './ScheduleDateHandler.js';
+import { serializeActivityType, parseActivityType } from './ActivityTypeHandler.js';
+import { serializePriority, parsePriority } from './PriorityHandler.js';
 
 export const serializeFlexibleEvent = (eventObj) => {
     if (!eventObj) return null;
@@ -12,12 +12,19 @@ export const serializeFlexibleEvent = (eventObj) => {
         duration: eventObj.duration,
         priority: serializePriority(eventObj.priority),
         deadline: serializeScheduleDate(eventObj.deadline),
-        id: eventObj.id
-    }
-}
+        id: eventObj.id,
+    };
+};
 
 export const parseFlexibleEvent = (rawObj) => {
-    if (!rawObj || rawObj.name == null || rawObj.type == null || rawObj.duration == null || rawObj.priority == null || rawObj.deadline == null) {
+    if (
+        !rawObj ||
+        rawObj.name == null ||
+        rawObj.type == null ||
+        rawObj.duration == null ||
+        rawObj.priority == null ||
+        rawObj.deadline == null
+    ) {
         return null;
     }
 
@@ -27,6 +34,6 @@ export const parseFlexibleEvent = (rawObj) => {
         rawObj.duration,
         parsePriority(rawObj.priority),
         parseScheduleDate(rawObj.deadline),
-        rawObj.id
+        rawObj.id,
     );
-}
+};

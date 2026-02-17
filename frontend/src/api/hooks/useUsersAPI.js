@@ -10,6 +10,7 @@ export const useUsersAPI = () => {
         updateAvatar: (avatarName) => usersApi.updateAvatar(makeAuthenticatedRequest, avatarName),
         markOnboardingComplete: () => usersApi.markOnboardingComplete(makeAuthenticatedRequest),
         deleteUserAccount: () => usersApi.deleteUserAccount(makeAuthenticatedRequest),
-        syncUserToBackend: () => usersApi.syncUserToBackend(makeAuthenticatedRequest, getToken, user),
+        syncUserToBackend: () =>
+            usersApi.syncUserToBackend(makeAuthenticatedRequest, getToken, user),
     };
 };

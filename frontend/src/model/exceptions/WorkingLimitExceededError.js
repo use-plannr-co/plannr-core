@@ -3,10 +3,9 @@
  */
 class WorkingLimitExceededError extends Error {
     constructor() {
-      super('Working hours limit exceeded');
-      this.name = 'WorkingLimitExceededError';
+        super('Working hours limit exceeded');
+        this.name = 'WorkingLimitExceededError';
     }
-  }
-  
-  export default WorkingLimitExceededError;
-  
+}
+
+export default WorkingLimitExceededError;

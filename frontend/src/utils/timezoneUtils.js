@@ -19,13 +19,12 @@ export const getUserTimezone = () => {
             // iOS specific logic could go here
             return 'America/New_York'; // Default for North America
         } else if (Platform.OS === 'android') {
-            // Android specific logic could go here  
+            // Android specific logic could go here
             return 'America/New_York'; // Default for North America
         }
 
         // Ultimate fallback
         return 'UTC';
-
     } catch (error) {
         console.warn('Failed to determine user timezone, falling back to UTC:', error);
         return 'UTC';
@@ -42,12 +41,12 @@ export const getTimezoneDisplayName = (timezone) => {
         const now = new Date();
         const formatter = new Intl.DateTimeFormat('en', {
             timeZone: timezone,
-            timeZoneName: 'long'
+            timeZoneName: 'long',
         });
-        
+
         const parts = formatter.formatToParts(now);
-        const timeZoneName = parts.find(part => part.type === 'timeZoneName');
-        
+        const timeZoneName = parts.find((part) => part.type === 'timeZoneName');
+
         return timeZoneName ? timeZoneName.value : timezone;
     } catch (error) {
         console.warn('Failed to get timezone display name:', error);
@@ -88,6 +87,6 @@ export const getCommonTimezones = () => {
         { value: 'Asia/Tokyo', label: 'Japan Standard Time (Tokyo)' },
         { value: 'Asia/Shanghai', label: 'China Standard Time (Shanghai)' },
         { value: 'Australia/Sydney', label: 'Australian Eastern Time (Sydney)' },
-        { value: 'UTC', label: 'Coordinated Universal Time (UTC)' }
+        { value: 'UTC', label: 'Coordinated Universal Time (UTC)' },
     ];
 };

@@ -15,7 +15,10 @@ import { View, Text, StyleSheet, Platform, Linking, Animated } from 'react-nativ
 import Markdown from 'react-native-markdown-display';
 import { lightColor, darkColor } from '../../design/colors.js';
 import { useAppState } from '../../context/AppStateContext.js';
+import { useChat } from '../../context/ChatContext.js';
 import ChatTypingIndicator from './ChatTypingIndicator.jsx';
+import ChatActionButtons from './ChatActionButtons.jsx';
+import ChatProcessingBlock from './ChatProcessingBlock.jsx';
 
 const SCREEN_PADDING = 20;
 
@@ -30,9 +33,27 @@ function buildMarkdownStyles(theme, isDark) {
         body: { color: theme.FOREGROUND, fontSize: 16, lineHeight: 26 },
 
         // Headings
-        heading1: { fontSize: 22, fontWeight: '700', color: theme.FOREGROUND, marginTop: 20, marginBottom: 8 },
-        heading2: { fontSize: 19, fontWeight: '700', color: theme.FOREGROUND, marginTop: 16, marginBottom: 6 },
-        heading3: { fontSize: 17, fontWeight: '600', color: theme.FOREGROUND, marginTop: 14, marginBottom: 4 },
+        heading1: {
+            fontSize: 22,
+            fontWeight: '700',
+            color: theme.FOREGROUND,
+            marginTop: 20,
+            marginBottom: 8,
+        },
+        heading2: {
+            fontSize: 19,
+            fontWeight: '700',
+            color: theme.FOREGROUND,
+            marginTop: 16,
+            marginBottom: 6,
+        },
+        heading3: {
+            fontSize: 17,
+            fontWeight: '600',
+            color: theme.FOREGROUND,
+            marginTop: 14,
+            marginBottom: 4,
+        },
 
         // Paragraphs
         paragraph: { marginTop: 0, marginBottom: 12 },
@@ -103,7 +124,12 @@ function buildMarkdownStyles(theme, isDark) {
 
         // Tables
         table: { borderWidth: 1, borderColor: border, borderRadius: 6, marginVertical: 10 },
-        th: { backgroundColor: isDark ? '#2A2A2A' : '#F5F5F5', padding: 10, fontWeight: '700', color: theme.FOREGROUND },
+        th: {
+            backgroundColor: isDark ? '#2A2A2A' : '#F5F5F5',
+            padding: 10,
+            fontWeight: '700',
+            color: theme.FOREGROUND,
+        },
         td: { padding: 10, borderTopWidth: 1, borderTopColor: border, color: theme.FOREGROUND },
     };
 }
@@ -116,7 +142,7 @@ function BlinkingCursor({ color }) {
             Animated.sequence([
                 Animated.timing(opacity, { toValue: 0, duration: 530, useNativeDriver: true }),
                 Animated.timing(opacity, { toValue: 1, duration: 530, useNativeDriver: true }),
-            ])
+            ]),
         );
         anim.start();
         return () => anim.stop();
@@ -131,6 +157,7 @@ function BlinkingCursor({ color }) {
 
 function ChatBubble({ message }) {
     const { appState } = useAppState();
+    const { confirmAction } = useChat();
     const isDark = appState.userPreferences.theme !== 'light';
     const theme = isDark ? darkColor : lightColor;
 
@@ -149,7 +176,13 @@ function ChatBubble({ message }) {
     if (isUser) {
         return (
             <View style={styles.userRow}>
-                <Text style={[styles.roleLabel, styles.roleLabelUser, { color: isDark ? '#666' : '#999' }]}>
+                <Text
+                    style={[
+                        styles.roleLabel,
+                        styles.roleLabelUser,
+                        { color: isDark ? '#666' : '#999' },
+                    ]}
+                >
                     You
                 </Text>
                 <Text style={[styles.userText, { color: theme.FOREGROUND }]}>{content}</Text>
@@ -180,11 +213,22 @@ function ChatBubble({ message }) {
             ) : (
                 <Markdown
                     style={markdownStyles}
-                    onLinkPress={(url) => { Linking.openURL(url); return false; }}
+                    onLinkPress={(url) => {
+                        Linking.openURL(url);
+                        return false;
+                    }}
                 >
                     {content || ''}
                 </Markdown>
             )}
+
+            {message.actions && !message.processing && !isStreaming && (
+                <ChatActionButtons
+                    actions={message.actions}
+                    onConfirm={(action) => confirmAction(action.type, action.params || {})}
+                />
+            )}
+            {message.processing && <ChatProcessingBlock />}
         </View>
     );
 }

@@ -3,10 +3,9 @@
  */
 class EventConflictError extends Error {
     constructor() {
-      super('Event conflicts with existing event');
-      this.name = 'EventConflictError';
+        super('Event conflicts with existing event');
+        this.name = 'EventConflictError';
     }
-  }
-  
-  export default EventConflictError;
-  
+}
+
+export default EventConflictError;

@@ -8,9 +8,33 @@ import { useAppState } from '../../context/AppStateContext.js';
 function HamburgerIcon({ color }) {
     return (
         <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Line x1="3" y1="6" x2="21" y2="6" stroke={color} strokeWidth={2} strokeLinecap="round" />
-            <Line x1="3" y1="12" x2="21" y2="12" stroke={color} strokeWidth={2} strokeLinecap="round" />
-            <Line x1="3" y1="18" x2="21" y2="18" stroke={color} strokeWidth={2} strokeLinecap="round" />
+            <Line
+                x1="3"
+                y1="6"
+                x2="21"
+                y2="6"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+            />
+            <Line
+                x1="3"
+                y1="12"
+                x2="21"
+                y2="12"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+            />
+            <Line
+                x1="3"
+                y1="18"
+                x2="21"
+                y2="18"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+            />
         </Svg>
     );
 }
@@ -26,7 +50,13 @@ function NewChatIcon({ color }) {
 function BackIcon({ color }) {
     return (
         <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-            <Path d="M15 18L9 12L15 6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+            <Path
+                d="M15 18L9 12L15 6"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
         </Svg>
     );
 }
@@ -38,24 +68,38 @@ export default function ChatHeader({ onOpenDrawer, onNewChat, onBack }) {
     const isDark = appState.userPreferences.theme !== 'light';
 
     return (
-        <View style={[
-            styles.container,
-            {
-                backgroundColor: theme.BACKGROUND,
-                paddingTop: insets.top + 8,
-            }
-        ]}>
+        <View
+            style={[
+                styles.container,
+                {
+                    backgroundColor: theme.BACKGROUND,
+                    paddingTop: insets.top + 8,
+                },
+            ]}
+        >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity onPress={onBack} style={styles.iconBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <TouchableOpacity
+                    onPress={onBack}
+                    style={styles.iconBtn}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
                     <BackIcon color={theme.FOREGROUND} />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={onOpenDrawer} style={styles.iconBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <TouchableOpacity
+                    onPress={onOpenDrawer}
+                    style={styles.iconBtn}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
                     <HamburgerIcon color={theme.FOREGROUND} />
                 </TouchableOpacity>
             </View>
 
-            <TouchableOpacity onPress={onNewChat} style={styles.iconBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity
+                onPress={onNewChat}
+                style={styles.iconBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
                 <NewChatIcon color={theme.FOREGROUND} />
             </TouchableOpacity>
         </View>

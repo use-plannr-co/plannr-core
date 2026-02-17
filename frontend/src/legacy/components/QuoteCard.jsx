@@ -8,12 +8,13 @@ import { spacing, padding } from '../design/spacing.js';
 import { useQuote } from '../utils/useQuote.js';
 
 const { width, height } = Dimensions.get('window');
-const WIDTH = width - (padding.SCREEN_PADDING * 2);
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const WIDTH = width - padding.SCREEN_PADDING * 2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const QuoteCard = () => {
     const { appState } = useAppState();
-    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const { quote, author } = useQuote();
 
     return (

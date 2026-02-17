@@ -14,7 +14,7 @@ export const exportScheduleToGoogleCalendar = async (
     userTimezone = 'UTC',
     accessToken = null,
     scheduleName = null,
-    userName = null
+    userName = null,
 ) => {
     console.log('🔄 Starting Google Calendar export...');
 
@@ -48,20 +48,26 @@ export const exportScheduleToGoogleCalendar = async (
     if (userName) requestBody.userName = userName;
 
     try {
-        const response = await makeAuthenticatedRequest('/api/integrations/google-calendar/export', {
-            method: 'POST',
-            body: JSON.stringify(requestBody)
-        });
+        const response = await makeAuthenticatedRequest(
+            '/api/integrations/google-calendar/export',
+            {
+                method: 'POST',
+                body: JSON.stringify(requestBody),
+            },
+        );
 
         console.log('✅ Successfully exported to Google Calendar:', response.data);
         return response.data;
     } catch (error) {
-        if (error.errorCode === 'GOOGLE_ACCOUNT_REAUTH_NEEDED' || error.errorCode === 'GOOGLE_ACCOUNT_NOT_FOUND') {
+        if (
+            error.errorCode === 'GOOGLE_ACCOUNT_REAUTH_NEEDED' ||
+            error.errorCode === 'GOOGLE_ACCOUNT_NOT_FOUND'
+        ) {
             const { Alert } = require('react-native');
             Alert.alert(
                 'Google Calendar Access Required',
                 'Plannr currently does not have access to your Google Calendar. Please sign out and sign in with your Google account again to grant access.',
-                [{ text: 'OK', style: 'default' }]
+                [{ text: 'OK', style: 'default' }],
             );
             const authError = new Error('GOOGLE_CALENDAR_AUTH_ERROR');
             authError.originalError = error;
@@ -78,7 +84,13 @@ export const exportScheduleToGoogleCalendar = async (
  */
 const convertTimeBlockToCalendarEvent = (timeBlock, userTimezone = 'UTC') => {
     try {
-        if (!timeBlock || !timeBlock.getName || !timeBlock.getDate || !timeBlock.getStartTime || !timeBlock.getEndTime) {
+        if (
+            !timeBlock ||
+            !timeBlock.getName ||
+            !timeBlock.getDate ||
+            !timeBlock.getStartTime ||
+            !timeBlock.getEndTime
+        ) {
             console.warn('Invalid timeBlock structure:', timeBlock);
             return null;
         }
@@ -109,7 +121,11 @@ const convertTimeBlockToCalendarEvent = (timeBlock, userTimezone = 'UTC') => {
         if (timeBlock.getActivityType && timeBlock.getActivityType()) {
             description += `Activity: ${timeBlock.getActivityType()}\n`;
         }
-        if (timeBlock.priority && timeBlock.priority.toString && timeBlock.priority.toString() !== 'NONE') {
+        if (
+            timeBlock.priority &&
+            timeBlock.priority.toString &&
+            timeBlock.priority.toString() !== 'NONE'
+        ) {
             description += `Priority: ${timeBlock.priority.toString()}\n`;
         }
         if (timeBlock.deadline && timeBlock.deadline.getDateString) {
@@ -123,7 +139,7 @@ const convertTimeBlockToCalendarEvent = (timeBlock, userTimezone = 'UTC') => {
             description: description.trim(),
             start: startDateTime,
             end: endDateTime,
-            timeZone: userTimezone
+            timeZone: userTimezone,
         };
     } catch (error) {
         console.error('Error converting timeBlock to calendar event:', error);

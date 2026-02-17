@@ -5,6 +5,7 @@ export const usePreferencesAPI = () => {
     const { makeAuthenticatedRequest } = useApiCore();
     return {
         getPreferences: () => preferencesApi.getPreferences(makeAuthenticatedRequest),
-        updatePreferences: (data) => preferencesApi.updatePreferences(makeAuthenticatedRequest, data),
+        updatePreferences: (data) =>
+            preferencesApi.updatePreferences(makeAuthenticatedRequest, data),
     };
 };

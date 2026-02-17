@@ -13,18 +13,31 @@ import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 
 const { width, height } = Dimensions.get('window');
-const WIDTH = width - (padding.SCREEN_PADDING * 2);
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const WIDTH = width - padding.SCREEN_PADDING * 2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const Insights = ({ version, schedule }) => {
     const { appState } = useAppState();
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
     // Return placeholder if no schedule is available
     if (!schedule) {
         return (
-            <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center' }}>No schedule data available</Text>
+            <View
+                style={{
+                    ...styles.card,
+                    backgroundColor: theme.COMP_COLOR,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flex: 1,
+                }}
+            >
+                <Text
+                    style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center' }}
+                >
+                    No schedule data available
+                </Text>
             </View>
         );
     }
@@ -41,14 +54,32 @@ const Insights = ({ version, schedule }) => {
                     <ClockIcon width={24} height={24} color={theme.PURPLE} />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                    <Text style={{ ...styles.subHeading, marginBottom: -4, fontSize: 48, color: theme.FOREGROUND, width: 100 }}>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            marginBottom: -4,
+                            fontSize: 48,
+                            color: theme.FOREGROUND,
+                            width: 100,
+                        }}
+                    >
                         {day + 1}
-                        <Text style={{ ...styles.subHeading, marginBottom: 0, fontSize: 24, color: theme.FOREGROUND }}> / {totalDays}</Text>
+                        <Text
+                            style={{
+                                ...styles.subHeading,
+                                marginBottom: 0,
+                                fontSize: 24,
+                                color: theme.FOREGROUND,
+                            }}
+                        >
+                            {' '}
+                            / {totalDays}
+                        </Text>
                     </Text>
                 </View>
             </View>
         );
-    }
+    };
 
     const Type2 = (schedule) => {
         const [completed, setCompleted] = useState(0);
@@ -62,7 +93,7 @@ const Insights = ({ version, schedule }) => {
             for (const date of datesList) {
                 const tasks = schedule.getScheduleForDate(date).getTimeBlocks();
                 total += tasks.length;
-                done += tasks.filter(task => task.completed).length;
+                done += tasks.filter((task) => task.completed).length;
             }
 
             setCompleted(done);
@@ -73,10 +104,10 @@ const Insights = ({ version, schedule }) => {
 
         useEffect(() => {
             Animated.timing(animatedFill, {
-            toValue: completed * 100 / totalTasks,
-            duration: 1000,
-            easing: Easing.out(Easing.ease),
-            useNativeDriver: false,
+                toValue: (completed * 100) / totalTasks,
+                duration: 1000,
+                easing: Easing.out(Easing.ease),
+                useNativeDriver: false,
             }).start();
         }, [schedule, completed, totalTasks]);
 
@@ -93,16 +124,23 @@ const Insights = ({ version, schedule }) => {
                     tintColor={theme.GRADIENT_START}
                     backgroundColor={theme.INPUT}
                     rotation={0}
-                    lineCap='round'
+                    lineCap="round"
                     children={(fill) => (
-                        <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, fontWeight: '600', color: theme.FOREGROUND }}>
+                        <Text
+                            style={{
+                                fontFamily: 'AlbertSans',
+                                fontSize: 16,
+                                fontWeight: '600',
+                                color: theme.FOREGROUND,
+                            }}
+                        >
                             {Math.round(fill)}%
                         </Text>
                     )}
                 />
             </View>
         );
-    }
+    };
 
     const Type3 = (schedule) => {
         const time = useCurrentTime();
@@ -114,9 +152,11 @@ const Insights = ({ version, schedule }) => {
             let missingTasks = 0;
 
             for (const date of datesList) {
-                if (date === currentDate) { break; }
+                if (date === currentDate) {
+                    break;
+                }
                 const tasks = schedule.getScheduleForDate(date).getTimeBlocks();
-                missingTasks += tasks.filter(task => !task.completed).length;
+                missingTasks += tasks.filter((task) => !task.completed).length;
             }
             setMissedTasks(missingTasks);
         }, [schedule]);
@@ -128,14 +168,27 @@ const Insights = ({ version, schedule }) => {
                     <WarningIcon width={24} height={24} color={theme.RED} />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                    <Text style={{ ...styles.subHeading, marginBottom: -4, fontSize: 48, color: theme.FOREGROUND, width: 120 }}>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            marginBottom: -4,
+                            fontSize: 48,
+                            color: theme.FOREGROUND,
+                            width: 120,
+                        }}
+                    >
                         {missedTasks}
-                        <Text style={{ ...styles.subHeading, fontSize: 24, color: theme.FOREGROUND }}> tasks</Text>
+                        <Text
+                            style={{ ...styles.subHeading, fontSize: 24, color: theme.FOREGROUND }}
+                        >
+                            {' '}
+                            tasks
+                        </Text>
                     </Text>
                 </View>
             </View>
         );
-    }
+    };
 
     const Type4 = (schedule) => {
         const [streak, setStreak] = useState(0);
@@ -148,14 +201,14 @@ const Insights = ({ version, schedule }) => {
             for (const date of datesList) {
                 const tasks = schedule.getScheduleForDate(date).getTimeBlocks();
                 if (date === currentDate) {
-                    if (tasks.length > 0 && tasks.every(task => task.completed)) {
+                    if (tasks.length > 0 && tasks.every((task) => task.completed)) {
                         currStreak += 1;
                         break;
                     } else {
                         break;
                     }
                 }
-                if (tasks.length > 0 && tasks.every(task => task.completed)) {
+                if (tasks.length > 0 && tasks.every((task) => task.completed)) {
                     currStreak += 1;
                 } else {
                     currStreak = 0;
@@ -171,14 +224,27 @@ const Insights = ({ version, schedule }) => {
                     <FireIcon width={24} height={24} color={theme.ORANGE} />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-                    <Text style={{ ...styles.subHeading, marginBottom: -4, fontSize: 48, color: theme.FOREGROUND, width: 100 }}>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            marginBottom: -4,
+                            fontSize: 48,
+                            color: theme.FOREGROUND,
+                            width: 100,
+                        }}
+                    >
                         {streak}
-                        <Text style={{ ...styles.subHeading, fontSize: 24, color: theme.FOREGROUND }}> days</Text>
+                        <Text
+                            style={{ ...styles.subHeading, fontSize: 24, color: theme.FOREGROUND }}
+                        >
+                            {' '}
+                            days
+                        </Text>
                     </Text>
                 </View>
             </View>
         );
-    }
+    };
 
     switch (version) {
         case 1:
@@ -190,11 +256,22 @@ const Insights = ({ version, schedule }) => {
         case 4:
             return Type4(schedule);
         default:
-            return <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>No insights available</Text>
-            </View>;
+            return (
+                <View
+                    style={{
+                        ...styles.card,
+                        backgroundColor: theme.COMP_COLOR,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                        No insights available
+                    </Text>
+                </View>
+            );
     }
-}
+};
 
 const styles = StyleSheet.create({
     card: {
@@ -210,7 +287,7 @@ const styles = StyleSheet.create({
         padding: 16,
         marginBottom: SPACE,
         flexDirection: 'column',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
     },
     subHeading: {
         fontSize: typography.subHeadingSize,

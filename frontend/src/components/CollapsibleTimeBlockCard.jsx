@@ -1,36 +1,55 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Pressable, Platform, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView, Animated } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    TextInput,
+    Pressable,
+    Platform,
+    Keyboard,
+    TouchableWithoutFeedback,
+    KeyboardAvoidingView,
+    Animated,
+} from 'react-native';
 import { useAppState } from '../context/AppStateContext';
-import { lightColor, darkColor } from '../design/colors.js'
-import { typography } from '../design/typography.js'
-import { Picker } from '@react-native-picker/picker'
-import ActivityType from '../model/ActivityType.js'
-import DateTimePicker from '@react-native-community/datetimepicker'
-import convertDateToScheduleDate from '../utils/dateConversion.js'
-import convertTimeToTime24 from '../utils/timeConversion'
-import Time24 from '../model/Time24.js'
+import { lightColor, darkColor } from '../design/colors.js';
+import { typography } from '../design/typography.js';
+import { Picker } from '@react-native-picker/picker';
+import ActivityType from '../model/ActivityType.js';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import convertDateToScheduleDate from '../utils/dateConversion.js';
+import convertTimeToTime24 from '../utils/timeConversion';
+import Time24 from '../model/Time24.js';
 import RigidEvent from '../model/RigidEvent';
-import ScheduleDate from '../model/ScheduleDate.js'
-import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
-import DropDownIcon from '../../assets/system-icons/DropDownIcon.svg'
+import ScheduleDate from '../model/ScheduleDate.js';
+import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js';
+import DropDownIcon from '../../assets/system-icons/DropDownIcon.svg';
 
 const ActivityTypeColors = {
-  [ActivityType.PERSONAL]:     '#2E86DE',  // Blue
-  [ActivityType.MEETING]:      '#48C9B0',  // Teal
-  [ActivityType.WORK]:         '#27AE60',  // Green
-  [ActivityType.EVENT]:        '#E67E22',  // Orange
-  [ActivityType.EDUCATION]:    '#F39C12',  // Amber
-  [ActivityType.TRAVEL]:       '#8E44AD',  // Purple
-  [ActivityType.RECREATIONAL]: '#D35400',  // Dark Orange
-  [ActivityType.ERRAND]:       '#C0392B',  // Crimson
-  [ActivityType.OTHER]:        '#7F8C8D',  // Slate Gray
-  [ActivityType.BREAK]:        '#95A5A6',  // Light Gray
+    [ActivityType.PERSONAL]: '#2E86DE', // Blue
+    [ActivityType.MEETING]: '#48C9B0', // Teal
+    [ActivityType.WORK]: '#27AE60', // Green
+    [ActivityType.EVENT]: '#E67E22', // Orange
+    [ActivityType.EDUCATION]: '#F39C12', // Amber
+    [ActivityType.TRAVEL]: '#8E44AD', // Purple
+    [ActivityType.RECREATIONAL]: '#D35400', // Dark Orange
+    [ActivityType.ERRAND]: '#C0392B', // Crimson
+    [ActivityType.OTHER]: '#7F8C8D', // Slate Gray
+    [ActivityType.BREAK]: '#95A5A6', // Light Gray
 };
 
-const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index, showWarningForIndex }) => {
+const CollapsibleTimeBlockCard = ({
+    timeBlock,
+    minDate,
+    numDays,
+    onUpdate,
+    index,
+    showWarningForIndex,
+}) => {
     const { appState } = useAppState();
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
-    
+    let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
+
     // Collapsible state
     const [isExpanded, setIsExpanded] = useState(false);
     const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -42,10 +61,20 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
 
     // Initialize states from timeBlock data - handling both RigidEvent and TimeBlock objects
     const [name, setName] = useState(timeBlock.name || timeBlock.getName?.() || '');
-    const [type, setType] = useState(timeBlock.activityType || timeBlock.getActivityType?.() || timeBlock.type || timeBlock.getType?.() || ActivityType.PERSONAL);
+    const [type, setType] = useState(
+        timeBlock.activityType ||
+            timeBlock.getActivityType?.() ||
+            timeBlock.type ||
+            timeBlock.getType?.() ||
+            ActivityType.PERSONAL,
+    );
     const [date, setDate] = useState(timeBlock.date || timeBlock.getDate?.() || minDate);
-    const [startTime, setStartTime] = useState(timeBlock.startTime || timeBlock.getStartTime?.() || new Time24(900)); // 9:00 AM
-    const [endTime, setEndTime] = useState(timeBlock.endTime || timeBlock.getEndTime?.() || new Time24(1000)); // 10:00 AM
+    const [startTime, setStartTime] = useState(
+        timeBlock.startTime || timeBlock.getStartTime?.() || new Time24(900),
+    ); // 9:00 AM
+    const [endTime, setEndTime] = useState(
+        timeBlock.endTime || timeBlock.getEndTime?.() || new Time24(1000),
+    ); // 10:00 AM
 
     // Picker visibility states
     const [showTypePicker, setShowTypePicker] = useState(false);
@@ -62,10 +91,11 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
             const updatedRigidEvent = new RigidEvent(
                 updatedTimeBlock.name,
                 updatedTimeBlock.type,
-                (updatedTimeBlock.endTime.hour - updatedTimeBlock.startTime.hour) * 60 + (updatedTimeBlock.endTime.minute - updatedTimeBlock.startTime.minute),
+                (updatedTimeBlock.endTime.hour - updatedTimeBlock.startTime.hour) * 60 +
+                    (updatedTimeBlock.endTime.minute - updatedTimeBlock.startTime.minute),
                 updatedTimeBlock.date,
                 updatedTimeBlock.startTime.toInt(),
-                updatedTimeBlock.endTime.toInt()
+                updatedTimeBlock.endTime.toInt(),
             );
             onUpdate(updatedRigidEvent);
         }
@@ -73,32 +103,32 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
 
     const getActivityTypeFromLabel = (label) => {
         const typeMap = {
-          'PERSONAL': ActivityType.PERSONAL,
-          'MEETING': ActivityType.MEETING,
-          'WORK': ActivityType.WORK,
-          'EVENT': ActivityType.EVENT,
-          'EDUCATION': ActivityType.EDUCATION,
-          'TRAVEL': ActivityType.TRAVEL,
-          'RECREATIONAL': ActivityType.RECREATIONAL,
-          'ERRAND': ActivityType.ERRAND,
-          'OTHER': ActivityType.OTHER,
-          'BREAK': ActivityType.BREAK,
+            PERSONAL: ActivityType.PERSONAL,
+            MEETING: ActivityType.MEETING,
+            WORK: ActivityType.WORK,
+            EVENT: ActivityType.EVENT,
+            EDUCATION: ActivityType.EDUCATION,
+            TRAVEL: ActivityType.TRAVEL,
+            RECREATIONAL: ActivityType.RECREATIONAL,
+            ERRAND: ActivityType.ERRAND,
+            OTHER: ActivityType.OTHER,
+            BREAK: ActivityType.BREAK,
         };
         return typeMap[label] || ActivityType.OTHER;
     };
 
     const getActivityLabel = (activityType) => {
         const labelMap = {
-          [ActivityType.PERSONAL]: 'Personal',
-          [ActivityType.MEETING]: 'Meeting',
-          [ActivityType.WORK]: 'Work',
-          [ActivityType.EVENT]: 'Event',
-          [ActivityType.EDUCATION]: 'Education',
-          [ActivityType.TRAVEL]: 'Travel',
-          [ActivityType.RECREATIONAL]: 'Recreational',
-          [ActivityType.ERRAND]: 'Errand',
-          [ActivityType.OTHER]: 'Other',
-          [ActivityType.BREAK]: 'Break',
+            [ActivityType.PERSONAL]: 'Personal',
+            [ActivityType.MEETING]: 'Meeting',
+            [ActivityType.WORK]: 'Work',
+            [ActivityType.EVENT]: 'Event',
+            [ActivityType.EDUCATION]: 'Education',
+            [ActivityType.TRAVEL]: 'Travel',
+            [ActivityType.RECREATIONAL]: 'Recreational',
+            [ActivityType.ERRAND]: 'Errand',
+            [ActivityType.OTHER]: 'Other',
+            [ActivityType.BREAK]: 'Break',
         };
         return labelMap[activityType] || 'Unknown';
     };
@@ -124,12 +154,28 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
     // Date & Activity Type inputs
     const Panel1 = () => {
         return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                }}
+            >
                 <View style={{ width: '50%' }}>
                     <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Date</Text>
-                    <Pressable onPress={() => { setShowTypePicker(false); setShowDatePicker(true); }}>
+                    <Pressable
+                        onPress={() => {
+                            setShowTypePicker(false);
+                            setShowDatePicker(true);
+                        }}
+                    >
                         <TextInput
-                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                            style={{
+                                ...styles.input,
+                                width: '90%',
+                                backgroundColor: theme.INPUT,
+                                color: theme.FOREGROUND,
+                            }}
                             pointerEvents="none"
                             value={date.getDateString()}
                             editable={false}
@@ -137,10 +183,22 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                     </Pressable>
                 </View>
                 <View style={{ width: '50%' }}>
-                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Activity Type</Text>
-                    <Pressable onPress={() => { setShowTypePicker(true); setShowDatePicker(false); }}>
+                    <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                        Activity Type
+                    </Text>
+                    <Pressable
+                        onPress={() => {
+                            setShowTypePicker(true);
+                            setShowDatePicker(false);
+                        }}
+                    >
                         <TextInput
-                            style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                            style={{
+                                ...styles.input,
+                                width: '90%',
+                                backgroundColor: theme.INPUT,
+                                color: theme.FOREGROUND,
+                            }}
                             pointerEvents="none"
                             value={getActivityLabel(type)}
                             editable={false}
@@ -150,15 +208,18 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
             </View>
         );
     };
-    
+
     return (
         <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}>
             {/* Colored left edge */}
-            <View style={{
-                ...styles.coloredEdge,
-                backgroundColor: ActivityTypeColors[type] || ActivityTypeColors[ActivityType.OTHER]
-            }} />
-            
+            <View
+                style={{
+                    ...styles.coloredEdge,
+                    backgroundColor:
+                        ActivityTypeColors[type] || ActivityTypeColors[ActivityType.OTHER],
+                }}
+            />
+
             {/* Card Header - Always visible */}
             <TouchableOpacity onPress={toggleExpanded} style={styles.cardHeader}>
                 <View style={styles.headerContent}>
@@ -170,7 +231,7 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                                 setName(text);
                                 updateTimeBlock({
                                     ...timeBlock,
-                                    name: text
+                                    name: text,
                                 });
                             }}
                             placeholder="Enter time block name"
@@ -178,7 +239,8 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                             multiline
                         />
                         <Text style={{ ...styles.timeInfo, color: theme.FOREGROUND }}>
-                            {date.getDateString()} • {startTime.to12HourString()} - {endTime.to12HourString()}
+                            {date.getDateString()} • {startTime.to12HourString()} -{' '}
+                            {endTime.to12HourString()}
                         </Text>
                     </View>
                     <Animated.View style={{ transform: [{ rotate: rotateIcon }] }}>
@@ -186,7 +248,7 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                     </Animated.View>
                 </View>
             </TouchableOpacity>
-            
+
             {/* Expandable content */}
             {isExpanded && (
                 <View style={styles.expandedContent}>
@@ -204,24 +266,38 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                                         setDate(newDate);
                                         updateTimeBlock({
                                             ...timeBlock,
-                                            date: newDate
+                                            date: newDate,
                                         });
                                     }
                                 }}
-                                minimumDate={combineScheduleDateAndTime24(minDate, new Time24(0, 0))}
-                                maximumDate={combineScheduleDateAndTime24(maxDate, new Time24(23, 59))}
+                                minimumDate={combineScheduleDateAndTime24(
+                                    minDate,
+                                    new Time24(0, 0),
+                                )}
+                                maximumDate={combineScheduleDateAndTime24(
+                                    maxDate,
+                                    new Time24(23, 59),
+                                )}
                                 themeVariant={appState.userPreferences.theme}
                             />
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={styles.button}
                                 onPress={() => setShowDatePicker(false)}
                             >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                <Text
+                                    style={{
+                                        color: '#FFF',
+                                        fontFamily: 'AlbertSans',
+                                        alignSelf: 'center',
+                                    }}
+                                >
+                                    Done
+                                </Text>
                             </TouchableOpacity>
                         </View>
                     )}
                     {/* Activity Type Picker - appears after Panel1 */}
-                    {showTypePicker && 
+                    {showTypePicker && (
                         <View>
                             <Picker
                                 selectedValue={type}
@@ -229,7 +305,7 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                                     setType(itemValue);
                                     updateTimeBlock({
                                         ...timeBlock,
-                                        type: itemValue
+                                        type: itemValue,
                                     });
                                 }}
                                 themeVariant={appState.userPreferences.theme}
@@ -240,25 +316,56 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                                 <Picker.Item label="Event" value={ActivityType.EVENT} />
                                 <Picker.Item label="Education" value={ActivityType.EDUCATION} />
                                 <Picker.Item label="Travel" value={ActivityType.TRAVEL} />
-                                <Picker.Item label="Recreational" value={ActivityType.RECREATIONAL} />
+                                <Picker.Item
+                                    label="Recreational"
+                                    value={ActivityType.RECREATIONAL}
+                                />
                                 <Picker.Item label="Errand" value={ActivityType.ERRAND} />
                                 <Picker.Item label="Other" value={ActivityType.OTHER} />
                                 <Picker.Item label="Break" value={ActivityType.BREAK} />
                             </Picker>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                                 style={styles.button}
                                 onPress={() => setShowTypePicker(false)}
                             >
-                                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                <Text
+                                    style={{
+                                        color: '#FFF',
+                                        fontFamily: 'AlbertSans',
+                                        alignSelf: 'center',
+                                    }}
+                                >
+                                    Done
+                                </Text>
                             </TouchableOpacity>
                         </View>
-                    }
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    )}
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}
+                    >
                         <View style={{ width: '50%' }}>
-                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Start Time</Text>
-                            <Pressable onPress={() => { setShowStartTimePicker(true); setShowEndTimePicker(false); setShowTypePicker(false); setShowDatePicker(false); }}>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                                Start Time
+                            </Text>
+                            <Pressable
+                                onPress={() => {
+                                    setShowStartTimePicker(true);
+                                    setShowEndTimePicker(false);
+                                    setShowTypePicker(false);
+                                    setShowDatePicker(false);
+                                }}
+                            >
                                 <TextInput
-                                    style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                    style={{
+                                        ...styles.input,
+                                        width: '90%',
+                                        backgroundColor: theme.INPUT,
+                                        color: theme.FOREGROUND,
+                                    }}
                                     pointerEvents="none"
                                     value={startTime.to12HourString()}
                                     editable={false}
@@ -266,10 +373,24 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                             </Pressable>
                         </View>
                         <View style={{ width: '50%' }}>
-                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>End Time</Text>
-                            <Pressable onPress={() => { setShowEndTimePicker(true); setShowStartTimePicker(false); setShowTypePicker(false); setShowDatePicker(false); }}>
+                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                                End Time
+                            </Text>
+                            <Pressable
+                                onPress={() => {
+                                    setShowEndTimePicker(true);
+                                    setShowStartTimePicker(false);
+                                    setShowTypePicker(false);
+                                    setShowDatePicker(false);
+                                }}
+                            >
                                 <TextInput
-                                    style={{ ...styles.input, width: '90%', backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+                                    style={{
+                                        ...styles.input,
+                                        width: '90%',
+                                        backgroundColor: theme.INPUT,
+                                        color: theme.FOREGROUND,
+                                    }}
                                     pointerEvents="none"
                                     value={endTime.to12HourString()}
                                     editable={false}
@@ -286,25 +407,39 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                                     mode="time"
                                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                                     minimumDate={combineScheduleDateAndTime24(date, new Time24(0))}
-                                    maximumDate={combineScheduleDateAndTime24(date, new Time24(2359))}
+                                    maximumDate={combineScheduleDateAndTime24(
+                                        date,
+                                        new Time24(2359),
+                                    )}
                                     onChange={(event, selectedTime) => {
                                         if (selectedTime) {
                                             const newStartTime = convertTimeToTime24(selectedTime);
                                             setStartTime(newStartTime);
                                             updateTimeBlock({
                                                 ...timeBlock,
-                                                startTime: newStartTime
+                                                startTime: newStartTime,
                                             });
-                                            console.log('Selected Start Time:', newStartTime.to12HourString());
+                                            console.log(
+                                                'Selected Start Time:',
+                                                newStartTime.to12HourString(),
+                                            );
                                         }
                                     }}
                                     themeVariant={appState.userPreferences.theme}
                                 />
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     style={styles.button}
                                     onPress={() => setShowStartTimePicker(false)}
                                 >
-                                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                    <Text
+                                        style={{
+                                            color: '#FFF',
+                                            fontFamily: 'AlbertSans',
+                                            alignSelf: 'center',
+                                        }}
+                                    >
+                                        Done
+                                    </Text>
                                 </TouchableOpacity>
                             </View>
                         )}
@@ -316,25 +451,39 @@ const CollapsibleTimeBlockCard = ({ timeBlock, minDate, numDays, onUpdate, index
                                     mode="time"
                                     display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                                     minimumDate={combineScheduleDateAndTime24(date, new Time24(0))}
-                                    maximumDate={combineScheduleDateAndTime24(date, new Time24(2359))}
+                                    maximumDate={combineScheduleDateAndTime24(
+                                        date,
+                                        new Time24(2359),
+                                    )}
                                     onChange={(event, selectedTime) => {
                                         if (selectedTime) {
                                             const newEndTime = convertTimeToTime24(selectedTime);
                                             setEndTime(newEndTime);
                                             updateTimeBlock({
                                                 ...timeBlock,
-                                                endTime: newEndTime
+                                                endTime: newEndTime,
                                             });
-                                            console.log('Selected End Time:', newEndTime.to12HourString());
+                                            console.log(
+                                                'Selected End Time:',
+                                                newEndTime.to12HourString(),
+                                            );
                                         }
                                     }}
                                     themeVariant={appState.userPreferences.theme}
                                 />
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     style={styles.button}
                                     onPress={() => setShowEndTimePicker(false)}
                                 >
-                                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Done</Text>
+                                    <Text
+                                        style={{
+                                            color: '#FFF',
+                                            fontFamily: 'AlbertSans',
+                                            alignSelf: 'center',
+                                        }}
+                                    >
+                                        Done
+                                    </Text>
                                 </TouchableOpacity>
                             </View>
                         )}
@@ -400,17 +549,17 @@ const styles = StyleSheet.create({
     subHeading: {
         fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
-        marginBottom: 8
+        marginBottom: 8,
     },
     input: {
         height: 48,
-        borderRadius: 12, 
+        borderRadius: 12,
         fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: '#F0F0F0',
-        marginBottom: 16
+        marginBottom: 16,
     },
     button: {
         width: '100%',
@@ -420,7 +569,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         marginTop: 8,
         marginBottom: 8,
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
     warning: {
         fontSize: typography.bodySize,
@@ -428,7 +577,7 @@ const styles = StyleSheet.create({
         marginTop: 12,
         marginBottom: 8,
         color: '#FF0000',
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
 });
 

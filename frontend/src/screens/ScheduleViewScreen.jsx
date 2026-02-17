@@ -1,5 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, Animated, TouchableOpacity, Switch, Alert } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    Dimensions,
+    ScrollView,
+    Animated,
+    TouchableOpacity,
+    Switch,
+    Alert,
+} from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 import { useAuthenticatedAPI } from '../utils/authenticatedAPI';
@@ -18,21 +28,27 @@ import ExportCalendarBottomSheet from '../components/ExportCalendarBottomSheet.j
 import LoadingScreen from './LoadingScreen.jsx';
 
 const { width, height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
-const ICON_DIM = (width > 400) ? 24 : 20
-const INDICATOR_DIM = ICON_DIM * 7 / 4;
-const PADDING_HORIZONTAL = ICON_DIM * 5/6;
-const OFFSET = PADDING_HORIZONTAL - ((INDICATOR_DIM - ICON_DIM) / 2);
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
+const ICON_DIM = width > 400 ? 24 : 20;
+const INDICATOR_DIM = (ICON_DIM * 7) / 4;
+const PADDING_HORIZONTAL = (ICON_DIM * 5) / 6;
+const OFFSET = PADDING_HORIZONTAL - (INDICATOR_DIM - ICON_DIM) / 2;
 
 const ScheduleViewScreen = ({ route }) => {
     const { appState, setAppState } = useAppState();
     const { logUserAction, logScheduleAction, logError } = useActionLogger('ScheduleView');
-    const { updateSchedule, getSchedules, checkGoogleCalendarStatus, exportScheduleToGoogleCalendar } = useAuthenticatedAPI();
+    const {
+        updateSchedule,
+        getSchedules,
+        checkGoogleCalendarStatus,
+        exportScheduleToGoogleCalendar,
+    } = useAuthenticatedAPI();
     const { user } = useUser();
     const { startSSOFlow } = useSSO();
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const { schedName } = route.params;
-    
+
     // ✅ ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedTB, setSelectedTB] = useState(null);
@@ -41,9 +57,9 @@ const ScheduleViewScreen = ({ route }) => {
     const [isLoading, setIsLoading] = useState(false);
     const indicatorX = useRef(new Animated.Value(0)).current;
     const exportBottomSheetRef = useRef(null);
-    
+
     // ✅ NOW we can safely check for schedule existence
-    const schedule = appState.savedSchedules.find(sched => sched.name === schedName);
+    const schedule = appState.savedSchedules.find((sched) => sched.name === schedName);
 
     // ✅ Initialize selectedDate when schedule is available
     useEffect(() => {
@@ -54,18 +70,27 @@ const ScheduleViewScreen = ({ route }) => {
     // ✅ Screen view logging
     useEffect(() => {
         if (!schedule) return; // ✅ Early return if no schedule
-        logUserAction('view_schedule', { 
+        logUserAction('view_schedule', {
             scheduleName: schedName,
             isActive: schedule.isActive || false,
-            totalDays: schedule.schedule?.numDays || 0
+            totalDays: schedule.schedule?.numDays || 0,
         });
     }, [schedule, schedName]);
 
     // Early return for missing schedule to prevent hooks errors
     if (!schedule.schedule) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.BACKGROUND }}>
-                <Text style={{ fontFamily: 'AlbertSans', fontSize: 20, color: theme.FOREGROUND }}>Schedule not found.</Text>
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: theme.BACKGROUND,
+                }}
+            >
+                <Text style={{ fontFamily: 'AlbertSans', fontSize: 20, color: theme.FOREGROUND }}>
+                    Schedule not found.
+                </Text>
             </View>
         );
     }
@@ -73,10 +98,10 @@ const ScheduleViewScreen = ({ route }) => {
     useEffect(() => {
         if (!schedule || !selectedDate) return; // ✅ Guard against null values
 
-        console.log("Selected date:", selectedDate);
-        console.log("All dates in order:", schedule.schedule.getAllDatesInOrder());
+        console.log('Selected date:', selectedDate);
+        console.log('All dates in order:', schedule.schedule.getAllDatesInOrder());
         const index = schedule.schedule.getAllDatesInOrder().indexOf(selectedDate);
-        console.log("Index:", index);
+        console.log('Index:', index);
         const xPosition = index * (2 * PADDING_HORIZONTAL + ICON_DIM) + OFFSET;
         Animated.spring(indicatorX, {
             toValue: xPosition,
@@ -87,49 +112,49 @@ const ScheduleViewScreen = ({ route }) => {
     const onSelectTB = (tb) => {
         setSelectedTB(tb);
         setShowInfoModal(true);
-    }
+    };
 
     const onCloseModal = () => {
         setShowInfoModal(false);
-    }
+    };
 
     // Handle Google Calendar authorization/re-authorization
     const handleGoogleCalendarAuth = async () => {
         try {
-            logUserAction('google_calendar_auth_attempt', { 
+            logUserAction('google_calendar_auth_attempt', {
                 scheduleName: schedName,
-                reason: 'missing_calendar_scope'
+                reason: 'missing_calendar_scope',
             });
 
             // Check if user already has Google OAuth connected
             console.log('🔍 Checking user external accounts...');
             console.log('🔍 User external accounts count:', user.externalAccounts?.length || 0);
-            
+
             // Debug: Log all external accounts
             if (user.externalAccounts && user.externalAccounts.length > 0) {
                 user.externalAccounts.forEach((account, index) => {
                     console.log(`🔍 Auth check - External account ${index}:`, {
                         provider: account.provider,
                         email: account.emailAddress,
-                        verification: account.verification?.status
+                        verification: account.verification?.status,
                     });
                 });
             }
-            
+
             const existingGoogleAccount = user.externalAccounts?.find(
-                account => account.provider === 'google' || account.provider === 'oauth_google'
+                (account) => account.provider === 'google' || account.provider === 'oauth_google',
             );
-            
+
             if (existingGoogleAccount) {
                 console.log('✅ User already has Google OAuth connected');
                 console.log('🔍 Checking if we need additional scopes...');
-                
+
                 // User is already signed in with Google, but we might need additional scopes
                 // Since we can't easily check scopes on the frontend, we'll show a message
                 // explaining that we need calendar permissions
                 Alert.alert(
                     'Google Calendar Permissions',
-                    'You\'re already signed in with Google, but we need additional calendar permissions to export your schedule. This will redirect you to Google to grant calendar access.',
+                    "You're already signed in with Google, but we need additional calendar permissions to export your schedule. This will redirect you to Google to grant calendar access.",
                     [
                         { text: 'Cancel', style: 'cancel' },
                         {
@@ -148,10 +173,10 @@ const ScheduleViewScreen = ({ route }) => {
                                             'https://www.googleapis.com/auth/calendar.calendarlist.readonly',
                                         ],
                                     });
-                                    
+
                                     if (createdSessionId) {
                                         await setActive({ session: createdSessionId });
-                                        
+
                                         Alert.alert(
                                             'Permissions Updated!',
                                             'Google Calendar permissions have been updated. You can now export your schedule.',
@@ -160,10 +185,13 @@ const ScheduleViewScreen = ({ route }) => {
                                                 {
                                                     text: 'Export Now',
                                                     onPress: () => {
-                                                        setTimeout(() => handleExportToGoogleCalendar(), 1000);
-                                                    }
-                                                }
-                                            ]
+                                                        setTimeout(
+                                                            () => handleExportToGoogleCalendar(),
+                                                            1000,
+                                                        );
+                                                    },
+                                                },
+                                            ],
                                         );
                                     }
                                 } catch (error) {
@@ -175,21 +203,21 @@ const ScheduleViewScreen = ({ route }) => {
                                             { text: 'Cancel', style: 'cancel' },
                                             {
                                                 text: 'Try Export',
-                                                onPress: () => handleExportToGoogleCalendar()
-                                            }
-                                        ]
+                                                onPress: () => handleExportToGoogleCalendar(),
+                                            },
+                                        ],
                                     );
                                 }
-                            }
-                        }
-                    ]
+                            },
+                        },
+                    ],
                 );
                 return;
             }
 
             // No existing Google account - proceed with normal OAuth flow
             console.log('🔍 No existing Google account, starting OAuth flow...');
-            
+
             // Start Google OAuth flow with calendar permissions
             const { createdSessionId, setActive } = await startSSOFlow({
                 strategy: 'oauth_google',
@@ -205,9 +233,9 @@ const ScheduleViewScreen = ({ route }) => {
 
             if (createdSessionId) {
                 await setActive({ session: createdSessionId });
-                
-                logUserAction('google_calendar_auth_success', { 
-                    scheduleName: schedName 
+
+                logUserAction('google_calendar_auth_success', {
+                    scheduleName: schedName,
                 });
 
                 // Show success message and offer to retry export
@@ -219,23 +247,24 @@ const ScheduleViewScreen = ({ route }) => {
                         {
                             text: 'Export Now',
                             onPress: () => {
-                                logUserAction('google_calendar_export_after_auth', { scheduleName: schedName });
+                                logUserAction('google_calendar_export_after_auth', {
+                                    scheduleName: schedName,
+                                });
                                 setTimeout(() => handleExportToGoogleCalendar(), 1000);
-                            }
-                        }
-                    ]
+                            },
+                        },
+                    ],
                 );
             } else {
                 // OAuth flow completed but no session created (user might have cancelled)
                 logUserAction('google_calendar_auth_incomplete', { scheduleName: schedName });
-                
+
                 Alert.alert(
                     'Connection Incomplete',
                     'Google Calendar connection was not completed. Please try again if you want to export your schedule.',
-                    [{ text: 'OK' }]
+                    [{ text: 'OK' }],
                 );
             }
-
         } catch (error) {
             console.error('Google Calendar OAuth error:', error);
             logError('google_calendar_auth_failed', error, { scheduleName: schedName });
@@ -243,28 +272,30 @@ const ScheduleViewScreen = ({ route }) => {
             // Handle specific OAuth error cases
             if (error.errors && error.errors.length > 0) {
                 const errorCode = error.errors[0]?.code;
-                
+
                 switch (errorCode) {
                     case 'oauth_access_denied':
                         // User cancelled the OAuth process
-                        logUserAction('google_calendar_auth_cancelled', { scheduleName: schedName });
+                        logUserAction('google_calendar_auth_cancelled', {
+                            scheduleName: schedName,
+                        });
                         break;
                     case 'clerk_network_error':
                         Alert.alert(
-                            'Network Error', 
-                            'Please check your internet connection and try again.'
+                            'Network Error',
+                            'Please check your internet connection and try again.',
                         );
                         break;
                     default:
                         Alert.alert(
                             'Connection Failed',
-                            'Failed to connect Google Calendar. Please try again or check your Google account settings.'
+                            'Failed to connect Google Calendar. Please try again or check your Google account settings.',
                         );
                 }
             } else {
                 Alert.alert(
                     'Connection Failed',
-                    'Failed to connect Google Calendar. Please try again.'
+                    'Failed to connect Google Calendar. Please try again.',
                 );
             }
         }
@@ -274,18 +305,18 @@ const ScheduleViewScreen = ({ route }) => {
     const handleExportToGoogleCalendar = async () => {
         try {
             setIsLoading(true);
-            logUserAction('google_calendar_export_attempt', { 
+            logUserAction('google_calendar_export_attempt', {
                 scheduleName: schedName,
-                totalDays: schedule.schedule?.numDays || 0
+                totalDays: schedule.schedule?.numDays || 0,
             });
 
             console.log('🔍 Starting Google Calendar export...');
-            
+
             // Check if user has Google account connected
             const googleAccount = user.externalAccounts?.find(
-                account => account.provider === 'google' || account.provider === 'oauth_google'
+                (account) => account.provider === 'google' || account.provider === 'oauth_google',
             );
-            
+
             if (!googleAccount) {
                 console.log('❌ No Google account found, prompting to connect...');
                 Alert.alert(
@@ -295,9 +326,9 @@ const ScheduleViewScreen = ({ route }) => {
                         { text: 'Cancel', style: 'cancel' },
                         {
                             text: 'Connect Google',
-                            onPress: () => handleGoogleCalendarAuth()
-                        }
-                    ]
+                            onPress: () => handleGoogleCalendarAuth(),
+                        },
+                    ],
                 );
                 return;
             }
@@ -305,106 +336,108 @@ const ScheduleViewScreen = ({ route }) => {
             console.log('✅ Google account found:', {
                 provider: googleAccount.provider,
                 email: googleAccount.emailAddress,
-                verification: googleAccount.verification?.status
+                verification: googleAccount.verification?.status,
             });
 
             // Step 2: Get user's timezone - you might want to get this from user preferences
             const userTimezone = 'America/Vancouver'; // TODO: Get from user preferences
-            
+
             // Step 3: Prepare user and schedule names for calendar naming
             const userName = user?.firstName || user?.fullName || 'User';
             const currentScheduleName = schedName || 'Schedule';
-            
+
             // Step 4: Export to Google Calendar - let backend handle token retrieval
             try {
                 console.log('🔍 Attempting to export schedule via backend...');
-                
+
                 const result = await exportScheduleToGoogleCalendar(
-                    schedule.schedule, 
-                    userTimezone, 
-                    null,  // Let backend handle OAuth tokens
+                    schedule.schedule,
+                    userTimezone,
+                    null, // Let backend handle OAuth tokens
                     currentScheduleName, // Pass schedule name
-                    userName  // Pass user name
+                    userName, // Pass user name
                 );
-                
+
                 // Show success message
                 Alert.alert(
                     'Success!',
                     `Exported ${result.inserted} events to your "Plannr" calendar in Google Calendar.`,
-                    [{ text: 'Great!' }]
+                    [{ text: 'Great!' }],
                 );
-                
-                logUserAction('google_calendar_export_success', { 
+
+                logUserAction('google_calendar_export_success', {
                     scheduleName: schedName,
                     eventsExported: result.inserted,
-                    calendarId: result.calendarId
+                    calendarId: result.calendarId,
                 });
                 return;
-                
             } catch (exportError) {
                 console.log('🔍 Export error details:', exportError);
                 console.log('🔍 Export error message:', exportError.message);
-                
+
                 // Check if we need to use frontend token (Clerk backend SDK limitation)
                 if (exportError.message?.includes('GOOGLE_CALENDAR_USE_FRONTEND_TOKEN')) {
-                    console.log('🔍 Backend cannot access OAuth tokens - user has permissions but tokens not accessible');
+                    console.log(
+                        '🔍 Backend cannot access OAuth tokens - user has permissions but tokens not accessible',
+                    );
                     console.log('💡 Need to refresh OAuth connection to get accessible tokens');
-                    
+
                     Alert.alert(
                         'Calendar Connection Issue',
                         'Your Google Calendar is connected but we need to refresh the connection to export your schedule.',
                         [
                             { text: 'Cancel', style: 'cancel' },
-                            { 
-                                text: 'Refresh Connection', 
-                                onPress: () => handleGoogleCalendarAuth()
-                            }
-                        ]
+                            {
+                                text: 'Refresh Connection',
+                                onPress: () => handleGoogleCalendarAuth(),
+                            },
+                        ],
                     );
                     return;
                 }
-                
+
                 // Check if it's other auth-related errors
-                if (exportError.message?.includes('GOOGLE_CALENDAR_NOT_CONNECTED') || 
-                    exportError.message?.includes('GOOGLE_CALENDAR_NEEDS_REAUTH')) {
+                if (
+                    exportError.message?.includes('GOOGLE_CALENDAR_NOT_CONNECTED') ||
+                    exportError.message?.includes('GOOGLE_CALENDAR_NEEDS_REAUTH')
+                ) {
                     Alert.alert(
                         'Google Calendar Permissions Required',
                         'We need additional calendar permissions to export your schedule. This will redirect you to Google.',
                         [
                             { text: 'Cancel', style: 'cancel' },
-                            { 
-                                text: 'Grant Permissions', 
-                                onPress: () => handleGoogleCalendarAuth()
-                            }
-                        ]
+                            {
+                                text: 'Grant Permissions',
+                                onPress: () => handleGoogleCalendarAuth(),
+                            },
+                        ],
                     );
                     return;
                 }
-                
+
                 // Re-throw the error to be handled by the outer catch
                 throw exportError;
             }
-            
+
             // Show success message
             Alert.alert(
                 'Success!',
                 `Exported ${result.inserted} events to your "Plannr" calendar in Google Calendar.`,
-                [{ text: 'Great!' }]
+                [{ text: 'Great!' }],
             );
-            
-            logUserAction('google_calendar_export_success', { 
+
+            logUserAction('google_calendar_export_success', {
                 scheduleName: schedName,
                 eventsExported: result.inserted,
-                calendarId: result.calendarId
+                calendarId: result.calendarId,
             });
-
         } catch (error) {
             console.error('Google Calendar export failed:', error);
-            
+
             // Handle specific error types with user-friendly messages
             let errorMessage = 'Failed to export to Google Calendar. Please try again.';
             let shouldShowAuthOption = false;
-            
+
             if (error.message?.includes('GOOGLE_CALENDAR_NOT_CONNECTED')) {
                 errorMessage = 'Google Calendar is not connected or missing calendar permissions.';
                 shouldShowAuthOption = true;
@@ -414,179 +447,201 @@ const ScheduleViewScreen = ({ route }) => {
             } else if (error.message?.includes('No events found')) {
                 errorMessage = 'No events found in your schedule to export.';
             }
-            
+
             if (shouldShowAuthOption) {
-                Alert.alert(
-                    'Export Failed',
-                    errorMessage,
-                    [
-                        { text: 'Cancel', style: 'cancel' },
-                        { 
-                            text: 'Fix Connection', 
-                            onPress: () => handleGoogleCalendarAuth()
+                Alert.alert('Export Failed', errorMessage, [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Fix Connection',
+                        onPress: () => handleGoogleCalendarAuth(),
+                    },
+                    {
+                        text: 'Try Again',
+                        onPress: () => {
+                            // Retry export after a short delay in case permissions are propagating
+                            setTimeout(() => {
+                                logUserAction('google_calendar_export_retry', {
+                                    scheduleName: schedName,
+                                });
+                                handleExportToGoogleCalendar();
+                            }, 2000);
                         },
-                        {
-                            text: 'Try Again',
-                            onPress: () => {
-                                // Retry export after a short delay in case permissions are propagating
-                                setTimeout(() => {
-                                    logUserAction('google_calendar_export_retry', { scheduleName: schedName });
-                                    handleExportToGoogleCalendar();
-                                }, 2000);
-                            }
-                        }
-                    ]
-                );
+                    },
+                ]);
             } else {
-                Alert.alert(
-                    'Export Failed', 
-                    errorMessage,
-                    [
-                        { text: 'OK', style: 'cancel' },
-                        {
-                            text: 'Try Again',
-                            onPress: () => {
-                                setTimeout(() => {
-                                    logUserAction('google_calendar_export_retry', { scheduleName: schedName });
-                                    handleExportToGoogleCalendar();
-                                }, 1000);
-                            }
-                        }
-                    ]
-                );
+                Alert.alert('Export Failed', errorMessage, [
+                    { text: 'OK', style: 'cancel' },
+                    {
+                        text: 'Try Again',
+                        onPress: () => {
+                            setTimeout(() => {
+                                logUserAction('google_calendar_export_retry', {
+                                    scheduleName: schedName,
+                                });
+                                handleExportToGoogleCalendar();
+                            }, 1000);
+                        },
+                    },
+                ]);
             }
-            
+
             logError('google_calendar_export_error', error, {
                 scheduleName: schedName,
-                errorType: error.message?.includes('GOOGLE_CALENDAR') ? 'auth_error' : 'unknown_error'
+                errorType: error.message?.includes('GOOGLE_CALENDAR')
+                    ? 'auth_error'
+                    : 'unknown_error',
             });
         } finally {
             setIsLoading(false);
         }
     };
 
-    if (isLoading) { return <LoadingScreen />; }
+    if (isLoading) {
+        return <LoadingScreen />;
+    }
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.SPACING_16, justifyContent: 'space-between', paddingBottom: SPACE }}>
-                <Text style={{ ...styles.title, color: theme.FOREGROUND, alignSelf: 'center' }}>{schedule.name}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, alignSelf: 'flex-start' }}>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: spacing.SPACING_16,
+                    justifyContent: 'space-between',
+                    paddingBottom: SPACE,
+                }}
+            >
+                <Text style={{ ...styles.title, color: theme.FOREGROUND, alignSelf: 'center' }}>
+                    {schedule.name}
+                </Text>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 12,
+                        alignSelf: 'flex-start',
+                    }}
+                >
                     <Switch
                         trackColor={{ false: '#000000', true: theme.GRADIENT_START }}
                         thumbColor={'#FFFFFF'}
                         ios_backgroundColor={'#C0C0C0'}
-                        onValueChange={async () => { 
+                        onValueChange={async () => {
                             const wasActive = schedule.isActive;
-                            
+
                             // 🚀 OPTIMISTIC UPDATE: Update UI immediately
                             if (wasActive) {
                                 // Deactivating current schedule
-                                setAppState({ 
-                                    ...appState, 
-                                    activeSchedule: null, 
-                                    savedSchedules: appState.savedSchedules.map(sched => {
+                                setAppState({
+                                    ...appState,
+                                    activeSchedule: null,
+                                    savedSchedules: appState.savedSchedules.map((sched) => {
                                         if (sched.name === schedule.name) {
                                             return { ...sched, isActive: false };
                                         }
                                         return sched;
-                                    }) 
+                                    }),
                                 });
                             } else {
                                 // Activating this schedule - deactivate all others
-                                setAppState({ 
-                                    ...appState, 
-                                    activeSchedule: { 
-                                        name: schedule.name, 
-                                        schedule: schedule.schedule, 
+                                setAppState({
+                                    ...appState,
+                                    activeSchedule: {
+                                        name: schedule.name,
+                                        schedule: schedule.schedule,
                                         backendId: schedule.backendId,
-                                        isActive: true 
-                                    }, 
-                                    savedSchedules: appState.savedSchedules.map(sched => {
+                                        isActive: true,
+                                    },
+                                    savedSchedules: appState.savedSchedules.map((sched) => {
                                         if (sched.name === schedule.name) {
                                             return { ...sched, isActive: true };
                                         }
                                         return {
                                             ...sched,
-                                            isActive: false
+                                            isActive: false,
                                         };
-                                    }) 
+                                    }),
                                 });
                             }
-                            
+
                             // 🔄 BACKGROUND UPDATE: Handle backend request
                             try {
                                 if (wasActive) {
                                     // Deactivating current schedule
                                     logScheduleAction('deactivate', {
                                         scheduleName: schedule.name,
-                                        scheduleId: schedule.backendId
+                                        scheduleId: schedule.backendId,
                                     });
-                                    
+
                                     await updateSchedule(schedule.backendId, { isActive: false });
                                 } else {
                                     // Activating this schedule - first deactivate all others
                                     logScheduleAction('activate', {
                                         scheduleName: schedule.name,
                                         scheduleId: schedule.backendId,
-                                        totalDays: schedule.schedule?.numDays || 0
+                                        totalDays: schedule.schedule?.numDays || 0,
                                     });
-                                    
+
                                     const allSchedules = await getSchedules();
-                                    
+
                                     // Update all schedules in database
                                     await Promise.all(
-                                        allSchedules.data.map(sched => 
-                                            updateSchedule(sched.id, { 
-                                                isActive: sched.id === schedule.backendId 
-                                            })
-                                        )
+                                        allSchedules.data.map((sched) =>
+                                            updateSchedule(sched.id, {
+                                                isActive: sched.id === schedule.backendId,
+                                            }),
+                                        ),
                                     );
                                 }
-                                
-                                console.log('✅ Schedule activation updated successfully in backend');
+
+                                console.log(
+                                    '✅ Schedule activation updated successfully in backend',
+                                );
                             } catch (error) {
                                 // 🚨 REVERT ON ERROR: If backend fails, revert the optimistic update
-                                console.error('❌ Failed to update schedule activation in backend, reverting UI:', error);
-                                
+                                console.error(
+                                    '❌ Failed to update schedule activation in backend, reverting UI:',
+                                    error,
+                                );
+
                                 logError('schedule_activation_failed', error, {
                                     scheduleName: schedule.name,
                                     scheduleId: schedule.backendId,
-                                    action: wasActive ? 'deactivate' : 'activate'
+                                    action: wasActive ? 'deactivate' : 'activate',
                                 });
-                                
+
                                 // Revert to original state
                                 if (wasActive) {
                                     // Revert deactivation - make it active again
-                                    setAppState({ 
-                                        ...appState, 
-                                        activeSchedule: { 
-                                            name: schedule.name, 
-                                            schedule: schedule.schedule, 
+                                    setAppState({
+                                        ...appState,
+                                        activeSchedule: {
+                                            name: schedule.name,
+                                            schedule: schedule.schedule,
                                             backendId: schedule.backendId,
-                                            isActive: true 
-                                        }, 
-                                        savedSchedules: appState.savedSchedules.map(sched => {
+                                            isActive: true,
+                                        },
+                                        savedSchedules: appState.savedSchedules.map((sched) => {
                                             if (sched.name === schedule.name) {
                                                 return { ...sched, isActive: true };
                                             }
                                             return sched;
-                                        }) 
+                                        }),
                                     });
                                 } else {
                                     // Revert activation - make it inactive again
-                                    setAppState({ 
-                                        ...appState, 
+                                    setAppState({
+                                        ...appState,
                                         activeSchedule: appState.activeSchedule, // Keep previous active schedule
-                                        savedSchedules: appState.savedSchedules.map(sched => {
+                                        savedSchedules: appState.savedSchedules.map((sched) => {
                                             if (sched.name === schedule.name) {
                                                 return { ...sched, isActive: false };
                                             }
                                             return sched;
-                                        }) 
+                                        }),
                                     });
                                 }
-                                
+
                                 // Could add error toast here to inform user
                                 // showErrorToast('Failed to update schedule. Please try again.');
                             }
@@ -604,7 +659,7 @@ const ScheduleViewScreen = ({ route }) => {
                         <DeleteIcon width={32} height={32} color={theme.FOREGROUND} />
                     </TouchableOpacity>
                     */}
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={{ width: 32, height: 32, marginRight: 8 }}
                         onPress={() => exportBottomSheetRef.current?.show()}
                     >
@@ -613,41 +668,74 @@ const ScheduleViewScreen = ({ route }) => {
                 </View>
             </View>
             <View style={styles.subContainer}>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Here's what your calendar looks like</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                    Here's what your calendar looks like
+                </Text>
                 {/* Date Selection Carousel */}
                 <View style={{ width: '100%' }}>
-                    <ScrollView 
+                    <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        style={{ width: '100%', contentContainerStyle: { justifyContent: 'center', alignItems: 'center' } }}
+                        style={{
+                            width: '100%',
+                            contentContainerStyle: {
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            },
+                        }}
                     >
                         <Animated.View
-                            style={[
-                                styles.indicator,
-                                { transform: [{ translateX: indicatorX }], },
-                            ]}
+                            style={[styles.indicator, { transform: [{ translateX: indicatorX }] }]}
                         >
-                            <Indicator width={INDICATOR_DIM} height={INDICATOR_DIM} color={theme.FOREGROUND} />
+                            <Indicator
+                                width={INDICATOR_DIM}
+                                height={INDICATOR_DIM}
+                                color={theme.FOREGROUND}
+                            />
                         </Animated.View>
                         {schedule.schedule.getAllDatesInOrder().map((date, index) => {
-                            const dateString = date.split("-")[0];
+                            const dateString = date.split('-')[0];
 
                             return (
-                                <TouchableOpacity style={{ width: ICON_DIM, margin: PADDING_HORIZONTAL, alignItems: 'center' }} key={index} onPress={() => setSelectedDate(date)}>
-                                    <Text style={{ ...styles.bodySize, color: (date === selectedDate) ? theme.ACCENT : theme.FOREGROUND }}>{dateString}</Text>
+                                <TouchableOpacity
+                                    style={{
+                                        width: ICON_DIM,
+                                        margin: PADDING_HORIZONTAL,
+                                        alignItems: 'center',
+                                    }}
+                                    key={index}
+                                    onPress={() => setSelectedDate(date)}
+                                >
+                                    <Text
+                                        style={{
+                                            ...styles.bodySize,
+                                            color:
+                                                date === selectedDate
+                                                    ? theme.ACCENT
+                                                    : theme.FOREGROUND,
+                                        }}
+                                    >
+                                        {dateString}
+                                    </Text>
                                 </TouchableOpacity>
-                            )
+                            );
                         })}
                     </ScrollView>
                 </View>
                 {/* Schedule Calendar Component */}
                 <View style={{ height: '100%', paddingBottom: SPACE * 3 }}>
                     {schedule.schedule.getAllDatesInOrder().map((date, index) => {
-                        const visible = (date === selectedDate);
+                        const visible = date === selectedDate;
 
                         return (
-                            <ScheduleCalendarView schedule={schedule.schedule} date={date} isVisible={visible} onBlockSelect={(block) => onSelectTB(block)} key={index}/>
-                        )
+                            <ScheduleCalendarView
+                                schedule={schedule.schedule}
+                                date={date}
+                                isVisible={visible}
+                                onBlockSelect={(block) => onSelectTB(block)}
+                                key={index}
+                            />
+                        );
                     })}
                 </View>
             </View>
@@ -659,8 +747,8 @@ const ScheduleViewScreen = ({ route }) => {
                 toDelete={schedule.name}
             />
             */}
-            
-            <ExportCalendarBottomSheet 
+
+            <ExportCalendarBottomSheet
                 ref={exportBottomSheetRef}
                 onExportGoogle={handleExportToGoogleCalendar}
                 onExportApple={() => addScheduleToAppleCalendar(appState.name, schedule.schedule)}
@@ -668,7 +756,7 @@ const ScheduleViewScreen = ({ route }) => {
             />
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -680,7 +768,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: typography.titleSize,
-        fontFamily: 'PinkSunset'
+        fontFamily: 'PinkSunset',
     },
     subHeading: {
         fontSize: typography.headingSize,
@@ -688,7 +776,7 @@ const styles = StyleSheet.create({
         marginBottom: SPACE,
     },
     bodySize: {
-        fontSize: ICON_DIM/1.5,
+        fontSize: ICON_DIM / 1.5,
         fontFamily: 'AlbertSans',
         lineHeight: ICON_DIM,
     },

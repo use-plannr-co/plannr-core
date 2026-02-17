@@ -1,16 +1,16 @@
-import * as Notifications from 'expo-notifications'
-import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js'
-import convertDateToScheduleDate from '../utils/dateConversion.js'
-import Time24 from '../model/Time24.js'
+import * as Notifications from 'expo-notifications';
+import combineScheduleDateAndTime24 from '../utils/combineScheduleDateAndTime24.js';
+import convertDateToScheduleDate from '../utils/dateConversion.js';
+import Time24 from '../model/Time24.js';
 
 const NotificationService = {
     async requestPermissions() {
         Notifications.setNotificationHandler({
             handleNotification: async () => ({
-                shouldShowBanner:  true,
-                shouldShowList:    true,
-                shouldPlaySound:   true,
-                shouldSetBadge:    true,
+                shouldShowBanner: true,
+                shouldShowList: true,
+                shouldPlaySound: true,
+                shouldSetBadge: true,
             }),
         });
 
@@ -33,7 +33,7 @@ const NotificationService = {
 
     async scheduleTaskReminder(timeBlock, leadMinutes) {
         // schedule notification X minutes before timeBlock.startTime
-        try{
+        try {
             const { name, date, startTime } = timeBlock;
 
             const triggerTime24 = startTime.copy();
@@ -53,8 +53,8 @@ const NotificationService = {
                     priority: Notifications.AndroidNotificationPriority.HIGH,
                 },
                 trigger: {
-                    type:'date', 
-                    date: notificationTime
+                    type: 'date',
+                    date: notificationTime,
                 },
             });
 
@@ -68,7 +68,7 @@ const NotificationService = {
 
     async scheduleBreakReminder(timeBlock, leadMinutes) {
         // schedule notification X minutes before break
-        try{
+        try {
             const { date, startTime } = timeBlock;
 
             const triggerTime24 = startTime.copy();
@@ -88,8 +88,8 @@ const NotificationService = {
                     priority: Notifications.AndroidNotificationPriority.HIGH,
                 },
                 trigger: {
-                    type:'date', 
-                    date: notificationTime
+                    type: 'date',
+                    date: notificationTime,
                 },
             });
 
@@ -108,7 +108,7 @@ const NotificationService = {
                 console.warn('cancelNotification: No notification ID provided');
                 return;
             }
-          
+
             await Notifications.cancelScheduledNotificationAsync(notificationId);
             console.log(`Cancelled notification with ID: ${notificationId}`);
         } catch (error) {
@@ -129,31 +129,32 @@ const NotificationService = {
                 return null;
             }
 
-            const content = allTasksCompleted 
-            ? {
-                title: '🎉 You slayed the day!',
-                body: 'Congrats on finishing all your tasks today!',
-                sound: true,
-                priority: Notifications.AndroidNotificationPriority.HIGH,
-            }
-            : {
-                title: '📋 Unfinished Tasks',
-                body: 'You have some incomplete tasks today. Click to review or reschedule!',
-                sound: true,
-                priority: Notifications.AndroidNotificationPriority.HIGH,
-            }
+            const content = allTasksCompleted
+                ? {
+                      title: '🎉 You slayed the day!',
+                      body: 'Congrats on finishing all your tasks today!',
+                      sound: true,
+                      priority: Notifications.AndroidNotificationPriority.HIGH,
+                  }
+                : {
+                      title: '📋 Unfinished Tasks',
+                      body: 'You have some incomplete tasks today. Click to review or reschedule!',
+                      sound: true,
+                      priority: Notifications.AndroidNotificationPriority.HIGH,
+                  };
 
             const notificationId = await Notifications.scheduleNotificationAsync({
                 content,
                 trigger: {
-                    type:'date', 
-                    date: notificationTime
+                    type: 'date',
+                    date: notificationTime,
                 },
             });
 
-            console.log(`[Daily Summary] Scheduled for 11:00 PM → allComplete=${allTasksCompleted}, ID=${notificationId}`);
+            console.log(
+                `[Daily Summary] Scheduled for 11:00 PM → allComplete=${allTasksCompleted}, ID=${notificationId}`,
+            );
             return notificationId;
-
         } catch (error) {
             console.error('Failed to schedule daily summary notification:', error);
             return null;
@@ -172,19 +173,19 @@ const NotificationService = {
     async sendDummyNotification() {
         const notificationId = await Notifications.scheduleNotificationAsync({
             content: {
-                title: "😭😭😭 Test Notification",
-                body: "This is a test notification. Please ignore.",
+                title: '😭😭😭 Test Notification',
+                body: 'This is a test notification. Please ignore.',
             },
             trigger: {
                 type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
                 seconds: 5,
-            }
-        })
+            },
+        });
 
-        console.log("Dummy notification scheduled:", notificationId);
+        console.log('Dummy notification scheduled:', notificationId);
         const check = await Notifications.getAllScheduledNotificationsAsync();
         console.log(check);
-    }
-}
+    },
+};
 
-export default NotificationService
+export default NotificationService;

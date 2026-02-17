@@ -1,7 +1,7 @@
-import React, { createContext, useState, useEffect, useContext } from 'react'
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Scheduler from '../model/Scheduler'
-import ScheduleDate from '../model/ScheduleDate'
+import Scheduler from '../model/Scheduler';
+import ScheduleDate from '../model/ScheduleDate';
 import RigidEvent from '../model/RigidEvent';
 import ActivityType from '../model/ActivityType';
 import FlexibleEvent from '../model/FlexibleEvent';
@@ -29,70 +29,94 @@ export const AppStateProvider = ({ children }) => {
         const date6 = date5.getNextDate();
         const date7 = date6.getNextDate();
         const scheduler = new Scheduler(7, date1, 'Saturday', 30, 6);
-        
+
         // --- Rigid Events ---
         const rigidEvents = [
-            new RigidEvent("Church Visit", ActivityType.PERSONAL, 60, date1, 1000, 1100),
-            new RigidEvent("Math Midterm", ActivityType.EDUCATION, 120, date2, 1000, 1200),
-            new RigidEvent("Physio Checkup", ActivityType.PERSONAL, 30, date3, 900, 930),
-            new RigidEvent("Team Workshop", ActivityType.WORK, 120, date4, 1400, 1600),
-            new RigidEvent("Chemistry Quiz", ActivityType.EDUCATION, 60, date4, 900, 1000),
-            new RigidEvent("Staff Meeting", ActivityType.WORK, 60, date5, 1100, 1200),
-            new RigidEvent("Manager Check-In", ActivityType.WORK, 30, date5, 1500, 1530),
-            new RigidEvent("Final Presentation", ActivityType.WORK, 60, date6, 1500, 1600),
-            new RigidEvent("Dinner Party", ActivityType.PERSONAL, 120, date7, 1900, 2100)
+            new RigidEvent('Church Visit', ActivityType.PERSONAL, 60, date1, 1000, 1100),
+            new RigidEvent('Math Midterm', ActivityType.EDUCATION, 120, date2, 1000, 1200),
+            new RigidEvent('Physio Checkup', ActivityType.PERSONAL, 30, date3, 900, 930),
+            new RigidEvent('Team Workshop', ActivityType.WORK, 120, date4, 1400, 1600),
+            new RigidEvent('Chemistry Quiz', ActivityType.EDUCATION, 60, date4, 900, 1000),
+            new RigidEvent('Staff Meeting', ActivityType.WORK, 60, date5, 1100, 1200),
+            new RigidEvent('Manager Check-In', ActivityType.WORK, 30, date5, 1500, 1530),
+            new RigidEvent('Final Presentation', ActivityType.WORK, 60, date6, 1500, 1600),
+            new RigidEvent('Dinner Party', ActivityType.PERSONAL, 120, date7, 1900, 2100),
         ];
-        rigidEvents.forEach(e => scheduler.addRigidEvent(e));
-        
+        rigidEvents.forEach((e) => scheduler.addRigidEvent(e));
+
         // --- Flexible Events ---
         const flexibleEvents = [
-            new FlexibleEvent("Study Math Chapters", ActivityType.EDUCATION, 90, Priority.HIGH, date2),
-            new FlexibleEvent("Fill Health Journal", ActivityType.PERSONAL, 30, Priority.LOW, date3),
-            new FlexibleEvent("Slide Draft", ActivityType.WORK, 60, Priority.MEDIUM, date4),
-            new FlexibleEvent("Write Research Notes", ActivityType.EDUCATION, 45, Priority.MEDIUM, date5),
-            new FlexibleEvent("Data Cleaning", ActivityType.WORK, 30, Priority.LOW, date5),
-            new FlexibleEvent("Weekly Planning", ActivityType.PERSONAL, 20, Priority.LOW, date7),
-            new FlexibleEvent("Report Draft", ActivityType.WORK, 90, Priority.HIGH, date6),
-            new FlexibleEvent("Design Mockups", ActivityType.WORK, 60, Priority.MEDIUM, date6),
-            new FlexibleEvent("Proofread Notes", ActivityType.EDUCATION, 30, Priority.LOW, date6),
-            new FlexibleEvent("Buy Gifts", ActivityType.PERSONAL, 45, Priority.LOW, date7),
-            new FlexibleEvent("Reflective Essay", ActivityType.EDUCATION, 60, Priority.HIGH, date7),
-            new FlexibleEvent("Meditation Session", ActivityType.PERSONAL, 30, Priority.LOW, date1),
-            new FlexibleEvent("Read Case Studies", ActivityType.EDUCATION, 60, Priority.MEDIUM, date4),
-            new FlexibleEvent("Finalize Budget", ActivityType.WORK, 40, Priority.MEDIUM, date6),
-            new FlexibleEvent("Email Follow-Ups", ActivityType.WORK, 30, Priority.LOW, date5),
-            new FlexibleEvent("Packing Checklist", ActivityType.PERSONAL, 20, Priority.LOW, date7)
+            new FlexibleEvent(
+                'Study Math Chapters',
+                ActivityType.EDUCATION,
+                90,
+                Priority.HIGH,
+                date2,
+            ),
+            new FlexibleEvent(
+                'Fill Health Journal',
+                ActivityType.PERSONAL,
+                30,
+                Priority.LOW,
+                date3,
+            ),
+            new FlexibleEvent('Slide Draft', ActivityType.WORK, 60, Priority.MEDIUM, date4),
+            new FlexibleEvent(
+                'Write Research Notes',
+                ActivityType.EDUCATION,
+                45,
+                Priority.MEDIUM,
+                date5,
+            ),
+            new FlexibleEvent('Data Cleaning', ActivityType.WORK, 30, Priority.LOW, date5),
+            new FlexibleEvent('Weekly Planning', ActivityType.PERSONAL, 20, Priority.LOW, date7),
+            new FlexibleEvent('Report Draft', ActivityType.WORK, 90, Priority.HIGH, date6),
+            new FlexibleEvent('Design Mockups', ActivityType.WORK, 60, Priority.MEDIUM, date6),
+            new FlexibleEvent('Proofread Notes', ActivityType.EDUCATION, 30, Priority.LOW, date6),
+            new FlexibleEvent('Buy Gifts', ActivityType.PERSONAL, 45, Priority.LOW, date7),
+            new FlexibleEvent('Reflective Essay', ActivityType.EDUCATION, 60, Priority.HIGH, date7),
+            new FlexibleEvent('Meditation Session', ActivityType.PERSONAL, 30, Priority.LOW, date1),
+            new FlexibleEvent(
+                'Read Case Studies',
+                ActivityType.EDUCATION,
+                60,
+                Priority.MEDIUM,
+                date4,
+            ),
+            new FlexibleEvent('Finalize Budget', ActivityType.WORK, 40, Priority.MEDIUM, date6),
+            new FlexibleEvent('Email Follow-Ups', ActivityType.WORK, 30, Priority.LOW, date5),
+            new FlexibleEvent('Packing Checklist', ActivityType.PERSONAL, 20, Priority.LOW, date7),
         ];
-        flexibleEvents.forEach(e => scheduler.addFlexibleEvent(e));
-        
+        flexibleEvents.forEach((e) => scheduler.addFlexibleEvent(e));
+
         // --- Breaks ---
         scheduler.addBreak(date2, new Break(30, 1300, 1330));
         scheduler.addBreak(date4, new Break(30, 1200, 1230));
         scheduler.addBreak(date5, new Break(30, 1000, 1030));
         scheduler.addBreak(date6, new Break(30, 900, 930));
         scheduler.addRepeatedBreak(new Break(30, 1700, 1730));
-        
+
         // --- Dependencies ---
         const deps = new EventDependencies();
         const depList = [
-            ["Math Midterm", "Study Math Chapters"],
-            ["Fill Health Journal", "Physio Checkup"],
-            ["Write Research Notes", "Slide Draft"],
-            ["Proofread Notes", "Write Research Notes"],
-            ["Reflective Essay", "Proofread Notes"],
-            ["Design Mockups", "Slide Draft"],
-            ["Design Mockups", "Report Draft"],
-            ["Report Draft", "Staff Meeting"],
-            ["Finalize Budget", "Report Draft"],
-            ["Email Follow-Ups", "Staff Meeting"],
-            ["Buy Gifts", "Weekly Planning"],
-            ["Packing Checklist", "Buy Gifts"]
+            ['Math Midterm', 'Study Math Chapters'],
+            ['Fill Health Journal', 'Physio Checkup'],
+            ['Write Research Notes', 'Slide Draft'],
+            ['Proofread Notes', 'Write Research Notes'],
+            ['Reflective Essay', 'Proofread Notes'],
+            ['Design Mockups', 'Slide Draft'],
+            ['Design Mockups', 'Report Draft'],
+            ['Report Draft', 'Staff Meeting'],
+            ['Finalize Budget', 'Report Draft'],
+            ['Email Follow-Ups', 'Staff Meeting'],
+            ['Buy Gifts', 'Weekly Planning'],
+            ['Packing Checklist', 'Buy Gifts'],
         ];
         const nameToEvent = {};
-        [...rigidEvents, ...flexibleEvents].forEach(e => {
+        [...rigidEvents, ...flexibleEvents].forEach((e) => {
             nameToEvent[e.getName()] = e;
         });
-        
+
         try {
             for (const [dependent, prerequisite] of depList) {
                 deps.addDependency(nameToEvent[dependent], nameToEvent[prerequisite]);
@@ -103,16 +127,16 @@ export const AppStateProvider = ({ children }) => {
             }
         }
         scheduler.setEventDependencies(deps);
-        
+
         // --- Schedule Generation ---
-        return scheduler.createSchedules("Earliest Fit", 800, 1700);
+        return scheduler.createSchedules('Earliest Fit', 800, 1700);
     }
 
     let scheduleForTesting1 = testScheduler(new ScheduleDate(27, 6, 2025));
     let scheduleForTesting2 = testScheduler(new ScheduleDate(4, 7, 2025));
     let scheduleForTesting3 = testScheduler(new ScheduleDate(17, 9, 2025));
     let scheduleForTesting4 = testScheduler(new ScheduleDate(11, 11, 2025));
-    
+
     const [appState, setAppState] = useState({
         name: '',
         avatarName: 'cat', // Default avatar
@@ -130,42 +154,45 @@ export const AppStateProvider = ({ children }) => {
             { name: 'July 3rd Week', schedule: scheduleForTesting3, isActive: false },
             { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: true },
         ],
-        activeSchedule: {name: 'Schedule 4', schedule: scheduleForTesting4, isActive: true},
+        activeSchedule: { name: 'Schedule 4', schedule: scheduleForTesting4, isActive: true },
         onboarded: false,
-        firstLaunch: true
+        firstLaunch: true,
     });
     const [storageLoaded, setStorageLoaded] = useState(false);
 
     useEffect(() => {
         const loadAppState = async () => {
-            console.log("Loading state")
+            console.log('Loading state');
             try {
                 if (isSignedIn) {
                     console.log('Loading app state from database...');
                     // Try to load from database first (database is source of truth)
                     try {
-                        // Full loading with Schedule objects 
+                        // Full loading with Schedule objects
                         const databaseState = await loadCompleteAppStateWithSchedules();
-                        
+
                         // console.log('Loaded from database:', databaseState);
-                        setAppState(prevState => ({
+                        setAppState((prevState) => ({
                             ...prevState,
-                            ...databaseState
+                            ...databaseState,
                         }));
                     } catch (dbError) {
-                        console.warn('Failed to load from database, falling back to AsyncStorage:', dbError);
+                        console.warn(
+                            'Failed to load from database, falling back to AsyncStorage:',
+                            dbError,
+                        );
                         // Fallback to AsyncStorage if database fails
                         const raw = await AsyncStorage.getItem('appState');
                         const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
-                        
+
                         if (parsed !== null) {
                             setAppState(parsed);
                         } else if (parsed == null) {
                             if (appState.firstLaunch) {
-                                console.log("First launch detected, initializing app state");
+                                console.log('First launch detected, initializing app state');
                                 setAppState({
                                     ...appState,
-                                    firstLaunch: false
+                                    firstLaunch: false,
                                 });
                             }
                         }
@@ -175,15 +202,15 @@ export const AppStateProvider = ({ children }) => {
                     // If not signed in, only use AsyncStorage
                     const raw = await AsyncStorage.getItem('appState');
                     const parsed = raw ? parseAppState(JSON.parse(raw)) : null;
-                    
+
                     if (parsed !== null) {
                         setAppState(parsed);
                     } else if (parsed == null) {
                         if (appState.firstLaunch) {
-                            console.log("First launch detected, initializing app state");
+                            console.log('First launch detected, initializing app state');
                             setAppState({
                                 ...appState,
-                                firstLaunch: false
+                                firstLaunch: false,
                             });
                         }
                     }
@@ -198,20 +225,20 @@ export const AppStateProvider = ({ children }) => {
     }, [isSignedIn]); // Re-run when authentication status changes
 
     useEffect(() => {
-        console.log("Writing state")
+        console.log('Writing state');
         if (storageLoaded) {
             AsyncStorage.setItem('appState', JSON.stringify(serializeAppState(appState)));
         }
     }, [appState]);
 
-    useScheduleNotificationSync(appState.activeSchedule?.schedule, appState.userPreferences);    
+    useScheduleNotificationSync(appState.activeSchedule?.schedule, appState.userPreferences);
 
     return (
         <AppStateContext.Provider value={{ appState, setAppState, storageLoaded }}>
-          {children}
+            {children}
         </AppStateContext.Provider>
-      )
-}
+    );
+};
 
 const serializeAppState = (appState) => {
     if (!appState) return null;
@@ -221,25 +248,36 @@ const serializeAppState = (appState) => {
         avatarName: appState.avatarName,
         timeOfUpdate: appState.timeOfUpdate,
         userPreferences: appState.userPreferences,
-        savedSchedules: appState.savedSchedules.map(schedule => ({
+        savedSchedules: appState.savedSchedules.map((schedule) => ({
             name: schedule.name,
             backendId: schedule.backendId,
             schedule: schedule.schedule ? serializeSchedule(schedule.schedule) : null,
-            isActive: schedule.isActive
+            isActive: schedule.isActive,
         })),
-        activeSchedule: appState.activeSchedule ? { 
-            name: appState.activeSchedule.name, 
-            backendId: appState.activeSchedule.backendId,
-            schedule: appState.activeSchedule.schedule ? serializeSchedule(appState.activeSchedule.schedule) : null, 
-            isActive: appState.activeSchedule.active 
-        } : null,
+        activeSchedule: appState.activeSchedule
+            ? {
+                  name: appState.activeSchedule.name,
+                  backendId: appState.activeSchedule.backendId,
+                  schedule: appState.activeSchedule.schedule
+                      ? serializeSchedule(appState.activeSchedule.schedule)
+                      : null,
+                  isActive: appState.activeSchedule.active,
+              }
+            : null,
         onboarded: appState.onboarded,
-        firstLaunch: appState.firstLaunch
+        firstLaunch: appState.firstLaunch,
     };
-}
+};
 
 const parseAppState = (rawObj) => {
-    if (!rawObj || rawObj.name == null || rawObj.userPreferences == null || rawObj.savedSchedules == null || rawObj.onboarded == null || rawObj.firstLaunch == null) {
+    if (
+        !rawObj ||
+        rawObj.name == null ||
+        rawObj.userPreferences == null ||
+        rawObj.savedSchedules == null ||
+        rawObj.onboarded == null ||
+        rawObj.firstLaunch == null
+    ) {
         return null;
     }
 
@@ -248,27 +286,31 @@ const parseAppState = (rawObj) => {
         avatarName: rawObj.avatarName || 'cat', // Default fallback
         timeOfUpdate: rawObj.timeOfUpdate || new Date().toISOString(),
         userPreferences: rawObj.userPreferences,
-        savedSchedules: rawObj.savedSchedules.map(sched => ({
+        savedSchedules: rawObj.savedSchedules.map((sched) => ({
             name: sched.name,
             backendId: sched.backendId,
             schedule: sched.schedule ? parseSchedule(sched.schedule) : null,
-            isActive: sched.isActive
+            isActive: sched.isActive,
         })),
-        activeSchedule: rawObj.activeSchedule ? {
-            name: rawObj.activeSchedule.name, 
-            backendId: rawObj.activeSchedule.backendId,
-            schedule: rawObj.activeSchedule.schedule ? parseSchedule(rawObj.activeSchedule.schedule) : null, 
-            isActive: rawObj.activeSchedule.active
-        } : null,
+        activeSchedule: rawObj.activeSchedule
+            ? {
+                  name: rawObj.activeSchedule.name,
+                  backendId: rawObj.activeSchedule.backendId,
+                  schedule: rawObj.activeSchedule.schedule
+                      ? parseSchedule(rawObj.activeSchedule.schedule)
+                      : null,
+                  isActive: rawObj.activeSchedule.active,
+              }
+            : null,
         onboarded: rawObj.onboarded,
-        firstLaunch: rawObj.firstLaunch
+        firstLaunch: rawObj.firstLaunch,
     };
-}
+};
 
 export const useAppState = () => {
     const context = useContext(AppStateContext);
     if (context === undefined) {
-      throw new Error('useAppState must be used within an AppStateProvider');
+        throw new Error('useAppState must be used within an AppStateProvider');
     }
     return context;
-};  
+};

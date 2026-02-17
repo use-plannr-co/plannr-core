@@ -74,26 +74,28 @@ const schedules = await getSchedules(makeAuthenticatedRequest);
 ## Adding New API Modules (e.g. AI Chat)
 
 1. Create `api/modules/aiChat.api.js`:
-   ```javascript
-   export const sendMessage = (makeAuthenticatedRequest, message) =>
-       makeAuthenticatedRequest('/api/ai-chat/message', {
-           method: 'POST',
-           body: JSON.stringify({ message }),
-       });
-   ```
+
+    ```javascript
+    export const sendMessage = (makeAuthenticatedRequest, message) =>
+        makeAuthenticatedRequest('/api/ai-chat/message', {
+            method: 'POST',
+            body: JSON.stringify({ message }),
+        });
+    ```
 
 2. Create `api/hooks/useAIChatAPI.js`:
-   ```javascript
-   import { useApiCore } from '../core/useApiCore.js';
-   import * as aiChatApi from '../modules/aiChat.api.js';
 
-   export const useAIChatAPI = () => {
-       const { makeAuthenticatedRequest } = useApiCore();
-       return {
-           sendMessage: (message) => aiChatApi.sendMessage(makeAuthenticatedRequest, message),
-       };
-   };
-   ```
+    ```javascript
+    import { useApiCore } from '../core/useApiCore.js';
+    import * as aiChatApi from '../modules/aiChat.api.js';
+
+    export const useAIChatAPI = () => {
+        const { makeAuthenticatedRequest } = useApiCore();
+        return {
+            sendMessage: (message) => aiChatApi.sendMessage(makeAuthenticatedRequest, message),
+        };
+    };
+    ```
 
 3. Optionally add to `api/index.js` for backward compatibility.
 
@@ -103,14 +105,14 @@ No changes needed to any existing module.
 
 ## Module Ownership
 
-| Module | Functions | Domain |
-|--------|-----------|--------|
-| `users.api.js` | 7 | User profile, auth, onboarding |
-| `schedules.api.js` | 6 | Schedule CRUD + complex save |
-| `days.api.js` | 5 | Day CRUD (nested under schedules) |
-| `blocks.api.js` | 5 | Block CRUD + completion |
-| `dependencies.api.js` | 3 | Event dependencies |
-| `preferences.api.js` | 2 | User preferences |
-| `integrations.api.js` | 2 | Google Calendar export |
-| `textToTasks.api.js` | 1 | AI text parsing |
-| `appState.api.js` | 3 | Cross-domain orchestration |
+| Module                | Functions | Domain                            |
+| --------------------- | --------- | --------------------------------- |
+| `users.api.js`        | 7         | User profile, auth, onboarding    |
+| `schedules.api.js`    | 6         | Schedule CRUD + complex save      |
+| `days.api.js`         | 5         | Day CRUD (nested under schedules) |
+| `blocks.api.js`       | 5         | Block CRUD + completion           |
+| `dependencies.api.js` | 3         | Event dependencies                |
+| `preferences.api.js`  | 2         | User preferences                  |
+| `integrations.api.js` | 2         | Google Calendar export            |
+| `textToTasks.api.js`  | 1         | AI text parsing                   |
+| `appState.api.js`     | 3         | Cross-domain orchestration        |

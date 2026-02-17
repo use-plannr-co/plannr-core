@@ -10,18 +10,17 @@ import Recreational from '../../assets/type-icons/Recreational.svg';
 import Errand from '../../assets/type-icons/Errand.svg';
 import Other from '../../assets/type-icons/Other.svg';
 
-
 const ActivityTypeIcons = {
-  [ActivityType.PERSONAL]: Personal,
-  [ActivityType.MEETING]: Meeting,
-  [ActivityType.WORK]: Work,
-  [ActivityType.EVENT]: Event,
-  [ActivityType.EDUCATION]: Education,
-  [ActivityType.TRAVEL]: Travel,
-  [ActivityType.RECREATIONAL]: Recreational,
-  [ActivityType.ERRAND]: Errand,
-  [ActivityType.OTHER]: Other,
-  [ActivityType.BREAK]: Break,
+    [ActivityType.PERSONAL]: Personal,
+    [ActivityType.MEETING]: Meeting,
+    [ActivityType.WORK]: Work,
+    [ActivityType.EVENT]: Event,
+    [ActivityType.EDUCATION]: Education,
+    [ActivityType.TRAVEL]: Travel,
+    [ActivityType.RECREATIONAL]: Recreational,
+    [ActivityType.ERRAND]: Errand,
+    [ActivityType.OTHER]: Other,
+    [ActivityType.BREAK]: Break,
 };
 
 export default ActivityTypeIcons;

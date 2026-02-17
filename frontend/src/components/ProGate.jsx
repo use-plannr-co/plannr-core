@@ -15,9 +15,9 @@ const { width } = Dimensions.get('window');
 
 /**
  * ProGate - Feature gating component for Plannr Pro
- * 
+ *
  * Wraps premium features and shows an upsell card for non-Pro users
- * 
+ *
  * @param {ReactNode} children - The content to show for Pro users
  * @param {ReactNode} fallback - Optional custom fallback UI for non-Pro users
  * @param {string} featureKey - Identifier for tracking which feature was locked
@@ -32,9 +32,7 @@ const ProGate = ({ children, fallback, featureKey, navigation }) => {
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <Text style={[styles.loadingText, { color: theme.FOREGROUND }]}>
-                    Loading...
-                </Text>
+                <Text style={[styles.loadingText, { color: theme.FOREGROUND }]}>Loading...</Text>
             </View>
         );
     }
@@ -73,7 +71,8 @@ const ProGate = ({ children, fallback, featureKey, navigation }) => {
 
                 {/* Description */}
                 <Text style={[styles.lockedDescription, { color: theme.FOREGROUND }]}>
-                    Upgrade to Plannr Pro to unlock this feature and get access to advanced scheduling tools.
+                    Upgrade to Plannr Pro to unlock this feature and get access to advanced
+                    scheduling tools.
                 </Text>
 
                 {/* Unlock Button */}

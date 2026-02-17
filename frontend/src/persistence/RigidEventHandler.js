@@ -1,7 +1,7 @@
-import RigidEvent from "../model/RigidEvent.js";
-import { serializeScheduleDate, parseScheduleDate } from "./ScheduleDateHandler.js";
-import { serializeActivityType, parseActivityType } from "./ActivityTypeHandler.js";
-import { serializeTime24, parseTime24 } from "./Time24Handler.js";
+import RigidEvent from '../model/RigidEvent.js';
+import { serializeScheduleDate, parseScheduleDate } from './ScheduleDateHandler.js';
+import { serializeActivityType, parseActivityType } from './ActivityTypeHandler.js';
+import { serializeTime24, parseTime24 } from './Time24Handler.js';
 
 export const serializeRigidEvent = (eventObj) => {
     if (!eventObj) return null;
@@ -13,12 +13,20 @@ export const serializeRigidEvent = (eventObj) => {
         date: serializeScheduleDate(eventObj.date),
         startTime: serializeTime24(eventObj.startTime),
         endTime: serializeTime24(eventObj.endTime),
-        id: eventObj.id
-    }
-}
+        id: eventObj.id,
+    };
+};
 
 export const parseRigidEvent = (rawObj) => {
-    if (!rawObj || rawObj.name == null || rawObj.type == null || rawObj.duration == null || rawObj.startTime == null || rawObj.endTime == null || rawObj.date == null) {
+    if (
+        !rawObj ||
+        rawObj.name == null ||
+        rawObj.type == null ||
+        rawObj.duration == null ||
+        rawObj.startTime == null ||
+        rawObj.endTime == null ||
+        rawObj.date == null
+    ) {
         return null;
     }
 
@@ -29,6 +37,6 @@ export const parseRigidEvent = (rawObj) => {
         parseScheduleDate(rawObj.date),
         parseTime24(rawObj.startTime),
         parseTime24(rawObj.endTime),
-        rawObj.id
+        rawObj.id,
     );
-}
+};

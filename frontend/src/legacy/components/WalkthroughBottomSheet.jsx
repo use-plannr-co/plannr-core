@@ -1,5 +1,16 @@
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
-import { Animated, Dimensions, PanResponder, View, Pressable, StyleSheet, ScrollView, Text, Image, TouchableOpacity } from 'react-native';
+import {
+    Animated,
+    Dimensions,
+    PanResponder,
+    View,
+    Pressable,
+    StyleSheet,
+    ScrollView,
+    Text,
+    Image,
+    TouchableOpacity,
+} from 'react-native';
 import { spacing } from '../design/spacing.js';
 import { useAppState } from '../context/AppStateContext.js';
 import { typography } from '../design/typography.js';
@@ -7,7 +18,12 @@ import { typography } from '../design/typography.js';
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const MAX_TRANSLATE_Y = SCREEN_HEIGHT * 0.6;
 
-const SPACE = (SCREEN_HEIGHT > 900) ? spacing.SPACING_4 : (SCREEN_HEIGHT > 800) ? spacing.SPACING_3 : spacing.SPACING_2
+const SPACE =
+    SCREEN_HEIGHT > 900
+        ? spacing.SPACING_4
+        : SCREEN_HEIGHT > 800
+          ? spacing.SPACING_3
+          : spacing.SPACING_2;
 
 const WalkthroughBottomSheet = forwardRef(({ theme }, ref) => {
     const { appState, setAppState } = useAppState();
@@ -31,7 +47,7 @@ const WalkthroughBottomSheet = forwardRef(({ theme }, ref) => {
                     }).start();
                 }
             },
-        })
+        }),
     ).current;
 
     const show = () => {
@@ -107,28 +123,54 @@ const WalkthroughBottomSheet = forwardRef(({ theme }, ref) => {
                         paddingVertical: 10,
                     }}
                 >
-                    <View style={{ height: 8, width: 40, backgroundColor: theme.INPUT, marginBottom: SPACE, alignSelf: 'center', borderRadius: 12 }} />
-                    
+                    <View
+                        style={{
+                            height: 8,
+                            width: 40,
+                            backgroundColor: theme.INPUT,
+                            marginBottom: SPACE,
+                            alignSelf: 'center',
+                            borderRadius: 12,
+                        }}
+                    />
+
                     {/* Planzo Image */}
                     <Image
                         source={require('../../assets/walkthrough/PlanzoPopUp.png')}
-                        style={{ width: 240, height: 300, marginBottom: SPACE, alignSelf: 'center' }}
+                        style={{
+                            width: 240,
+                            height: 300,
+                            marginBottom: SPACE,
+                            alignSelf: 'center',
+                        }}
                     />
-                    
-                    <Text style={{ fontSize: typography.headingSize, fontFamily: 'AlbertSans', color: theme.FOREGROUND, marginBottom: SPACE/2, alignSelf: 'center' }}>You're ready to start planning!</Text>
+
+                    <Text
+                        style={{
+                            fontSize: typography.headingSize,
+                            fontFamily: 'AlbertSans',
+                            color: theme.FOREGROUND,
+                            marginBottom: SPACE / 2,
+                            alignSelf: 'center',
+                        }}
+                    >
+                        You're ready to start planning!
+                    </Text>
                 </View>
-                
+
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        setAppState(prevState => ({
+                        setAppState((prevState) => ({
                             ...prevState,
                             onboarded: true,
                         }));
                         hide();
                     }}
                 >
-                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Get Started</Text>
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>
+                        Get Started
+                    </Text>
                 </TouchableOpacity>
             </Animated.View>
         </>
@@ -142,7 +184,7 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         paddingHorizontal: 16,
         marginBottom: SPACE,
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
     button: {
         width: '100%',
@@ -154,7 +196,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginTop: SPACE,
         marginBottom: 8,
-    }
+    },
 });
 
 export default WalkthroughBottomSheet;

@@ -9,11 +9,12 @@ import Google from '../../assets/auth/Google.svg';
 import Apple from '../../assets/auth/Apple.svg';
 
 const { width, height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const ExportCalendarModal = ({ isVisible, onClose, onExportGoogle, onExportApple }) => {
     const { appState } = useAppState();
-    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
     const handleGoogleExport = () => {
         onClose();
@@ -42,9 +43,7 @@ const ExportCalendarModal = ({ isVisible, onClose, onExportGoogle, onExportApple
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={[styles.handle, { backgroundColor: theme.INPUT }]} />
-                    <Text style={[styles.title, { color: theme.FOREGROUND }]}>
-                        Export Schedule
-                    </Text>
+                    <Text style={[styles.title, { color: theme.FOREGROUND }]}>Export Schedule</Text>
                     <Text style={[styles.subtitle, { color: theme.FOREGROUND }]}>
                         Choose where to export your schedule
                     </Text>
@@ -66,7 +65,12 @@ const ExportCalendarModal = ({ isVisible, onClose, onExportGoogle, onExportApple
                                 <Text style={[styles.optionTitle, { color: theme.FOREGROUND }]}>
                                     Google Calendar
                                 </Text>
-                                <Text style={[styles.optionDescription, { color: theme.FOREGROUND_MUTED }]}>
+                                <Text
+                                    style={[
+                                        styles.optionDescription,
+                                        { color: theme.FOREGROUND_MUTED },
+                                    ]}
+                                >
                                     Export to your Google Calendar
                                 </Text>
                             </View>
@@ -87,7 +91,12 @@ const ExportCalendarModal = ({ isVisible, onClose, onExportGoogle, onExportApple
                                 <Text style={[styles.optionTitle, { color: theme.FOREGROUND }]}>
                                     Apple Calendar
                                 </Text>
-                                <Text style={[styles.optionDescription, { color: theme.FOREGROUND_MUTED }]}>
+                                <Text
+                                    style={[
+                                        styles.optionDescription,
+                                        { color: theme.FOREGROUND_MUTED },
+                                    ]}
+                                >
                                     Export to your device calendar
                                 </Text>
                             </View>
@@ -97,7 +106,10 @@ const ExportCalendarModal = ({ isVisible, onClose, onExportGoogle, onExportApple
 
                 {/* Cancel Button */}
                 <TouchableOpacity
-                    style={[styles.cancelButton, { backgroundColor: theme.FOREGROUND_MUTED + '20' }]}
+                    style={[
+                        styles.cancelButton,
+                        { backgroundColor: theme.FOREGROUND_MUTED + '20' },
+                    ]}
                     onPress={onClose}
                     activeOpacity={0.7}
                 >

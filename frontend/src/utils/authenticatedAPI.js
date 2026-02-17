@@ -11,7 +11,7 @@ if (__DEV__) {
     // eslint-disable-next-line no-console
     console.warn(
         '[Plannr] Importing from utils/authenticatedAPI is deprecated. ' +
-        'Please import from src/api/ instead. See src/api/README.md for details.'
+            'Please import from src/api/ instead. See src/api/README.md for details.',
     );
 }
 
