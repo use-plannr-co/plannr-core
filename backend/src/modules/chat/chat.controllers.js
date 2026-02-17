@@ -138,6 +138,47 @@ export async function sendMessage(req, res, next) {
     }
 }
 
+export async function submitActionResult(req, res, next) {
+    try {
+        const { userId } = req.auth;
+        const { chatId } = req.validated?.params || req.params;
+        const { actionType, summary } = req.validated?.body || req.body;
+
+        const chat = await repo.getChatById(chatId, userId);
+        if (!chat) return res.status(404).json({ success: false, error: 'Chat not found' });
+
+        // Save system message (NOT counted against daily usage)
+        await repo.insertMessage({
+            chatId,
+            role: 'system',
+            content: `[Action completed] ${actionType}: ${summary}`,
+        });
+
+        // Build Claude context
+        const storedMessages = await repo.getMessages(chatId, 30);
+        const claudeMessages = buildClaudeMessages(storedMessages);
+        const [userRow] = await db.select({ displayName: users.displayName }).from(users)
+            .where(eq(users.id, userId)).limit(1);
+        const subscription = await getSubscriptionByUserId(userId);
+        const systemPrompt = buildSystemPrompt({
+            hasActiveSchedule: true,
+            isPro: subscription?.isPro === true,
+            userName: userRow?.displayName || null,
+            timezone: 'UTC',
+        });
+
+        // Stream Claude's confirmation
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+
+        await runStreamingLoop(res, claudeMessages, systemPrompt, userId, chatId, 'UTC');
+    } catch (err) {
+        next(err);
+    }
+}
+
 // ─── Streaming Loop ───────────────────────────────────────────────────────────
 
 async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, timezone) {
@@ -209,12 +250,21 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, tim
                 writeSSE(res, 'tool_executing', { toolName: toolBlock.name });
 
                 const result = await executeTool(toolBlock.name, toolBlock.input, userId, timezone);
+                const parsedResult = JSON.parse(result);
 
                 writeSSE(res, 'tool_result', {
                     toolUseId: toolBlock.id,
                     toolName: toolBlock.name,
-                    result: JSON.parse(result),
+                    result: parsedResult,
                 });
+
+                // For proposal tools: emit structured action proposal for button rendering
+                if (toolBlock.name.startsWith('propose_') && !parsedResult.error && parsedResult.count !== 0) {
+                    writeSSE(res, 'action_proposal', {
+                        proposalId: toolBlock.id,
+                        actions: [parsedResult],
+                    });
+                }
 
                 toolResultContents.push({
                     type: 'tool_result',
@@ -290,6 +340,9 @@ function buildClaudeMessages(storedMessages) {
             } else {
                 result.push({ role: 'user', content: msg.content });
             }
+        } else if (msg.role === 'system') {
+            // Map system action-result notifications to user role so Claude understands context
+            result.push({ role: 'user', content: msg.content });
         } else if (msg.role === 'assistant') {
             if (msg.toolCalls && msg.toolCalls.length > 0) {
                 // Only include tool_use blocks if the very next stored message is

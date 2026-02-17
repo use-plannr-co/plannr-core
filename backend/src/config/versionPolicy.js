@@ -13,7 +13,7 @@ export const VERSION_POLICY = {
 
     // App Store URLs for updates
     updateUrls: {
-        ios: "https://apps.apple.com/app/plannr/id[YOUR_APP_ID]", // Replace [YOUR_APP_ID] with actual App Store ID
+        ios: "https://apps.apple.com/app/plannr/id6748265401", 
         android: "https://play.google.com/store/apps/details?id=com.sthareja19.Plannr" // For future use
     },
 

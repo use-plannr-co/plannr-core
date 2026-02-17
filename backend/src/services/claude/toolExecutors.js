@@ -251,17 +251,85 @@ export async function executeGetScheduleForDate(input, userId) {
     });
 }
 
+// ─── Propose tool executors ───────────────────────────────────────────────────
+
+export async function executeProposeMissedTaskShift(_input, userId) {
+    console.log('[Tool] executeProposeMissedTaskShift called for userId:', userId);
+    const schedule = await getActiveSchedule(userId);
+    if (!schedule) return JSON.stringify({ error: 'No active schedule found.' });
+
+    const scheduleDays = await db.select({ id: days.id, date: days.date }).from(days)
+        .where(eq(days.scheduleId, schedule.id))
+        .orderBy(asc(days.date));
+
+    const affectedTasks = [];
+    for (const day of scheduleDays) {
+        const dayBlocks = await db.select().from(blocks)
+            .where(and(eq(blocks.dayId, day.id), isNull(blocks.deletedAt)));
+        for (const block of dayBlocks) {
+            if (!block.completed) {
+                affectedTasks.push({ title: block.title, date: day.date });
+            }
+        }
+    }
+
+    if (affectedTasks.length === 0) {
+        return JSON.stringify({ type: 'missed_task_shift', count: 0, message: 'No incomplete tasks found.' });
+    }
+
+    return JSON.stringify({
+        type: 'missed_task_shift',
+        affectedTasks: affectedTasks.slice(0, 5),
+        count: affectedTasks.length,
+        label: `Reschedule ${affectedTasks.length} incomplete task${affectedTasks.length !== 1 ? 's' : ''}`,
+    });
+}
+
+export async function executeProposedAddTask(input, userId) {
+    console.log('[Tool] executeProposedAddTask called for userId:', userId);
+    const schedule = await getActiveSchedule(userId);
+    if (!schedule) return JSON.stringify({ error: 'No active schedule found.' });
+
+    const { name, duration, category, priority = 'medium', deadline } = input;
+    return JSON.stringify({
+        type: 'add_task',
+        params: { name, duration, category, priority, deadline: deadline || null },
+        label: `Add "${name}" (${duration} min)`,
+    });
+}
+
+export async function executeProposeStrategySwitch(input, userId) {
+    console.log('[Tool] executeProposeStrategySwitch called for userId:', userId);
+    const schedule = await getActiveSchedule(userId);
+    if (!schedule) return JSON.stringify({ error: 'No active schedule found.' });
+
+    const { newStrategy } = input;
+    if (schedule.strategy === newStrategy) {
+        return JSON.stringify({ error: `Already using the ${newStrategy} strategy.` });
+    }
+
+    return JSON.stringify({
+        type: 'strategy_switch',
+        params: { newStrategy },
+        currentStrategy: schedule.strategy,
+        label: `Switch to ${newStrategy} (reschedules all remaining tasks)`,
+    });
+}
+
 // ─── Dispatcher ───────────────────────────────────────────────────────────────
 
 export async function executeTool(toolName, toolInput, userId, timezone = 'UTC') {
     switch (toolName) {
-        case 'get_active_schedule':    return executeGetActiveSchedule(toolInput, userId);
-        case 'get_todays_tasks':       return executeGetTodaysTasks(toolInput, userId, timezone);
-        case 'get_completed_tasks':    return executeGetCompletedTasks(toolInput, userId, timezone);
-        case 'get_incomplete_tasks':   return executeGetIncompleteTasks(toolInput, userId, timezone);
-        case 'get_overdue_tasks':      return executeGetOverdueTasks(toolInput, userId, timezone);
-        case 'get_upcoming_tasks':     return executeGetUpcomingTasks(toolInput, userId, timezone);
-        case 'get_schedule_for_date':  return executeGetScheduleForDate(toolInput, userId);
+        case 'get_active_schedule':          return executeGetActiveSchedule(toolInput, userId);
+        case 'get_todays_tasks':             return executeGetTodaysTasks(toolInput, userId, timezone);
+        case 'get_completed_tasks':          return executeGetCompletedTasks(toolInput, userId, timezone);
+        case 'get_incomplete_tasks':         return executeGetIncompleteTasks(toolInput, userId, timezone);
+        case 'get_overdue_tasks':            return executeGetOverdueTasks(toolInput, userId, timezone);
+        case 'get_upcoming_tasks':           return executeGetUpcomingTasks(toolInput, userId, timezone);
+        case 'get_schedule_for_date':        return executeGetScheduleForDate(toolInput, userId);
+        case 'propose_missed_task_shift':    return executeProposeMissedTaskShift(toolInput, userId);
+        case 'propose_add_task':             return executeProposedAddTask(toolInput, userId);
+        case 'propose_strategy_switch':      return executeProposeStrategySwitch(toolInput, userId);
         default: return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
 }

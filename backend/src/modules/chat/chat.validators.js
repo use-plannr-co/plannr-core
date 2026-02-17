@@ -12,3 +12,8 @@ export const sendMessageSchema = z.object({
 export const chatIdParamSchema = z.object({
     chatId: z.string().uuid(),
 });
+
+export const actionResultSchema = z.object({
+    actionType: z.enum(['missed_task_shift', 'add_task', 'strategy_switch']),
+    summary: z.string().max(500),
+});

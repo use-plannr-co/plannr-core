@@ -26,5 +26,10 @@ router.post('/chats/:chatId/messages',
     validate(validators.sendMessageSchema),
     ctrl.sendMessage
 );
+router.post('/chats/:chatId/action-result',
+    validate(validators.chatIdParamSchema, 'params'),
+    validate(validators.actionResultSchema),
+    ctrl.submitActionResult
+);
 
 export default router;

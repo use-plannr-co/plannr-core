@@ -70,7 +70,7 @@ export const enforceMinAppVersion = (req, res, next) => {
  *   "code": "APP_UPDATE_REQUIRED",
  *   "minVersion": "1.1.1", 
  *   "platform": "ios",
- *   "updateUrl": "https://apps.apple.com/app/plannr/id123456789",
+ *   "updateUrl": "https://apps.apple.com/app/plannr/id6748265401",
  *   "message": "Please update Plannr to continue."
  * }
  * 

@@ -1,6 +1,5 @@
 // List all chats (sidebar)
-export const getChats = (makeAuthenticatedRequest) =>
-    makeAuthenticatedRequest('/api/chat/chats');
+export const getChats = (makeAuthenticatedRequest) => makeAuthenticatedRequest('/api/chat/chats');
 
 // Create a new chat
 export const createChat = (makeAuthenticatedRequest, title) =>
@@ -31,3 +30,24 @@ export const sendMessage = (makeStreamingRequest, chatId, message, onEvent, onDo
         onError,
     );
 };
+
+/**
+ * Submit the result of a confirmed action (SSE stream).
+ * Triggers Claude's confirmation response without incrementing daily usage.
+ */
+export const submitActionResult = (
+    makeStreamingRequest,
+    chatId,
+    actionType,
+    summary,
+    onEvent,
+    onDone,
+    onError,
+) =>
+    makeStreamingRequest(
+        `/api/chat/chats/${chatId}/action-result`,
+        { method: 'POST', body: JSON.stringify({ actionType, summary }) },
+        onEvent,
+        onDone,
+        onError,
+    );
