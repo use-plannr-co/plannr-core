@@ -115,8 +115,11 @@ export async function sendMessage(req, res, next) {
         const claudeMessages = buildClaudeMessages(storedMessages);
 
         // 7. Build system prompt
-        const [userRow] = await db.select({ displayName: users.displayName }).from(users)
-            .where(eq(users.id, userId)).limit(1);
+        const [userRow] = await db
+            .select({ displayName: users.displayName })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
 
         const systemPrompt = buildSystemPrompt({
             hasActiveSchedule: true, // optimistic; tools will handle the no-schedule case
@@ -157,8 +160,11 @@ export async function submitActionResult(req, res, next) {
         // Build Claude context
         const storedMessages = await repo.getMessages(chatId, 30);
         const claudeMessages = buildClaudeMessages(storedMessages);
-        const [userRow] = await db.select({ displayName: users.displayName }).from(users)
-            .where(eq(users.id, userId)).limit(1);
+        const [userRow] = await db
+            .select({ displayName: users.displayName })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
         const subscription = await getSubscriptionByUserId(userId);
         const systemPrompt = buildSystemPrompt({
             hasActiveSchedule: true,
@@ -219,7 +225,6 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, tim
                 finalInputTokens = event.usage?.input_tokens || finalInputTokens;
                 finalOutputTokens = event.usage?.output_tokens || finalOutputTokens;
             }
-
         }
 
         // Get final message for stop_reason and usage
@@ -230,9 +235,9 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, tim
 
         if (stopReason === 'tool_use') {
             // Extract tool use blocks from final message
-            const toolUseBlocks = finalMsg.content.filter(b => b.type === 'tool_use');
-            const textBlocks = finalMsg.content.filter(b => b.type === 'text');
-            const textContent = textBlocks.map(b => b.text).join('');
+            const toolUseBlocks = finalMsg.content.filter((b) => b.type === 'tool_use');
+            const textBlocks = finalMsg.content.filter((b) => b.type === 'text');
+            const textContent = textBlocks.map((b) => b.text).join('');
 
             // Save assistant message with tool calls
             await repo.insertMessage({
@@ -259,7 +264,11 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, tim
                 });
 
                 // For proposal tools: emit structured action proposal for button rendering
-                if (toolBlock.name.startsWith('propose_') && !parsedResult.error && parsedResult.count !== 0) {
+                if (
+                    toolBlock.name.startsWith('propose_') &&
+                    !parsedResult.error &&
+                    parsedResult.count !== 0
+                ) {
                     writeSSE(res, 'action_proposal', {
                         proposalId: toolBlock.id,
                         actions: [parsedResult],
@@ -307,7 +316,10 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, tim
                 outputTokens: finalOutputTokens,
             });
             await repo.touchChat(chatId);
-            writeSSE(res, 'message_stop', { inputTokens: finalInputTokens, outputTokens: finalOutputTokens });
+            writeSSE(res, 'message_stop', {
+                inputTokens: finalInputTokens,
+                outputTokens: finalOutputTokens,
+            });
             res.end();
         }
     } catch (err) {
@@ -379,8 +391,12 @@ function buildClaudeMessages(storedMessages) {
         const prev = merged[merged.length - 1];
         if (prev && prev.role === turn.role) {
             // Merge into previous turn
-            const prevContent = Array.isArray(prev.content) ? prev.content : [{ type: 'text', text: prev.content }];
-            const thisContent = Array.isArray(turn.content) ? turn.content : [{ type: 'text', text: turn.content }];
+            const prevContent = Array.isArray(prev.content)
+                ? prev.content
+                : [{ type: 'text', text: prev.content }];
+            const thisContent = Array.isArray(turn.content)
+                ? turn.content
+                : [{ type: 'text', text: turn.content }];
             prev.content = [...prevContent, ...thisContent];
         } else {
             merged.push({ ...turn });

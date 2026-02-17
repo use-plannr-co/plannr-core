@@ -28,8 +28,8 @@ function getCurrentTimeInt(timezone) {
             minute: '2-digit',
             hour12: false,
         }).formatToParts(new Date());
-        const h = parseInt(parts.find(p => p.type === 'hour').value, 10);
-        const m = parseInt(parts.find(p => p.type === 'minute').value, 10);
+        const h = parseInt(parts.find((p) => p.type === 'hour').value, 10);
+        const m = parseInt(parts.find((p) => p.type === 'minute').value, 10);
         return h * 100 + m;
     } catch {
         const now = new Date();
@@ -62,14 +62,21 @@ function formatBlock(block) {
 
 async function getActiveSchedule(userId) {
     console.log('[Tool Helper] getActiveSchedule query - userId:', userId);
-    const [schedule] = await db.select().from(schedules)
-        .where(and(
-            eq(schedules.ownerId, userId),
-            eq(schedules.isActive, true),
-            isNull(schedules.deletedAt)
-        ))
+    const [schedule] = await db
+        .select()
+        .from(schedules)
+        .where(
+            and(
+                eq(schedules.ownerId, userId),
+                eq(schedules.isActive, true),
+                isNull(schedules.deletedAt)
+            )
+        )
         .limit(1);
-    console.log('[Tool Helper] Query result:', schedule ? `Found schedule ID: ${schedule.id}` : 'No schedule found');
+    console.log(
+        '[Tool Helper] Query result:',
+        schedule ? `Found schedule ID: ${schedule.id}` : 'No schedule found'
+    );
     return schedule || null;
 }
 
@@ -79,12 +86,16 @@ async function getTodayData(userId, timezone) {
     if (!schedule) return null;
 
     const today = getTodayString(timezone);
-    const [day] = await db.select().from(days)
+    const [day] = await db
+        .select()
+        .from(days)
         .where(and(eq(days.scheduleId, schedule.id), eq(days.date, today)))
         .limit(1);
     if (!day) return { today, day: null, todayBlocks: [] };
 
-    const todayBlocks = await db.select().from(blocks)
+    const todayBlocks = await db
+        .select()
+        .from(blocks)
         .where(and(eq(blocks.dayId, day.id), isNull(blocks.deletedAt)))
         .orderBy(asc(blocks.startAt));
 
@@ -98,18 +109,21 @@ export async function executeGetActiveSchedule(input, userId) {
     const schedule = await getActiveSchedule(userId);
     if (!schedule) return JSON.stringify({ error: 'No active schedule found.' });
 
-    const scheduleDays = await db.select({ id: days.id }).from(days)
+    const scheduleDays = await db
+        .select({ id: days.id })
+        .from(days)
         .where(eq(days.scheduleId, schedule.id));
-    const dayIds = scheduleDays.map(d => d.id);
+    const dayIds = scheduleDays.map((d) => d.id);
 
     let totalBlocks = 0;
     let completedBlocks = 0;
     if (dayIds.length > 0) {
-        const allBlocks = await db.select({ completed: blocks.completed })
+        const allBlocks = await db
+            .select({ completed: blocks.completed })
             .from(blocks)
             .where(and(inArray(blocks.dayId, dayIds), isNull(blocks.deletedAt)));
         totalBlocks = allBlocks.length;
-        completedBlocks = allBlocks.filter(b => b.completed).length;
+        completedBlocks = allBlocks.filter((b) => b.completed).length;
     }
 
     return JSON.stringify({
@@ -122,9 +136,8 @@ export async function executeGetActiveSchedule(input, userId) {
         periodEnd: schedule.periodEnd,
         totalBlocks,
         completedBlocks,
-        completionRate: totalBlocks > 0
-            ? `${Math.round((completedBlocks / totalBlocks) * 100)}%`
-            : '0%',
+        completionRate:
+            totalBlocks > 0 ? `${Math.round((completedBlocks / totalBlocks) * 100)}%` : '0%',
     });
 }
 
@@ -137,7 +150,10 @@ export async function executeGetTodaysTasks(input, userId, timezone) {
     return JSON.stringify({
         date: today,
         blocks: todayBlocks.map(formatBlock),
-        summary: { total: todayBlocks.length, completed: todayBlocks.filter(b => b.completed).length },
+        summary: {
+            total: todayBlocks.length,
+            completed: todayBlocks.filter((b) => b.completed).length,
+        },
     });
 }
 
@@ -147,7 +163,7 @@ export async function executeGetCompletedTasks(input, userId, timezone) {
     if (!data) return JSON.stringify({ error: 'No active schedule found.' });
 
     const { today, todayBlocks } = data;
-    const completed = todayBlocks.filter(b => b.completed);
+    const completed = todayBlocks.filter((b) => b.completed);
     return JSON.stringify({
         date: today,
         blocks: completed.map(formatBlock),
@@ -161,7 +177,7 @@ export async function executeGetIncompleteTasks(input, userId, timezone) {
     if (!data) return JSON.stringify({ error: 'No active schedule found.' });
 
     const { today, todayBlocks } = data;
-    const incomplete = todayBlocks.filter(b => !b.completed);
+    const incomplete = todayBlocks.filter((b) => !b.completed);
     return JSON.stringify({
         date: today,
         blocks: incomplete.map(formatBlock),
@@ -178,7 +194,7 @@ export async function executeGetOverdueTasks(input, userId, timezone) {
     const currentTimeInt = getCurrentTimeInt(timezone);
 
     // Overdue = end time has passed AND not yet completed
-    const overdue = todayBlocks.filter(b => b.endAt < currentTimeInt && !b.completed);
+    const overdue = todayBlocks.filter((b) => b.endAt < currentTimeInt && !b.completed);
     return JSON.stringify({
         date: today,
         currentTime: formatTime(currentTimeInt),
@@ -197,25 +213,36 @@ export async function executeGetUpcomingTasks(input, userId, timezone) {
     futureDate.setDate(futureDate.getDate() + daysAhead);
     const futureDateStr = futureDate.toISOString().split('T')[0];
 
-    const upcomingDays = await db.select().from(days)
-        .where(and(
-            eq(days.scheduleId, schedule.id),
-            gte(days.date, today),
-            lte(days.date, futureDateStr)
-        ))
+    const upcomingDays = await db
+        .select()
+        .from(days)
+        .where(
+            and(
+                eq(days.scheduleId, schedule.id),
+                gte(days.date, today),
+                lte(days.date, futureDateStr)
+            )
+        )
         .orderBy(asc(days.date));
 
-    const result = await Promise.all(upcomingDays.map(async (d) => {
-        const dayBlocks = await db.select().from(blocks)
-            .where(and(eq(blocks.dayId, d.id), isNull(blocks.deletedAt)))
-            .orderBy(asc(blocks.startAt));
-        return {
-            date: d.date,
-            dayName: d.dayName,
-            blocks: dayBlocks.map(formatBlock),
-            summary: { total: dayBlocks.length, completed: dayBlocks.filter(b => b.completed).length },
-        };
-    }));
+    const result = await Promise.all(
+        upcomingDays.map(async (d) => {
+            const dayBlocks = await db
+                .select()
+                .from(blocks)
+                .where(and(eq(blocks.dayId, d.id), isNull(blocks.deletedAt)))
+                .orderBy(asc(blocks.startAt));
+            return {
+                date: d.date,
+                dayName: d.dayName,
+                blocks: dayBlocks.map(formatBlock),
+                summary: {
+                    total: dayBlocks.length,
+                    completed: dayBlocks.filter((b) => b.completed).length,
+                },
+            };
+        })
+    );
 
     return JSON.stringify({ days: result });
 }
@@ -227,7 +254,9 @@ export async function executeGetScheduleForDate(input, userId) {
     const schedule = await getActiveSchedule(userId);
     if (!schedule) return JSON.stringify({ error: 'No active schedule found.' });
 
-    const [day] = await db.select().from(days)
+    const [day] = await db
+        .select()
+        .from(days)
         .where(and(eq(days.scheduleId, schedule.id), eq(days.date, date)))
         .limit(1);
 
@@ -239,7 +268,9 @@ export async function executeGetScheduleForDate(input, userId) {
         });
     }
 
-    const dayBlocks = await db.select().from(blocks)
+    const dayBlocks = await db
+        .select()
+        .from(blocks)
         .where(and(eq(blocks.dayId, day.id), isNull(blocks.deletedAt)))
         .orderBy(asc(blocks.startAt));
 
@@ -247,7 +278,10 @@ export async function executeGetScheduleForDate(input, userId) {
         date,
         dayName: day.dayName,
         blocks: dayBlocks.map(formatBlock),
-        summary: { total: dayBlocks.length, completed: dayBlocks.filter(b => b.completed).length },
+        summary: {
+            total: dayBlocks.length,
+            completed: dayBlocks.filter((b) => b.completed).length,
+        },
     });
 }
 
@@ -258,13 +292,17 @@ export async function executeProposeMissedTaskShift(_input, userId) {
     const schedule = await getActiveSchedule(userId);
     if (!schedule) return JSON.stringify({ error: 'No active schedule found.' });
 
-    const scheduleDays = await db.select({ id: days.id, date: days.date }).from(days)
+    const scheduleDays = await db
+        .select({ id: days.id, date: days.date })
+        .from(days)
         .where(eq(days.scheduleId, schedule.id))
         .orderBy(asc(days.date));
 
     const affectedTasks = [];
     for (const day of scheduleDays) {
-        const dayBlocks = await db.select().from(blocks)
+        const dayBlocks = await db
+            .select()
+            .from(blocks)
             .where(and(eq(blocks.dayId, day.id), isNull(blocks.deletedAt)));
         for (const block of dayBlocks) {
             if (!block.completed) {
@@ -274,7 +312,11 @@ export async function executeProposeMissedTaskShift(_input, userId) {
     }
 
     if (affectedTasks.length === 0) {
-        return JSON.stringify({ type: 'missed_task_shift', count: 0, message: 'No incomplete tasks found.' });
+        return JSON.stringify({
+            type: 'missed_task_shift',
+            count: 0,
+            message: 'No incomplete tasks found.',
+        });
     }
 
     return JSON.stringify({
@@ -320,16 +362,27 @@ export async function executeProposeStrategySwitch(input, userId) {
 
 export async function executeTool(toolName, toolInput, userId, timezone = 'UTC') {
     switch (toolName) {
-        case 'get_active_schedule':          return executeGetActiveSchedule(toolInput, userId);
-        case 'get_todays_tasks':             return executeGetTodaysTasks(toolInput, userId, timezone);
-        case 'get_completed_tasks':          return executeGetCompletedTasks(toolInput, userId, timezone);
-        case 'get_incomplete_tasks':         return executeGetIncompleteTasks(toolInput, userId, timezone);
-        case 'get_overdue_tasks':            return executeGetOverdueTasks(toolInput, userId, timezone);
-        case 'get_upcoming_tasks':           return executeGetUpcomingTasks(toolInput, userId, timezone);
-        case 'get_schedule_for_date':        return executeGetScheduleForDate(toolInput, userId);
-        case 'propose_missed_task_shift':    return executeProposeMissedTaskShift(toolInput, userId);
-        case 'propose_add_task':             return executeProposedAddTask(toolInput, userId);
-        case 'propose_strategy_switch':      return executeProposeStrategySwitch(toolInput, userId);
-        default: return JSON.stringify({ error: `Unknown tool: ${toolName}` });
+        case 'get_active_schedule':
+            return executeGetActiveSchedule(toolInput, userId);
+        case 'get_todays_tasks':
+            return executeGetTodaysTasks(toolInput, userId, timezone);
+        case 'get_completed_tasks':
+            return executeGetCompletedTasks(toolInput, userId, timezone);
+        case 'get_incomplete_tasks':
+            return executeGetIncompleteTasks(toolInput, userId, timezone);
+        case 'get_overdue_tasks':
+            return executeGetOverdueTasks(toolInput, userId, timezone);
+        case 'get_upcoming_tasks':
+            return executeGetUpcomingTasks(toolInput, userId, timezone);
+        case 'get_schedule_for_date':
+            return executeGetScheduleForDate(toolInput, userId);
+        case 'propose_missed_task_shift':
+            return executeProposeMissedTaskShift(toolInput, userId);
+        case 'propose_add_task':
+            return executeProposedAddTask(toolInput, userId);
+        case 'propose_strategy_switch':
+            return executeProposeStrategySwitch(toolInput, userId);
+        default:
+            return JSON.stringify({ error: `Unknown tool: ${toolName}` });
     }
 }

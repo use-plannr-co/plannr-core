@@ -10,30 +10,30 @@ export const clerkClient = createClerkClient({
 export const verifyClerkToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
-        
+
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 success: false,
-                message: 'Missing or invalid authorization header'
+                message: 'Missing or invalid authorization header',
             });
         }
 
         const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-        
+
         // Verify the token with Clerk
         const payload = await clerkClient.verifyToken(token);
-        
+
         // Add user info to request
         req.clerkUser = payload;
         req.headers['x-clerk-user-id'] = payload.sub; // Clerk user ID is in the 'sub' claim
-        
+
         next();
     } catch (error) {
         console.error('Token verification failed:', error);
         return res.status(401).json({
             success: false,
             message: 'Invalid or expired token',
-            error: error.message
+            error: error.message,
         });
     }
 };

@@ -18,11 +18,11 @@ router.get('/health', (req, res) => {
 // App version info endpoint
 router.get('/app/version', (req, res) => {
     const platform = req.query.platform || req.headers['x-platform'] || 'ios';
-    
+
     res.status(200).json({
         minVersion: getMinVersion(platform),
         platform: platform.toLowerCase(),
-        updateUrl: getUpdateUrl(platform)
+        updateUrl: getUpdateUrl(platform),
     });
 });
 

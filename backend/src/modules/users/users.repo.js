@@ -9,14 +9,17 @@ import { eq, and } from 'drizzle-orm';
 
 export const createUser = async (userData) => {
     const { clerkUserId, email, displayName, avatarName } = userData;
-    
+
     try {
-        const [newUser] = await db.insert(users).values({
-            clerkUserId,
-            email,
-            displayName,
-            avatarName,
-        }).returning();
+        const [newUser] = await db
+            .insert(users)
+            .values({
+                clerkUserId,
+                email,
+                displayName,
+                avatarName,
+            })
+            .returning();
 
         return newUser;
     } catch (error) {
@@ -40,11 +43,7 @@ export const getUserByClerkId = async (clerkUserId) => {
 
 export const getUserById = async (userId) => {
     try {
-        const [user] = await db
-            .select()
-            .from(users)
-            .where(eq(users.id, userId))
-            .limit(1);
+        const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
 
         return user || null;
     } catch (error) {
@@ -71,9 +70,7 @@ export const updateUser = async (userId, updateData) => {
 
 export const deleteUser = async (userId) => {
     try {
-        await db
-            .delete(users)
-            .where(eq(users.id, userId));
+        await db.delete(users).where(eq(users.id, userId));
 
         return true;
     } catch (error) {
@@ -106,15 +103,18 @@ export const getUserWithPreferences = async (userId) => {
 
 export const createDefaultPreferences = async (userId) => {
     try {
-        const [newPreferences] = await db.insert(preferences).values({
-            userId,
-            uiMode: 'system',
-            notificationsEnabled: true,
-            leadMinutes: 30,
-            minGapMinutes: 15,
-            maxWorkHoursPerDay: 8,
-            weekendPolicy: 'allow',
-        }).returning();
+        const [newPreferences] = await db
+            .insert(preferences)
+            .values({
+                userId,
+                uiMode: 'system',
+                notificationsEnabled: true,
+                leadMinutes: 30,
+                minGapMinutes: 15,
+                maxWorkHoursPerDay: 8,
+                weekendPolicy: 'allow',
+            })
+            .returning();
 
         return newPreferences;
     } catch (error) {

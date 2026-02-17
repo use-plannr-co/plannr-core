@@ -25,10 +25,7 @@ const verifyWebhookAuth = (authHeader) => {
         return false;
     }
 
-    return crypto.timingSafeEqual(
-        Buffer.from(authHeader),
-        Buffer.from(expected)
-    );
+    return crypto.timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected));
 };
 
 /**
@@ -45,7 +42,7 @@ export const syncSubscription = async (req, res, next) => {
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
@@ -55,7 +52,7 @@ export const syncSubscription = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
@@ -66,14 +63,14 @@ export const syncSubscription = async (req, res, next) => {
             expiration_at,
             product_id,
             store,
-            metadata
+            metadata,
         } = req.validatedData;
 
         // Verify that the rc_app_user_id matches the authenticated user
         if (rc_app_user_id !== clerkUserId) {
             return res.status(403).json({
                 success: false,
-                message: 'App User ID mismatch'
+                message: 'App User ID mismatch',
             });
         }
 
@@ -86,7 +83,7 @@ export const syncSubscription = async (req, res, next) => {
             expirationAt: expiration_at ? new Date(expiration_at) : null,
             productId: product_id,
             store: store || 'app_store',
-            metadata: metadata || null
+            metadata: metadata || null,
         });
 
         console.log(`✅ Subscription synced for user ${clerkUserId}: isPro=${is_pro}`);
@@ -99,8 +96,8 @@ export const syncSubscription = async (req, res, next) => {
                 entitlementActive: subscription.entitlementActive,
                 expirationAt: subscription.expirationAt,
                 productId: subscription.productId,
-                lastSyncedAt: subscription.lastSyncedAt
-            }
+                lastSyncedAt: subscription.lastSyncedAt,
+            },
         });
     } catch (error) {
         console.error('❌ Sync subscription error:', error);
@@ -121,7 +118,7 @@ export const getSubscriptionStatus = async (req, res, next) => {
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
@@ -131,7 +128,7 @@ export const getSubscriptionStatus = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
@@ -147,8 +144,8 @@ export const getSubscriptionStatus = async (req, res, next) => {
                     expirationAt: null,
                     productId: null,
                     store: null,
-                    lastSyncedAt: null
-                }
+                    lastSyncedAt: null,
+                },
             });
         }
 
@@ -160,8 +157,8 @@ export const getSubscriptionStatus = async (req, res, next) => {
                 expirationAt: subscription.expirationAt,
                 productId: subscription.productId,
                 store: subscription.store,
-                lastSyncedAt: subscription.lastSyncedAt
-            }
+                lastSyncedAt: subscription.lastSyncedAt,
+            },
         });
     } catch (error) {
         console.error('❌ Get subscription status error:', error);
@@ -185,7 +182,7 @@ export const handleRevenueCatWebhook = async (req, res, next) => {
             console.error('❌ Invalid webhook authorization');
             return res.status(401).json({
                 success: false,
-                message: 'Unauthorized'
+                message: 'Unauthorized',
             });
         }
 
@@ -198,7 +195,7 @@ export const handleRevenueCatWebhook = async (req, res, next) => {
             environment,
             entitlement_ids,
             entitlement_id,
-            store
+            store,
         } = event;
 
         console.log(`📱 RevenueCat webhook received: ${type} for user ${app_user_id}`);
@@ -211,7 +208,7 @@ export const handleRevenueCatWebhook = async (req, res, next) => {
             // Return 200 to acknowledge receipt (avoid retries)
             return res.status(200).json({
                 success: true,
-                message: 'User not found, webhook acknowledged'
+                message: 'User not found, webhook acknowledged',
             });
         }
 
@@ -282,22 +279,22 @@ export const handleRevenueCatWebhook = async (req, res, next) => {
             metadata: {
                 lastWebhookEvent: type,
                 lastWebhookTime: new Date().toISOString(),
-                environment: environment || 'PRODUCTION'
-            }
+                environment: environment || 'PRODUCTION',
+            },
         });
 
         console.log(`✅ Webhook processed: user ${app_user_id} isPro=${isPro}`);
 
         res.status(200).json({
             success: true,
-            message: 'Webhook processed successfully'
+            message: 'Webhook processed successfully',
         });
     } catch (error) {
         console.error('❌ Webhook processing error:', error);
         // Return 200 to avoid retries (we've logged the error)
         res.status(200).json({
             success: false,
-            message: 'Webhook acknowledged with error'
+            message: 'Webhook acknowledged with error',
         });
     }
 };

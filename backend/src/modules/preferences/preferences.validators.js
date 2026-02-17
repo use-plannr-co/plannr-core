@@ -7,10 +7,22 @@ import { z } from 'zod';
 export const updatePreferencesSchema = z.object({
     theme: z.enum(['light', 'dark']).optional(),
     defaultStrategy: z.enum(['earliest-fit', 'balanced-work', 'deadline-oriented']).optional(),
-    defaultMinGap: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val) && val >= 0, 'Must be a valid number').optional(),
-    defaultMaxWorkingHours: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val) && val >= 1 && val <= 24, 'Must be between 1 and 24 hours').optional(),
+    defaultMinGap: z
+        .string()
+        .transform((val) => parseInt(val))
+        .refine((val) => !isNaN(val) && val >= 0, 'Must be a valid number')
+        .optional(),
+    defaultMaxWorkingHours: z
+        .string()
+        .transform((val) => parseInt(val))
+        .refine((val) => !isNaN(val) && val >= 1 && val <= 24, 'Must be between 1 and 24 hours')
+        .optional(),
     taskRemindersEnabled: z.boolean().optional(),
-    leadMinutes: z.string().transform(val => parseInt(val)).refine(val => !isNaN(val) && val >= 0, 'Must be a valid number').optional(),
+    leadMinutes: z
+        .string()
+        .transform((val) => parseInt(val))
+        .refine((val) => !isNaN(val) && val >= 0, 'Must be a valid number')
+        .optional(),
     nickname: z.string().optional(),
     weekendPolicy: z.enum(['allow', 'restrict', 'disable']).optional(),
 });
@@ -22,7 +34,9 @@ export const mapFrontendToBackend = (frontendPrefs) => {
         notificationsEnabled: frontendPrefs.taskRemindersEnabled ?? true,
         leadMinutes: frontendPrefs.leadMinutes ? parseInt(frontendPrefs.leadMinutes) : 30,
         minGapMinutes: frontendPrefs.defaultMinGap ? parseInt(frontendPrefs.defaultMinGap) : 15,
-        maxWorkHoursPerDay: frontendPrefs.defaultMaxWorkingHours ? parseInt(frontendPrefs.defaultMaxWorkingHours) : 8,
+        maxWorkHoursPerDay: frontendPrefs.defaultMaxWorkingHours
+            ? parseInt(frontendPrefs.defaultMaxWorkingHours)
+            : 8,
         weekendPolicy: frontendPrefs.weekendPolicy || 'allow',
         defaultStrategy: frontendPrefs.defaultStrategy || 'earliest-fit',
         nickname: frontendPrefs.nickname || null,

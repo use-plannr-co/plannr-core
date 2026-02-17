@@ -27,14 +27,14 @@ backend/src/
 ```javascript
 export const VERSION_POLICY = {
     minVersions: {
-        ios: "1.1.1",
-        android: "1.1.1"
+        ios: '1.1.1',
+        android: '1.1.1',
     },
     updateUrls: {
-        ios: "https://apps.apple.com/app/plannr/id123456789",
-        android: "https://play.google.com/store/apps/details?id=com.sthareja19.Plannr"
+        ios: 'https://apps.apple.com/app/plannr/id123456789',
+        android: 'https://play.google.com/store/apps/details?id=com.sthareja19.Plannr',
     },
-    exemptRoutes: ["/health", "/metrics", "/api/health", "/api/app/version"]
+    exemptRoutes: ['/health', '/metrics', '/api/health', '/api/app/version'],
 };
 ```
 
@@ -43,27 +43,30 @@ export const VERSION_POLICY = {
 ### Client Headers
 
 Clients must send these headers with requests:
+
 - `X-App-Version`: App version (e.g., "1.2.0")
 - `X-Platform`: Platform name ("ios" or "android")
 
 ### Response Codes
 
 #### 400 - Missing Version Header
+
 ```json
 {
-  "code": "APP_VERSION_MISSING",
-  "message": "App version required"
+    "code": "APP_VERSION_MISSING",
+    "message": "App version required"
 }
 ```
 
 #### 426 - Update Required
+
 ```json
 {
-  "code": "APP_UPDATE_REQUIRED",
-  "minVersion": "1.1.1",
-  "platform": "ios",
-  "updateUrl": "https://apps.apple.com/app/plannr/id123456789",
-  "message": "Please update Plannr to continue."
+    "code": "APP_UPDATE_REQUIRED",
+    "minVersion": "1.1.1",
+    "platform": "ios",
+    "updateUrl": "https://apps.apple.com/app/plannr/id123456789",
+    "message": "Please update Plannr to continue."
 }
 ```
 
@@ -75,33 +78,35 @@ Returns version information for a platform:
 
 ```json
 {
-  "minVersion": "1.1.1",
-  "platform": "ios", 
-  "updateUrl": "https://apps.apple.com/app/plannr/id123456789"
+    "minVersion": "1.1.1",
+    "platform": "ios",
+    "updateUrl": "https://apps.apple.com/app/plannr/id123456789"
 }
 ```
 
 Query parameter:
+
 - `platform` (optional): Platform to get version info for
 
 ## Version Comparison Examples
 
 The system uses robust semantic version comparison:
 
-| Current Version | Min Version | Result | Reason |
-|----------------|-------------|---------|---------|
-| 1.1.0 | 1.1.1 | ❌ Update Required | Patch version behind |
-| 1.1.1 | 1.1.1 | ✅ Valid | Exact match |
-| 1.2.0 | 1.1.1 | ✅ Valid | Minor version ahead |
-| 2.0.0 | 1.1.1 | ✅ Valid | Major version ahead |
-| 1.0.9 | 1.1.1 | ❌ Update Required | Minor version behind |
-| 1.1 | 1.1.1 | ❌ Update Required | 1.1.0 < 1.1.1 |
+| Current Version | Min Version | Result             | Reason               |
+| --------------- | ----------- | ------------------ | -------------------- |
+| 1.1.0           | 1.1.1       | ❌ Update Required | Patch version behind |
+| 1.1.1           | 1.1.1       | ✅ Valid           | Exact match          |
+| 1.2.0           | 1.1.1       | ✅ Valid           | Minor version ahead  |
+| 2.0.0           | 1.1.1       | ✅ Valid           | Major version ahead  |
+| 1.0.9           | 1.1.1       | ❌ Update Required | Minor version behind |
+| 1.1             | 1.1.1       | ❌ Update Required | 1.1.0 < 1.1.1        |
 
 ## Exempt Routes
 
 The following routes skip version enforcement:
+
 - `/health` - Health check endpoint
-- `/metrics` - Metrics endpoint  
+- `/metrics` - Metrics endpoint
 - `/api/health` - API health check
 - `/api/app/version` - Version info endpoint
 
@@ -155,7 +160,7 @@ The React Native app should send headers with every API request:
 ```javascript
 // In your API client
 const headers = {
-  'X-App-Version': '1.2.0',  // From app.json or Constants.expoConfig.version
-  'X-Platform': Platform.OS   // 'ios' or 'android'
+    'X-App-Version': '1.2.0', // From app.json or Constants.expoConfig.version
+    'X-Platform': Platform.OS, // 'ios' or 'android'
 };
 ```

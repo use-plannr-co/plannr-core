@@ -1,45 +1,45 @@
 {
-  "name": "plannr-backend",
-  "version": "1.0.0",
-  "main": "src/server.js",
-  "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
-    "build": "echo 'No build step required for Node.js backend'",
-    "db:generate": "npx drizzle-kit generate",
-    "db:push": "npx drizzle-kit push",
-    "db:migrate": "npx drizzle-kit migrate",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
-  },
-  "keywords": [],
-  "type": "module",
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.74.0",
-    "@clerk/backend": "^2.29.0",
-    "@google/generative-ai": "^0.21.0",
-    "@neondatabase/serverless": "^1.0.0",
-    "axios": "^1.13.2",
-    "cors": "^2.8.5",
-    "cron": "^4.3.0",
-    "crypto": "^1.0.1",
-    "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.44.2",
-    "express": "^5.1.0",
-    "express-rate-limit": "^8.2.1",
-    "express-validator": "^7.3.1",
-    "multer": "^2.0.2",
-    "node-fetch": "^3.3.2",
-    "uuid": "^13.0.0",
-    "zod": "^4.1.11"
-  },
-  "devDependencies": {
-    "drizzle-kit": "^0.31.1",
-    "nodemon": "^3.1.10",
-    "prettier": "^3.8.1",
-    "supertest": "^7.2.2"
-  }
+    "name": "plannr-backend",
+    "version": "1.0.0",
+    "main": "src/server.js",
+    "scripts": {
+        "dev": "nodemon src/server.js",
+        "start": "node src/server.js",
+        "build": "echo 'No build step required for Node.js backend'",
+        "db:generate": "npx drizzle-kit generate",
+        "db:push": "npx drizzle-kit push",
+        "db:migrate": "npx drizzle-kit migrate",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "keywords": [],
+    "type": "module",
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "@anthropic-ai/sdk": "^0.74.0",
+        "@clerk/backend": "^2.29.0",
+        "@google/generative-ai": "^0.21.0",
+        "@neondatabase/serverless": "^1.0.0",
+        "axios": "^1.13.2",
+        "cors": "^2.8.5",
+        "cron": "^4.3.0",
+        "crypto": "^1.0.1",
+        "dotenv": "^16.5.0",
+        "drizzle-orm": "^0.44.2",
+        "express": "^5.1.0",
+        "express-rate-limit": "^8.2.1",
+        "express-validator": "^7.3.1",
+        "multer": "^2.0.2",
+        "node-fetch": "^3.3.2",
+        "uuid": "^13.0.0",
+        "zod": "^4.1.11"
+    },
+    "devDependencies": {
+        "drizzle-kit": "^0.31.1",
+        "nodemon": "^3.1.10",
+        "prettier": "^3.8.1",
+        "supertest": "^7.2.2"
+    }
 }

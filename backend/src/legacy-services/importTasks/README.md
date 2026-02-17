@@ -15,11 +15,13 @@ This module provides comprehensive integration with Microsoft To-Do and Calendar
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/import/auth/microsoft/initiate` - Start OAuth flow
 - `GET /api/import/auth/microsoft/callback` - Handle OAuth callback
 - `DELETE /api/import/auth/microsoft/disconnect` - Disconnect account
 
 ### Import Management
+
 - `GET /api/import/connections` - Get connected providers
 - `POST /api/import/start` - Start new import session
 - `POST /api/import/sessions/:id/execute` - Execute import
@@ -57,9 +59,9 @@ console.log('ENCRYPTION_KEY=' + EncryptionService.generateKey());
 3. Add redirect URI: `http://localhost:3000/api/import/auth/microsoft/callback`
 4. Go to "API permissions" > Add permission > Microsoft Graph > Delegated permissions
 5. Add these permissions:
-   - `Tasks.Read` - Read user's tasks
-   - `Calendars.Read` - Read user's calendars
-   - `offline_access` - Maintain access to data
+    - `Tasks.Read` - Read user's tasks
+    - `Calendars.Read` - Read user's calendars
+    - `offline_access` - Maintain access to data
 6. Grant admin consent if required
 7. Go to "Certificates & secrets" > New client secret (optional for confidential clients)
 8. Copy the Application (client) ID and client secret
@@ -85,41 +87,41 @@ npm run db:push
 ```javascript
 // Start import session
 const sessionResponse = await fetch('/api/import/start', {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer ' + userToken },
-  body: JSON.stringify({
-    provider: 'microsoft',
-    options: {
-      includeCompletedTasks: false,
-      dueDateFilter: {
-        after: '2024-01-01',
-        before: '2024-12-31'
-      }
-    }
-  })
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + userToken },
+    body: JSON.stringify({
+        provider: 'microsoft',
+        options: {
+            includeCompletedTasks: false,
+            dueDateFilter: {
+                after: '2024-01-01',
+                before: '2024-12-31',
+            },
+        },
+    }),
 });
 
 const { session } = await sessionResponse.json();
 
 // Execute import
 const importResponse = await fetch(`/api/import/sessions/${session.id}/execute`, {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer ' + userToken }
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + userToken },
 });
 
 // Generate schedule
 const scheduleResponse = await fetch(`/api/import/sessions/${session.id}/generate-schedule`, {
-  method: 'POST',
-  headers: { 'Authorization': 'Bearer ' + userToken },
-  body: JSON.stringify({
-    scheduleOptions: {
-      startDate: '2024-01-15',
-      endDate: '2024-01-31',
-      strategy: 'balanced',
-      workingHours: { start: 9, end: 17 },
-      workingDays: [1, 2, 3, 4, 5] // Mon-Fri
-    }
-  })
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + userToken },
+    body: JSON.stringify({
+        scheduleOptions: {
+            startDate: '2024-01-15',
+            endDate: '2024-01-31',
+            strategy: 'balanced',
+            workingHours: { start: 9, end: 17 },
+            workingDays: [1, 2, 3, 4, 5], // Mon-Fri
+        },
+    }),
 });
 ```
 
@@ -147,18 +149,18 @@ The module is designed to work with the existing scheduling system:
 ```javascript
 // In scheduleService.js
 export async function generateScheduleFromImport(userId, tasks, calendarEvents, options) {
-  // Convert imported tasks to existing task format
-  const formattedTasks = tasks.map(task => ({
-    title: task.title,
-    duration: task.estimatedDuration,
-    priority: task.priority,
-    dueDate: task.dueDate,
-    // ... other properties
-  }));
+    // Convert imported tasks to existing task format
+    const formattedTasks = tasks.map((task) => ({
+        title: task.title,
+        duration: task.estimatedDuration,
+        priority: task.priority,
+        dueDate: task.dueDate,
+        // ... other properties
+    }));
 
-  // Use existing scheduling strategies
-  const strategy = getStrategy(options.strategy);
-  return strategy.schedule(formattedTasks, calendarEvents, options);
+    // Use existing scheduling strategies
+    const strategy = getStrategy(options.strategy);
+    return strategy.schedule(formattedTasks, calendarEvents, options);
 }
 ```
 
@@ -172,6 +174,7 @@ npm test -- src/modules/importTasks/tests/
 ```
 
 Tests cover:
+
 - Encryption service functionality
 - Data mapping and transformation
 - API endpoint validation

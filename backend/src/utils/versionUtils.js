@@ -1,6 +1,6 @@
 /**
  * Semantic Version Utilities
- * 
+ *
  * Provides robust semantic version comparison for MAJOR.MINOR.PATCH format.
  * Handles missing parts by treating them as 0.
  */
@@ -17,9 +17,9 @@ export const parseVersion = (version) => {
 
     // Remove any leading 'v' prefix
     const cleanVersion = version.replace(/^v/i, '');
-    
+
     // Split by dots and convert to numbers, defaulting missing parts to 0
-    const parts = cleanVersion.split('.').map(part => {
+    const parts = cleanVersion.split('.').map((part) => {
         const num = parseInt(part, 10);
         return isNaN(num) ? 0 : num;
     });
@@ -27,7 +27,7 @@ export const parseVersion = (version) => {
     return {
         major: parts[0] || 0,
         minor: parts[1] || 0,
-        patch: parts[2] || 0
+        patch: parts[2] || 0,
     };
 };
 
@@ -72,14 +72,14 @@ export const isVersionValid = (currentVersion, minVersion) => {
 
 /**
  * Unit test examples (inline comments showing expected behavior):
- * 
+ *
  * compareVersions("1.1.0", "1.1.1") => -1 (1.1.0 < 1.1.1)
  * compareVersions("1.1.1", "1.1.1") => 0 (equal)
  * compareVersions("1.2.0", "1.1.1") => 1 (1.2.0 > 1.1.1)
  * compareVersions("2.0.0", "1.9.9") => 1 (2.0.0 > 1.9.9)
  * compareVersions("1.1", "1.1.0") => 0 (1.1.0 == 1.1.0, missing patch treated as 0)
  * compareVersions("1", "1.0.0") => 0 (1.0.0 == 1.0.0, missing parts treated as 0)
- * 
+ *
  * isVersionValid("1.1.0", "1.1.1") => false (update required)
  * isVersionValid("1.1.1", "1.1.1") => true (meets minimum)
  * isVersionValid("1.2.0", "1.1.1") => true (exceeds minimum)

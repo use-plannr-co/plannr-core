@@ -9,24 +9,21 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/chats', ctrl.listChats);
-router.post('/chats',
-    validate(validators.createChatSchema),
-    ctrl.createChat
-);
-router.get('/chats/:chatId',
-    validate(validators.chatIdParamSchema, 'params'),
-    ctrl.getChat
-);
-router.delete('/chats/:chatId',
+router.post('/chats', validate(validators.createChatSchema), ctrl.createChat);
+router.get('/chats/:chatId', validate(validators.chatIdParamSchema, 'params'), ctrl.getChat);
+router.delete(
+    '/chats/:chatId',
     validate(validators.chatIdParamSchema, 'params'),
     ctrl.deleteChatById
 );
-router.post('/chats/:chatId/messages',
+router.post(
+    '/chats/:chatId/messages',
     validate(validators.chatIdParamSchema, 'params'),
     validate(validators.sendMessageSchema),
     ctrl.sendMessage
 );
-router.post('/chats/:chatId/action-result',
+router.post(
+    '/chats/:chatId/action-result',
     validate(validators.chatIdParamSchema, 'params'),
     validate(validators.actionResultSchema),
     ctrl.submitActionResult
