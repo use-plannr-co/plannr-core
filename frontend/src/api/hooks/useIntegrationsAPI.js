@@ -6,7 +6,20 @@ export const useIntegrationsAPI = () => {
     return {
         checkGoogleCalendarStatus: () =>
             integrationsApi.checkGoogleCalendarStatus(makeAuthenticatedRequest),
-        exportScheduleToGoogleCalendar: (schedule, userTimezone, accessToken, scheduleName, userName) =>
-            integrationsApi.exportScheduleToGoogleCalendar(makeAuthenticatedRequest, schedule, userTimezone, accessToken, scheduleName, userName),
+        exportScheduleToGoogleCalendar: (
+            schedule,
+            userTimezone,
+            accessToken,
+            scheduleName,
+            userName,
+        ) =>
+            integrationsApi.exportScheduleToGoogleCalendar(
+                makeAuthenticatedRequest,
+                schedule,
+                userTimezone,
+                accessToken,
+                scheduleName,
+                userName,
+            ),
     };
 };

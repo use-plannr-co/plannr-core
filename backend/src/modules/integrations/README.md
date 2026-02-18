@@ -19,39 +19,42 @@ Exports events to the user's Google Calendar.
 **Authentication**: Requires Clerk session token in Authorization header
 
 **Request Body**:
+
 ```json
 {
-  "events": [
-    {
-      "uid": "unique-event-id",
-      "title": "Event Title",
-      "description": "Optional description",
-      "start": "2024-01-15T10:00:00.000Z",
-      "end": "2024-01-15T11:00:00.000Z",
-      "timeZone": "America/Vancouver"
-    }
-  ]
+    "events": [
+        {
+            "uid": "unique-event-id",
+            "title": "Event Title",
+            "description": "Optional description",
+            "start": "2024-01-15T10:00:00.000Z",
+            "end": "2024-01-15T11:00:00.000Z",
+            "timeZone": "America/Vancouver"
+        }
+    ]
 }
 ```
 
 **Response**:
+
 ```json
 {
-  "success": true,
-  "data": {
-    "inserted": 1,
-    "calendarId": "google-calendar-id",
-    "googleEventIds": [
-      {
-        "uid": "unique-event-id",
-        "eventId": "google-event-id"
-      }
-    ]
-  }
+    "success": true,
+    "data": {
+        "inserted": 1,
+        "calendarId": "google-calendar-id",
+        "googleEventIds": [
+            {
+                "uid": "unique-event-id",
+                "eventId": "google-event-id"
+            }
+        ]
+    }
 }
 ```
 
 **Error Responses**:
+
 - `409 GOOGLE_CALENDAR_NOT_CONNECTED`: User hasn't connected Google Calendar or missing required permissions
 - `409 GOOGLE_CALENDAR_REAUTH_REQUIRED`: Google access token expired or revoked
 - `400`: Validation error
@@ -64,23 +67,26 @@ Checks if the user has connected Google Calendar with the required permissions.
 **Authentication**: Requires Clerk session token in Authorization header
 
 **Response**:
+
 ```json
 {
-  "success": true,
-  "data": {
-    "connected": true
-  }
+    "success": true,
+    "data": {
+        "connected": true
+    }
 }
 ```
 
 ## Required Google OAuth Scope
 
 The integration requires the following OAuth scope:
+
 - `https://www.googleapis.com/auth/calendar.app.created` - Allows creating secondary calendars and managing events on those calendars
 
 ## Calendar Management
 
 The integration automatically:
+
 1. Checks if a "Plannr" calendar exists in the user's Google Calendar
 2. Creates one if it doesn't exist
 3. Caches the calendar ID to avoid repeated API calls
@@ -89,6 +95,7 @@ The integration automatically:
 ## Event Properties
 
 Each exported event includes:
+
 - **Summary**: Event title
 - **Description**: Event description
 - **Start/End Times**: With timezone support

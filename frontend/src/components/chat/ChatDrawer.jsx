@@ -1,12 +1,19 @@
 import React, { useRef, useEffect } from 'react';
 import {
-    View, Text, FlatList, TouchableOpacity, Animated,
-    Dimensions, StyleSheet, PanResponder,
+    View,
+    Text,
+    FlatList,
+    TouchableOpacity,
+    Animated,
+    Dimensions,
+    StyleSheet,
+    PanResponder,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Line, Path } from 'react-native-svg';
 import { lightColor, darkColor } from '../../design/colors.js';
 import { useAppState } from '../../context/AppStateContext.js';
+import ChatIcon from '../../../assets/system-icons/ChatIcon.svg';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DRAWER_WIDTH = Math.round(SCREEN_WIDTH * 0.78);
@@ -14,8 +21,24 @@ const DRAWER_WIDTH = Math.round(SCREEN_WIDTH * 0.78);
 function CloseIcon({ color }) {
     return (
         <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
-            <Line x1="18" y1="6" x2="6" y2="18" stroke={color} strokeWidth={2} strokeLinecap="round" />
-            <Line x1="6" y1="6" x2="18" y2="18" stroke={color} strokeWidth={2} strokeLinecap="round" />
+            <Line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+            />
+            <Line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+            />
         </Svg>
     );
 }
@@ -30,7 +53,15 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-export default function ChatDrawer({ isOpen, onClose, chats, activeChat, onSelectChat, onNewChat, onDeleteChat }) {
+export default function ChatDrawer({
+    isOpen,
+    onClose,
+    chats,
+    activeChat,
+    onSelectChat,
+    onNewChat,
+    onDeleteChat,
+}) {
     const insets = useSafeAreaInsets();
     const { appState } = useAppState();
     const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
@@ -47,21 +78,25 @@ export default function ChatDrawer({ isOpen, onClose, chats, activeChat, onSelec
         }).start();
     }, [isOpen, translateX]);
 
-    const panResponder = useRef(PanResponder.create({
-        onMoveShouldSetPanResponder: (_, gs) => gs.dx < -10 && Math.abs(gs.dy) < 30,
-        onPanResponderMove: (_, gs) => {
-            if (gs.dx < 0) translateX.setValue(Math.max(-DRAWER_WIDTH, gs.dx));
-        },
-        onPanResponderRelease: (_, gs) => {
-            if (gs.dx < -DRAWER_WIDTH * 0.35) {
-                onClose();
-            } else {
-                Animated.spring(translateX, {
-                    toValue: 0, useNativeDriver: true, bounciness: 0,
-                }).start();
-            }
-        },
-    })).current;
+    const panResponder = useRef(
+        PanResponder.create({
+            onMoveShouldSetPanResponder: (_, gs) => gs.dx < -10 && Math.abs(gs.dy) < 30,
+            onPanResponderMove: (_, gs) => {
+                if (gs.dx < 0) translateX.setValue(Math.max(-DRAWER_WIDTH, gs.dx));
+            },
+            onPanResponderRelease: (_, gs) => {
+                if (gs.dx < -DRAWER_WIDTH * 0.35) {
+                    onClose();
+                } else {
+                    Animated.spring(translateX, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                        bounciness: 0,
+                    }).start();
+                }
+            },
+        }),
+    ).current;
 
     if (!isOpen && translateX.__getValue() === -DRAWER_WIDTH) return null;
 
@@ -90,8 +125,21 @@ export default function ChatDrawer({ isOpen, onClose, chats, activeChat, onSelec
             >
                 {/* Drawer header */}
                 <View style={styles.drawerHeader}>
-                    <Text style={[styles.drawerTitle, { color: theme.FOREGROUND }]}>Plannr AI</Text>
-                    <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Text style={[styles.drawerTitle, { color: theme.FOREGROUND }]}>
+                            Planova
+                        </Text>
+                        <ChatIcon
+                            width={24}
+                            height={24}
+                            color={theme.FOREGROUND}
+                            style={{ marginBottom: 2 }}
+                        />
+                    </View>
+                    <TouchableOpacity
+                        onPress={onClose}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
                         <CloseIcon color={theme.FOREGROUND} />
                     </TouchableOpacity>
                 </View>
@@ -101,13 +149,15 @@ export default function ChatDrawer({ isOpen, onClose, chats, activeChat, onSelec
                     style={[styles.newChatBtn, { backgroundColor: theme.BUTTON }]}
                     onPress={onNewChat}
                 >
-                    <Text style={[styles.newChatText, { color: theme.SELECTED_TEXT }]}>+ New Chat</Text>
+                    <Text style={[styles.newChatText, { color: theme.SELECTED_TEXT }]}>
+                        + New Chat
+                    </Text>
                 </TouchableOpacity>
 
                 {/* Chat list */}
                 <FlatList
                     data={chats}
-                    keyExtractor={item => item.id}
+                    keyExtractor={(item) => item.id}
                     style={styles.list}
                     contentContainerStyle={{ paddingBottom: 8 }}
                     renderItem={({ item }) => {
@@ -128,7 +178,12 @@ export default function ChatDrawer({ isOpen, onClose, chats, activeChat, onSelec
                                     >
                                         {item.title || 'New chat'}
                                     </Text>
-                                    <Text style={[styles.chatDate, { color: isDark ? '#666' : '#999' }]}>
+                                    <Text
+                                        style={[
+                                            styles.chatDate,
+                                            { color: isDark ? '#666' : '#999' },
+                                        ]}
+                                    >
                                         {formatDate(item.updatedAt)}
                                     </Text>
                                 </View>
@@ -167,22 +222,22 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 16,
-        marginBottom: 12,
+        marginBottom: 16,
     },
     drawerTitle: {
-        fontSize: 18,
-        fontWeight: '700',
+        fontSize: 32,
+        fontFamily: 'Pink Sunset',
     },
     newChatBtn: {
         marginHorizontal: 16,
         borderRadius: 10,
         paddingVertical: 10,
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 24,
     },
     newChatText: {
         fontSize: 15,
-        fontWeight: '600',
+        fontFamily: 'Albert Sans',
     },
     list: {
         flex: 1,
@@ -203,7 +258,7 @@ const styles = StyleSheet.create({
     chatTitle: {
         flex: 1,
         fontSize: 14,
-        fontWeight: '500',
+        fontFamily: 'Albert Sans',
     },
     chatDate: {
         fontSize: 12,
@@ -213,5 +268,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 32,
         fontSize: 14,
+        fontFamily: 'Albert Sans',
     },
 });

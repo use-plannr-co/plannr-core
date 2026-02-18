@@ -5,15 +5,21 @@ export const useChatAPI = () => {
     const { makeAuthenticatedRequest, makeStreamingRequest } = useApiCore();
 
     return {
-        getChats: () =>
-            chatApi.getChats(makeAuthenticatedRequest),
-        createChat: (title) =>
-            chatApi.createChat(makeAuthenticatedRequest, title),
-        getChat: (chatId) =>
-            chatApi.getChat(makeAuthenticatedRequest, chatId),
-        deleteChat: (chatId) =>
-            chatApi.deleteChat(makeAuthenticatedRequest, chatId),
+        getChats: () => chatApi.getChats(makeAuthenticatedRequest),
+        createChat: (title) => chatApi.createChat(makeAuthenticatedRequest, title),
+        getChat: (chatId) => chatApi.getChat(makeAuthenticatedRequest, chatId),
+        deleteChat: (chatId) => chatApi.deleteChat(makeAuthenticatedRequest, chatId),
         sendMessage: (chatId, message, onEvent, onDone, onError) =>
             chatApi.sendMessage(makeStreamingRequest, chatId, message, onEvent, onDone, onError),
+        submitActionResult: (chatId, actionType, summary, onEvent, onDone, onError) =>
+            chatApi.submitActionResult(
+                makeStreamingRequest,
+                chatId,
+                actionType,
+                summary,
+                onEvent,
+                onDone,
+                onError,
+            ),
     };
 };

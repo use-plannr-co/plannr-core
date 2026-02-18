@@ -1,12 +1,12 @@
 import express from 'express';
 import * as ctrl from './users.controllers.js';
-import { 
-    validateCreateUser, 
-    validateUpdateUserProfile, 
+import {
+    validateCreateUser,
+    validateUpdateUserProfile,
     validateClerkWebhook,
     validateUpdateAvatar,
     validateUpdateUserEmail,
-    validateUpdateIntegrations
+    validateUpdateIntegrations,
 } from './users.validators.js';
 
 const router = express.Router();
@@ -60,10 +60,10 @@ router.put('/integrations', validateUpdateIntegrations, ctrl.updateUserIntegrati
 
 // GET /users/webhooks/test - Test webhook endpoint (for debugging)
 router.get('/webhooks/test', (req, res) => {
-    res.status(200).json({ 
-        success: true, 
+    res.status(200).json({
+        success: true,
         message: 'Webhook endpoint is reachable',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
     });
 });
 

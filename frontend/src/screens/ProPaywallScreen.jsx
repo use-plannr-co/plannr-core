@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, ActivityIndicator, Alert, Linking, Platform, Animated } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    Image,
+    TouchableOpacity,
+    Dimensions,
+    ActivityIndicator,
+    Alert,
+    Linking,
+    Platform,
+    Animated,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 
@@ -18,7 +30,7 @@ const SCREEN_PADDING = padding.SCREEN_PADDING;
 
 /**
  * ProPaywallScreen
- * 
+ *
  * Beautiful subscription paywall for Plannr Pro
  * Features:
  * - Monthly and Annual subscription options
@@ -30,13 +42,13 @@ const SCREEN_PADDING = padding.SCREEN_PADDING;
  */
 const ProPaywallScreen = ({ navigation, route }) => {
     const { appState } = useAppState();
-    const { 
-        isPro, 
-        isLoading, 
-        fetchOfferings, 
-        purchasePackage, 
+    const {
+        isPro,
+        isLoading,
+        fetchOfferings,
+        purchasePackage,
         restorePurchases,
-        getManagementURL 
+        getManagementURL,
     } = useSubscription();
     const { logAction, logScreenView } = useActionLogger('ProPaywall');
 
@@ -74,11 +86,9 @@ const ProPaywallScreen = ({ navigation, route }) => {
     // Redirect if already Pro
     useEffect(() => {
         if (isPro && !isLoading) {
-            Alert.alert(
-                'Already Pro! 🎉',
-                'You already have access to Plannr Pro features.',
-                [{ text: 'OK', onPress: () => navigation.goBack() }]
-            );
+            Alert.alert('Already Pro! 🎉', 'You already have access to Plannr Pro features.', [
+                { text: 'OK', onPress: () => navigation.goBack() },
+            ]);
         }
     }, [isPro, isLoading]);
 
@@ -94,25 +104,26 @@ const ProPaywallScreen = ({ navigation, route }) => {
         try {
             setLoadingOfferings(true);
             const fetchedOfferings = await fetchOfferings();
-            
+
             // Look for "Plannr Pro Default" offering
-            const defaultOffering = fetchedOfferings?.all?.['Plannr Pro Default'] || fetchedOfferings?.current;
-            
+            const defaultOffering =
+                fetchedOfferings?.all?.['Plannr Pro Default'] || fetchedOfferings?.current;
+
             if (!defaultOffering) {
                 throw new Error('No offerings found. Please check your RevenueCat configuration.');
             }
 
             setOfferings(defaultOffering);
-            logAction('offerings_loaded', { 
+            logAction('offerings_loaded', {
                 offeringId: defaultOffering.identifier,
-                packageCount: defaultOffering.availablePackages?.length 
+                packageCount: defaultOffering.availablePackages?.length,
             });
         } catch (error) {
             console.error('Failed to load offerings:', error);
             Alert.alert(
                 'Unable to Load Plans',
-                'We couldn\'t load subscription plans. Please try again later.',
-                [{ text: 'Go Back', onPress: () => navigation.goBack() }]
+                "We couldn't load subscription plans. Please try again later.",
+                [{ text: 'Go Back', onPress: () => navigation.goBack() }],
             );
             logAction('offerings_error', { error: error.message });
         } finally {
@@ -124,8 +135,8 @@ const ProPaywallScreen = ({ navigation, route }) => {
      * Get package by identifier
      */
     const getPackage = (identifier) => {
-        return offerings?.availablePackages?.find(pkg => 
-            pkg.identifier === identifier || pkg.packageType === identifier
+        return offerings?.availablePackages?.find(
+            (pkg) => pkg.identifier === identifier || pkg.packageType === identifier,
         );
     };
 
@@ -134,11 +145,9 @@ const ProPaywallScreen = ({ navigation, route }) => {
      */
     const handlePurchase = async () => {
         if (Platform.OS !== 'ios') {
-            Alert.alert(
-                'iOS Only',
-                'Subscriptions are currently only available on iOS.',
-                [{ text: 'OK' }]
-            );
+            Alert.alert('iOS Only', 'Subscriptions are currently only available on iOS.', [
+                { text: 'OK' },
+            ]);
             return;
         }
 
@@ -149,7 +158,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
             Alert.alert(
                 'Plan Not Available',
                 `The ${selectedPlan} plan is not available right now. Please try again later.`,
-                [{ text: 'OK' }]
+                [{ text: 'OK' }],
             );
             return;
         }
@@ -169,7 +178,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
             Alert.alert(
                 'Welcome to Plannr Pro! 🎉',
                 'Your subscription is now active. Enjoy all Pro features!',
-                [{ text: 'Get Started', onPress: () => navigation.goBack() }]
+                [{ text: 'Get Started', onPress: () => navigation.goBack() }],
             );
         } catch (error) {
             setPurchasing(false);
@@ -187,7 +196,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
             Alert.alert(
                 'Purchase Failed',
                 error.message || 'Unable to complete purchase. Please try again.',
-                [{ text: 'OK' }]
+                [{ text: 'OK' }],
             );
         }
     };
@@ -211,19 +220,17 @@ const ProPaywallScreen = ({ navigation, route }) => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             logAction('restore_success');
 
-            Alert.alert(
-                'Purchases Restored',
-                'Your purchases have been restored successfully.',
-                [{ text: 'OK' }]
-            );
+            Alert.alert('Purchases Restored', 'Your purchases have been restored successfully.', [
+                { text: 'OK' },
+            ]);
         } catch (error) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
             logAction('restore_error', { error: error.message });
 
             Alert.alert(
                 'Restore Failed',
-                'Unable to restore purchases. Please make sure you\'re signed in with the same Apple ID.',
-                [{ text: 'OK' }]
+                "Unable to restore purchases. Please make sure you're signed in with the same Apple ID.",
+                [{ text: 'OK' }],
             );
         } finally {
             setRestoring(false);
@@ -237,7 +244,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
         try {
             const managementURL = await getManagementURL();
             const url = managementURL || 'https://apps.apple.com/account/subscriptions';
-            
+
             Linking.openURL(url);
             logAction('manage_subscription_opened');
         } catch (error) {
@@ -283,9 +290,19 @@ const ProPaywallScreen = ({ navigation, route }) => {
                         end={{ x: 1, y: 1 }}
                         style={styles.badgeGradient}
                     >
-                        <View style={{ backgroundColor: theme.BACKGROUND, borderRadius: 20, flexDirection: 'row', paddingHorizontal: spacing.SPACING_4, paddingVertical: spacing.SPACING_2 }}>
+                        <View
+                            style={{
+                                backgroundColor: theme.BACKGROUND,
+                                borderRadius: 20,
+                                flexDirection: 'row',
+                                paddingHorizontal: spacing.SPACING_4,
+                                paddingVertical: spacing.SPACING_2,
+                            }}
+                        >
                             <LightningIcon width={16} height={16} color={theme.FOREGROUND} />
-                            <Text style={{ ...styles.badgeText, color: theme.FOREGROUND }}>Try Plannr Pro</Text>
+                            <Text style={{ ...styles.badgeText, color: theme.FOREGROUND }}>
+                                Try Plannr Pro
+                            </Text>
                         </View>
                     </LinearGradient>
                 </View>
@@ -302,19 +319,30 @@ const ProPaywallScreen = ({ navigation, route }) => {
                         style={[
                             styles.animatedSelector,
                             {
-                                transform: [{
-                                    translateX: selectorPosition.interpolate({
-                                        inputRange: [0, 1],
-                                        outputRange: [0, (width - SCREEN_PADDING * 2 - padding.PADDING_1 * 2 - spacing.SPACING_2) / 2 + spacing.SPACING_2 * 0.5]
-                                    })
-                                }]
-                            }
+                                transform: [
+                                    {
+                                        translateX: selectorPosition.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [
+                                                0,
+                                                (width -
+                                                    SCREEN_PADDING * 2 -
+                                                    padding.PADDING_1 * 2 -
+                                                    spacing.SPACING_2) /
+                                                    2 +
+                                                    spacing.SPACING_2 * 0.5,
+                                            ],
+                                        }),
+                                    },
+                                ],
+                            },
                         ]}
                     >
                         <LinearGradient
-                            colors={selectedPlan === 'annual' 
-                                ? [theme.GRADIENT_START, theme.GRADIENT_END]
-                                : [theme.GRADIENT_START, theme.GRADIENT_START]
+                            colors={
+                                selectedPlan === 'annual'
+                                    ? [theme.GRADIENT_START, theme.GRADIENT_END]
+                                    : [theme.GRADIENT_START, theme.GRADIENT_START]
                             }
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
@@ -334,17 +362,31 @@ const ProPaywallScreen = ({ navigation, route }) => {
                         style={styles.planButton}
                     >
                         <View style={styles.planButtonContent}>
-                            <Text style={[
-                                styles.planTitle,
-                                { color: selectedPlan === 'annual' ? '#FFFFFF' : theme.FOREGROUND }
-                            ]}>
+                            <Text
+                                style={[
+                                    styles.planTitle,
+                                    {
+                                        color:
+                                            selectedPlan === 'annual'
+                                                ? '#FFFFFF'
+                                                : theme.FOREGROUND,
+                                    },
+                                ]}
+                            >
                                 Annual (33% OFF)
                             </Text>
-                            <Text/>
-                            <Text style={[
-                                styles.planPrice,
-                                { color: selectedPlan === 'annual' ? '#FFFFFF' : theme.FOREGROUND }
-                            ]}>
+                            <Text />
+                            <Text
+                                style={[
+                                    styles.planPrice,
+                                    {
+                                        color:
+                                            selectedPlan === 'annual'
+                                                ? '#FFFFFF'
+                                                : theme.FOREGROUND,
+                                    },
+                                ]}
+                            >
                                 {annualPrice}/mo
                             </Text>
                         </View>
@@ -362,17 +404,31 @@ const ProPaywallScreen = ({ navigation, route }) => {
                         style={styles.planButton}
                     >
                         <View style={styles.planButtonContent}>
-                            <Text style={[
-                                styles.planTitle,
-                                { color: selectedPlan === 'monthly' ? '#FFFFFF' : theme.FOREGROUND }
-                            ]}>
+                            <Text
+                                style={[
+                                    styles.planTitle,
+                                    {
+                                        color:
+                                            selectedPlan === 'monthly'
+                                                ? '#FFFFFF'
+                                                : theme.FOREGROUND,
+                                    },
+                                ]}
+                            >
                                 Monthly
                             </Text>
-                            <Text/>
-                            <Text style={[
-                                styles.planPrice,
-                                { color: selectedPlan === 'monthly' ? '#FFFFFF' : theme.FOREGROUND }
-                            ]}>
+                            <Text />
+                            <Text
+                                style={[
+                                    styles.planPrice,
+                                    {
+                                        color:
+                                            selectedPlan === 'monthly'
+                                                ? '#FFFFFF'
+                                                : theme.FOREGROUND,
+                                    },
+                                ]}
+                            >
                                 {monthlyPrice}/mo
                             </Text>
                         </View>
@@ -381,19 +437,16 @@ const ProPaywallScreen = ({ navigation, route }) => {
 
                 {/* Features List */}
                 <View style={styles.featuresList}>
-                    <FeatureItem 
-                        text="Unlimited smart scheduling & rescheduling"
-                        colors={theme}
-                    />
-                    <FeatureItem 
+                    <FeatureItem text="Unlimited smart scheduling & rescheduling" colors={theme} />
+                    <FeatureItem
                         text="AI that understands natural languagerequests"
                         colors={theme}
                     />
-                    <FeatureItem 
+                    <FeatureItem
                         text="Co-planning with friends & shared availability"
                         colors={theme}
                     />
-                    <FeatureItem 
+                    <FeatureItem
                         text="Productivity analytics & trends to help you know yourself better"
                         colors={theme}
                     />
@@ -448,10 +501,9 @@ const ProPaywallScreen = ({ navigation, route }) => {
                     {/* Pricing Details */}
                     <Text style={[styles.pricingDetails, { color: theme.SELECTION }]}>
                         Free for 30 days,{'\n'}
-                        {selectedPlan === 'annual' 
+                        {selectedPlan === 'annual'
                             ? `$39.99/year afterwards`
-                            : `${monthlyPrice}/month afterwards`
-                        }
+                            : `${monthlyPrice}/month afterwards`}
                     </Text>
                 </View>
 
@@ -505,13 +557,15 @@ const FeatureItem = ({ text, colors }) => {
     };
 
     return (
-    <View style={styles.featureItem}>
-        <Image source={imageMap[theme]} style={{ width: 22, height: 16, alignSelf: 'center' }} />
-        <Text style={[styles.featureText, { color: colors.FOREGROUND }]}>
-            {text}
-        </Text>
-    </View>
-)};
+        <View style={styles.featureItem}>
+            <Image
+                source={imageMap[theme]}
+                style={{ width: 22, height: 16, alignSelf: 'center' }}
+            />
+            <Text style={[styles.featureText, { color: colors.FOREGROUND }]}>{text}</Text>
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -603,9 +657,7 @@ const styles = StyleSheet.create({
         minHeight: 80,
         borderRadius: 12,
     },
-    planButtonSelected: {
-
-    },
+    planButtonSelected: {},
     planButtonGradient: {
         flex: 1,
         paddingVertical: spacing.SPACING_4,

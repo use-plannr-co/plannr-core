@@ -61,7 +61,7 @@ export const upsertSubscription = async (data) => {
         expirationAt,
         productId,
         store,
-        metadata
+        metadata,
     } = data;
 
     // Check if subscription exists
@@ -105,7 +105,7 @@ export const upsertSubscription = async (data) => {
         .update(users)
         .set({
             isPro: isPro || false,
-            updatedAt: new Date()
+            updatedAt: new Date(),
         })
         .where(eq(users.id, userId));
 
@@ -141,16 +141,14 @@ export const createInitialSubscription = async (userId, rcAppUserId) => {
  * @returns {Promise<void>}
  */
 export const deleteSubscriptionByUserId = async (userId) => {
-    await db
-        .delete(subscriptions)
-        .where(eq(subscriptions.userId, userId));
+    await db.delete(subscriptions).where(eq(subscriptions.userId, userId));
 
     // Also reset users.is_pro
     await db
         .update(users)
         .set({
             isPro: false,
-            updatedAt: new Date()
+            updatedAt: new Date(),
         })
         .where(eq(users.id, userId));
 };

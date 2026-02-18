@@ -16,22 +16,22 @@ const parseTime24 = (timeValue) => {
 
 const convertScheduleDateToISO = (scheduleDate) => {
     if (!scheduleDate) return null;
-    
+
     // If it's already an ISO string, return as is
     if (typeof scheduleDate === 'string') return scheduleDate;
-    
+
     // If it's a ScheduleDate object {date: 7, month: 10, year: 2025}
     if (scheduleDate.date && scheduleDate.month && scheduleDate.year) {
         const isoString = `${scheduleDate.year}-${scheduleDate.month.toString().padStart(2, '0')}-${scheduleDate.date.toString().padStart(2, '0')}`;
         return isoString;
     }
-    
+
     return null;
 };
 
 const formatDateForDb = (dateValue) => {
     if (!dateValue) return null;
-    
+
     // Convert ScheduleDate object or ISO string to Date object for database
     const isoString = convertScheduleDateToISO(dateValue);
     return isoString;
@@ -39,12 +39,12 @@ const formatDateForDb = (dateValue) => {
 
 const convertDateToScheduleDate = (date) => {
     if (!date) return null;
-    
+
     const dateObj = new Date(date);
     return {
         date: dateObj.getDate(),
         month: dateObj.getMonth() + 1, // getMonth() is 0-indexed
-        year: dateObj.getFullYear()
+        year: dateObj.getFullYear(),
     };
 };
 
@@ -60,20 +60,22 @@ export const createSchedule = async (scheduleData) => {
         strategy: scheduleData.strategy || 'earliest-fit',
         startTime: parseTime24(scheduleData.startTime) || 900,
         endTime: parseTime24(scheduleData.endTime) || 1700,
-        metadata: scheduleData.metadata || {}
+        metadata: scheduleData.metadata || {},
     };
 
     // Handle period-based scheduling
     if (scheduleData.periodStart && scheduleData.periodEnd) {
         insertData.periodStart = formatDateForDb(scheduleData.periodStart);
-        insertData.periodEnd = formatDateForDb(scheduleData.periodStart.getDateAfter(scheduleData.numDays - 1));
+        insertData.periodEnd = formatDateForDb(
+            scheduleData.periodStart.getDateAfter(scheduleData.numDays - 1)
+        );
     }
 
     // Handle day1-based scheduling (your frontend Schedule model)
     if (scheduleData.day1Date) {
         insertData.day1Date = scheduleData.day1Date; // Store as ScheduleDate object
         insertData.day1Day = scheduleData.day1Day;
-        
+
         // Also set period dates for compatibility
         if (!insertData.periodStart) {
             insertData.periodStart = formatDateForDb(scheduleData.day1Date);
@@ -94,10 +96,7 @@ export const getScheduleById = async (scheduleId, includeBlocks = false) => {
         const [schedule] = await db
             .select()
             .from(schedules)
-            .where(and(
-                eq(schedules.id, scheduleId),
-                isNull(schedules.deletedAt)
-            ))
+            .where(and(eq(schedules.id, scheduleId), isNull(schedules.deletedAt)))
             .limit(1);
 
         if (!schedule) return null;
@@ -106,7 +105,7 @@ export const getScheduleById = async (scheduleId, includeBlocks = false) => {
             const scheduleBlocks = await getBlocksByScheduleId(scheduleId);
             return {
                 ...schedule,
-                blocks: scheduleBlocks
+                blocks: scheduleBlocks,
             };
         }
 
@@ -117,22 +116,13 @@ export const getScheduleById = async (scheduleId, includeBlocks = false) => {
 };
 
 export const getSchedulesByUserId = async (userId, options = {}) => {
-    const { 
-        since, 
-        limit = 20, 
-        cursor, 
-        isActive,
-        includeBlocks = true 
-    } = options;
-    
+    const { since, limit = 20, cursor, isActive, includeBlocks = true } = options;
+
     try {
         let query = db
             .select()
             .from(schedules)
-            .where(and(
-                eq(schedules.ownerId, userId),
-                isNull(schedules.deletedAt)
-            ));
+            .where(and(eq(schedules.ownerId, userId), isNull(schedules.deletedAt)));
 
         // Add filters
         if (isActive !== undefined) {
@@ -158,7 +148,7 @@ export const getSchedulesByUserId = async (userId, options = {}) => {
                     const scheduleBlocks = await getBlocksByScheduleId(schedule.id);
                     return {
                         ...schedule,
-                        schedule: scheduleBlocks
+                        schedule: scheduleBlocks,
                     };
                 })
             );
@@ -174,27 +164,29 @@ export const getSchedulesByUserId = async (userId, options = {}) => {
 export const updateSchedule = async (scheduleId, updateData) => {
     try {
         const updateFields = { updatedAt: new Date() };
-        
+
         // Handle each field with proper conversion
         if (updateData.title !== undefined) updateFields.title = updateData.title;
-        if (updateData.periodStart !== undefined) updateFields.periodStart = formatDateForDb(updateData.periodStart);
-        if (updateData.periodEnd !== undefined) updateFields.periodEnd = formatDateForDb(updateData.periodEnd);
+        if (updateData.periodStart !== undefined)
+            updateFields.periodStart = formatDateForDb(updateData.periodStart);
+        if (updateData.periodEnd !== undefined)
+            updateFields.periodEnd = formatDateForDb(updateData.periodEnd);
         if (updateData.isActive !== undefined) updateFields.isActive = updateData.isActive;
         if (updateData.numDays !== undefined) updateFields.numDays = updateData.numDays;
         if (updateData.minGap !== undefined) updateFields.minGap = updateData.minGap;
-        if (updateData.workingHoursLimit !== undefined) updateFields.workingHoursLimit = updateData.workingHoursLimit;
+        if (updateData.workingHoursLimit !== undefined)
+            updateFields.workingHoursLimit = updateData.workingHoursLimit;
         if (updateData.strategy !== undefined) updateFields.strategy = updateData.strategy;
-        if (updateData.startTime !== undefined) updateFields.startTime = parseTime24(updateData.startTime);
-        if (updateData.endTime !== undefined) updateFields.endTime = parseTime24(updateData.endTime);
+        if (updateData.startTime !== undefined)
+            updateFields.startTime = parseTime24(updateData.startTime);
+        if (updateData.endTime !== undefined)
+            updateFields.endTime = parseTime24(updateData.endTime);
         if (updateData.metadata !== undefined) updateFields.metadata = updateData.metadata;
 
         const [updatedSchedule] = await db
             .update(schedules)
             .set(updateFields)
-            .where(and(
-                eq(schedules.id, scheduleId),
-                isNull(schedules.deletedAt)
-            ))
+            .where(and(eq(schedules.id, scheduleId), isNull(schedules.deletedAt)))
             .returning();
 
         return updatedSchedule;
@@ -207,7 +199,7 @@ export const deleteSchedule = async (scheduleId) => {
     try {
         // First manually delete all blocks (hard delete to remove them completely)
         await db.delete(blocks).where(eq(blocks.scheduleId, scheduleId));
-        
+
         // Then hard delete the schedule
         const [deletedSchedule] = await db
             .delete(schedules)
@@ -237,7 +229,7 @@ export const createBlock = async (blockData) => {
         deadline,
         duration,
         frontendId,
-        completed = false
+        completed = false,
     } = blockData;
 
     try {
@@ -251,14 +243,14 @@ export const createBlock = async (blockData) => {
             // Auto-create or find day for this block
             const dateValue = blockDate || date || new Date().toISOString().split('T')[0];
             const dayForBlock = await findOrCreateDayForDate(scheduleId, dateValue);
-            
+
             // Create block with the found/created dayId
             const blockDataWithDay = {
                 ...blockData,
-                dayId: dayForBlock.id
+                dayId: dayForBlock.id,
             };
             delete blockDataWithDay.scheduleId; // Remove legacy field
-            
+
             return createBlockForDay(blockDataWithDay);
         }
 
@@ -275,10 +267,7 @@ export const findOrCreateDayForDate = async (scheduleId, dateString) => {
         const [existingDay] = await db
             .select()
             .from(days)
-            .where(and(
-                eq(days.scheduleId, scheduleId),
-                eq(days.date, dateString)
-            ))
+            .where(and(eq(days.scheduleId, scheduleId), eq(days.date, dateString)))
             .limit(1);
 
         if (existingDay) {
@@ -288,7 +277,7 @@ export const findOrCreateDayForDate = async (scheduleId, dateString) => {
         // If no day exists, create one
         const date = new Date(dateString + 'T00:00:00.000Z');
         const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-        
+
         // Get schedule to determine day number
         const schedule = await getScheduleById(scheduleId);
         const existingDays = await getDaysByScheduleId(scheduleId);
@@ -298,7 +287,7 @@ export const findOrCreateDayForDate = async (scheduleId, dateString) => {
         const dateObject = {
             date: date.getDate(),
             month: date.getMonth() + 1,
-            year: date.getFullYear()
+            year: date.getFullYear(),
         };
 
         const newDayData = {
@@ -309,7 +298,7 @@ export const findOrCreateDayForDate = async (scheduleId, dateString) => {
             dateObject,
             isWeekend: date.getDay() === 0 || date.getDay() === 6,
             minGap: schedule?.minGap || 15,
-            metadata: {}
+            metadata: {},
         };
 
         return createDay(newDayData);
@@ -326,20 +315,21 @@ export const createMultipleBlocks = async (blocksData) => {
         } else if (blocksData.length > 0 && blocksData[0].scheduleId) {
             // Legacy support with auto-migration
             const processedBlocks = [];
-            
+
             for (const blockData of blocksData) {
-                const dateValue = blockData.blockDate || blockData.date || new Date().toISOString().split('T')[0];
+                const dateValue =
+                    blockData.blockDate || blockData.date || new Date().toISOString().split('T')[0];
                 const dayForBlock = await findOrCreateDayForDate(blockData.scheduleId, dateValue);
-                
+
                 const processedBlock = {
                     ...blockData,
-                    dayId: dayForBlock.id
+                    dayId: dayForBlock.id,
                 };
                 delete processedBlock.scheduleId; // Remove legacy field
-                
+
                 processedBlocks.push(processedBlock);
             }
-            
+
             return createMultipleBlocksForDay(processedBlocks);
         } else {
             throw new Error('Blocks data must include either dayId or scheduleId');
@@ -363,10 +353,7 @@ export const getBlockById = async (blockId) => {
         const [block] = await db
             .select()
             .from(blocks)
-            .where(and(
-                eq(blocks.id, blockId),
-                isNull(blocks.deletedAt)
-            ))
+            .where(and(eq(blocks.id, blockId), isNull(blocks.deletedAt)))
             .limit(1);
 
         return block || null;
@@ -378,17 +365,22 @@ export const getBlockById = async (blockId) => {
 export const updateBlock = async (blockId, updateData) => {
     try {
         const updateFields = { updatedAt: new Date() };
-        
+
         // Handle each field with proper conversion
         if (updateData.type !== undefined) updateFields.type = updateData.type;
         if (updateData.title !== undefined) updateFields.title = updateData.title;
-        if (updateData.startAt !== undefined) updateFields.startAt = parseTime24(updateData.startAt);
+        if (updateData.startAt !== undefined)
+            updateFields.startAt = parseTime24(updateData.startAt);
         if (updateData.endAt !== undefined) updateFields.endAt = parseTime24(updateData.endAt);
-        if (updateData.blockDate !== undefined) updateFields.blockDate = formatDateForDb(updateData.blockDate);
+        if (updateData.blockDate !== undefined)
+            updateFields.blockDate = formatDateForDb(updateData.blockDate);
         if (updateData.category !== undefined) updateFields.category = updateData.category;
         if (updateData.metadata !== undefined) updateFields.metadata = updateData.metadata;
         if (updateData.priority !== undefined) updateFields.priority = updateData.priority;
-        if (updateData.deadline !== undefined) updateFields.deadline = updateData.deadline ? formatDateForDb(updateData.deadline) : null;
+        if (updateData.deadline !== undefined)
+            updateFields.deadline = updateData.deadline
+                ? formatDateForDb(updateData.deadline)
+                : null;
         if (updateData.duration !== undefined) updateFields.duration = updateData.duration;
         if (updateData.frontendId !== undefined) updateFields.frontendId = updateData.frontendId;
         if (updateData.completed !== undefined) updateFields.completed = updateData.completed;
@@ -396,10 +388,7 @@ export const updateBlock = async (blockId, updateData) => {
         const [updatedBlock] = await db
             .update(blocks)
             .set(updateFields)
-            .where(and(
-                eq(blocks.id, blockId),
-                isNull(blocks.deletedAt)
-            ))
+            .where(and(eq(blocks.id, blockId), isNull(blocks.deletedAt)))
             .returning();
 
         return updatedBlock;
@@ -414,12 +403,9 @@ export const deleteBlock = async (blockId) => {
             .update(blocks)
             .set({
                 deletedAt: new Date(),
-                updatedAt: new Date()
+                updatedAt: new Date(),
             })
-            .where(and(
-                eq(blocks.id, blockId),
-                isNull(blocks.deletedAt)
-            ))
+            .where(and(eq(blocks.id, blockId), isNull(blocks.deletedAt)))
             .returning();
 
         return deletedBlock;
@@ -433,14 +419,11 @@ export const getScheduleWithOwner = async (scheduleId) => {
         const result = await db
             .select({
                 schedule: schedules,
-                owner: users
+                owner: users,
             })
             .from(schedules)
             .innerJoin(users, eq(schedules.ownerId, users.id))
-            .where(and(
-                eq(schedules.id, scheduleId),
-                isNull(schedules.deletedAt)
-            ))
+            .where(and(eq(schedules.id, scheduleId), isNull(schedules.deletedAt)))
             .limit(1);
 
         return result.length ? result[0] : null;
@@ -477,16 +460,18 @@ export const getBlocksInDateRange = async (scheduleId, startDate, endDate) => {
                 // Include day information
                 dayNumber: days.dayNumber,
                 dayName: days.dayName,
-                dayDate: days.date
+                dayDate: days.date,
             })
             .from(blocks)
             .innerJoin(days, eq(blocks.dayId, days.id))
-            .where(and(
-                eq(days.scheduleId, scheduleId),
-                isNull(blocks.deletedAt),
-                gte(days.date, startDate), // Use day date instead of block date
-                lte(days.date, endDate)
-            ))
+            .where(
+                and(
+                    eq(days.scheduleId, scheduleId),
+                    isNull(blocks.deletedAt),
+                    gte(days.date, startDate), // Use day date instead of block date
+                    lte(days.date, endDate)
+                )
+            )
             .orderBy(asc(days.dayNumber), asc(blocks.startAt));
 
         return scheduleBlocks;
@@ -501,12 +486,9 @@ export const markBlockAsCompleted = async (blockId, completed = true) => {
             .update(blocks)
             .set({
                 completed,
-                updatedAt: new Date()
+                updatedAt: new Date(),
             })
-            .where(and(
-                eq(blocks.id, blockId),
-                isNull(blocks.deletedAt)
-            ))
+            .where(and(eq(blocks.id, blockId), isNull(blocks.deletedAt)))
             .returning();
 
         return updatedBlock;
@@ -546,7 +528,7 @@ export const createDay = async (dayData) => {
         isHoliday = false,
         maxWorkingHours,
         minGap = 15,
-        metadata = {}
+        metadata = {},
     } = dayData;
 
     try {
@@ -559,7 +541,7 @@ export const createDay = async (dayData) => {
             isWeekend,
             isHoliday,
             minGap,
-            metadata
+            metadata,
         };
 
         // Optional fields
@@ -582,11 +564,7 @@ export const createDay = async (dayData) => {
 
 export const getDayById = async (dayId, includeBlocks = false) => {
     try {
-        const [day] = await db
-            .select()
-            .from(days)
-            .where(eq(days.id, dayId))
-            .limit(1);
+        const [day] = await db.select().from(days).where(eq(days.id, dayId)).limit(1);
 
         if (!day) return null;
 
@@ -594,7 +572,7 @@ export const getDayById = async (dayId, includeBlocks = false) => {
             const dayBlocks = await getBlocksByDayId(dayId);
             return {
                 ...day,
-                blocks: dayBlocks
+                blocks: dayBlocks,
             };
         }
 
@@ -607,17 +585,20 @@ export const getDayById = async (dayId, includeBlocks = false) => {
 export const updateDay = async (dayId, updateData) => {
     try {
         const updateFields = { updatedAt: new Date() };
-        
+
         // Handle each field with proper conversion
         if (updateData.dayNumber !== undefined) updateFields.dayNumber = updateData.dayNumber;
         if (updateData.dayName !== undefined) updateFields.dayName = updateData.dayName;
         if (updateData.date !== undefined) updateFields.date = updateData.date;
         if (updateData.dateObject !== undefined) updateFields.dateObject = updateData.dateObject;
-        if (updateData.dayStartTime !== undefined) updateFields.dayStartTime = parseTime24(updateData.dayStartTime);
-        if (updateData.dayEndTime !== undefined) updateFields.dayEndTime = parseTime24(updateData.dayEndTime);
+        if (updateData.dayStartTime !== undefined)
+            updateFields.dayStartTime = parseTime24(updateData.dayStartTime);
+        if (updateData.dayEndTime !== undefined)
+            updateFields.dayEndTime = parseTime24(updateData.dayEndTime);
         if (updateData.isWeekend !== undefined) updateFields.isWeekend = updateData.isWeekend;
         if (updateData.isHoliday !== undefined) updateFields.isHoliday = updateData.isHoliday;
-        if (updateData.maxWorkingHours !== undefined) updateFields.maxWorkingHours = updateData.maxWorkingHours;
+        if (updateData.maxWorkingHours !== undefined)
+            updateFields.maxWorkingHours = updateData.maxWorkingHours;
         if (updateData.minGap !== undefined) updateFields.minGap = updateData.minGap;
         if (updateData.metadata !== undefined) updateFields.metadata = updateData.metadata;
 
@@ -636,10 +617,7 @@ export const updateDay = async (dayId, updateData) => {
 export const deleteDay = async (dayId) => {
     try {
         // Delete day (this will cascade delete all blocks due to foreign key constraint)
-        const [deletedDay] = await db
-            .delete(days)
-            .where(eq(days.id, dayId))
-            .returning();
+        const [deletedDay] = await db.delete(days).where(eq(days.id, dayId)).returning();
 
         return deletedDay;
     } catch (error) {
@@ -656,10 +634,7 @@ export const getBlocksByDayId = async (dayId) => {
         const dayBlocks = await db
             .select()
             .from(blocks)
-            .where(and(
-                eq(blocks.dayId, dayId),
-                isNull(blocks.deletedAt)
-            ))
+            .where(and(eq(blocks.dayId, dayId), isNull(blocks.deletedAt)))
             .orderBy(asc(blocks.startAt));
 
         return dayBlocks;
@@ -684,7 +659,7 @@ export const createBlockForDay = async (blockData) => {
         deadlineObject,
         duration,
         frontendId,
-        completed = false
+        completed = false,
     } = blockData;
 
     try {
@@ -699,7 +674,7 @@ export const createBlockForDay = async (blockData) => {
             priority,
             duration,
             frontendId,
-            completed
+            completed,
         };
 
         // Optional date fields (backward compatibility)
@@ -728,7 +703,7 @@ export const createBlockForDay = async (blockData) => {
 export const createMultipleBlocksForDay = async (blocksData) => {
     try {
         // Process each block to ensure proper format
-        const processedBlocks = blocksData.map(blockData => ({
+        const processedBlocks = blocksData.map((blockData) => ({
             dayId: blockData.dayId,
             type: blockData.type,
             title: blockData.title,
@@ -743,7 +718,7 @@ export const createMultipleBlocksForDay = async (blocksData) => {
             deadlineObject: blockData.deadlineObject || null,
             duration: blockData.duration,
             frontendId: blockData.frontendId,
-            completed: blockData.completed || false
+            completed: blockData.completed || false,
         }));
 
         const newBlocks = await db.insert(blocks).values(processedBlocks).returning();
@@ -808,14 +783,11 @@ export const getAllBlocksForSchedule = async (scheduleId) => {
                 // Include day information
                 dayNumber: days.dayNumber,
                 dayName: days.dayName,
-                dayDate: days.date
+                dayDate: days.date,
             })
             .from(blocks)
             .innerJoin(days, eq(blocks.dayId, days.id))
-            .where(and(
-                eq(days.scheduleId, scheduleId),
-                isNull(blocks.deletedAt)
-            ))
+            .where(and(eq(days.scheduleId, scheduleId), isNull(blocks.deletedAt)))
             .orderBy(asc(days.dayNumber), asc(blocks.startAt));
 
         return scheduleBlocks;
@@ -830,14 +802,14 @@ export const getScheduleStructureInfo = async (scheduleId) => {
         const schedule = await getScheduleById(scheduleId);
         const scheduleDays = await getDaysByScheduleId(scheduleId);
         const scheduleBlocks = await getAllBlocksForSchedule(scheduleId);
-        
+
         return {
             schedule,
             daysCount: scheduleDays.length,
             blocksCount: scheduleBlocks.length,
             days: scheduleDays,
             hasBlocks: scheduleBlocks.length > 0,
-            hasDays: scheduleDays.length > 0
+            hasDays: scheduleDays.length > 0,
         };
     } catch (error) {
         throw new Error(`Failed to get schedule structure info: ${error.message}`);
@@ -867,18 +839,18 @@ export const upsertEventDependencies = async (scheduleId, dependenciesMap, userI
 
         // Check if dependencies already exist
         const existingDeps = await getEventDependenciesByScheduleId(scheduleId, userId);
-        
+
         if (existingDeps) {
             // Update existing record
             const [updated] = await db
                 .update(dependencies)
-                .set({ 
+                .set({
                     dependenciesMap,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
                 })
                 .where(eq(dependencies.scheduleId, scheduleId))
                 .returning();
-            
+
             return updated;
         } else {
             // Create new record
@@ -886,10 +858,10 @@ export const upsertEventDependencies = async (scheduleId, dependenciesMap, userI
                 .insert(dependencies)
                 .values({
                     scheduleId,
-                    dependenciesMap
+                    dependenciesMap,
                 })
                 .returning();
-            
+
             return created;
         }
     } catch (error) {
@@ -917,7 +889,7 @@ export const getEventDependenciesByScheduleId = async (scheduleId, userId) => {
             .from(dependencies)
             .where(eq(dependencies.scheduleId, scheduleId))
             .limit(1);
-        
+
         return dependencyRecord || null;
     } catch (error) {
         console.error('Error fetching event dependencies:', error);
@@ -938,7 +910,7 @@ export const updateEventDependenciesById = async (dependenciesId, dependenciesMa
         const [existingDeps] = await db
             .select({
                 id: dependencies.id,
-                scheduleId: dependencies.scheduleId
+                scheduleId: dependencies.scheduleId,
             })
             .from(dependencies)
             .where(eq(dependencies.id, dependenciesId))
@@ -957,13 +929,13 @@ export const updateEventDependenciesById = async (dependenciesId, dependenciesMa
         // Update the dependencies
         const [updated] = await db
             .update(dependencies)
-            .set({ 
+            .set({
                 dependenciesMap,
-                updatedAt: new Date()
+                updatedAt: new Date(),
             })
             .where(eq(dependencies.id, dependenciesId))
             .returning();
-        
+
         return updated;
     } catch (error) {
         console.error('Error updating event dependencies:', error);
@@ -989,7 +961,7 @@ export const deleteEventDependenciesByScheduleId = async (scheduleId, userId) =>
             .delete(dependencies)
             .where(eq(dependencies.scheduleId, scheduleId))
             .returning();
-        
+
         return result.length > 0;
     } catch (error) {
         console.error('Error deleting event dependencies:', error);

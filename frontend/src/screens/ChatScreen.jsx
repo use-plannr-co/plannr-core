@@ -19,8 +19,14 @@
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-    View, FlatList, KeyboardAvoidingView, Platform, StyleSheet,
-    Text, TouchableOpacity, Image
+    View,
+    FlatList,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    Image,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
@@ -35,7 +41,13 @@ import ChatDrawer from '../components/chat/ChatDrawer.jsx';
 function ChevronDownIcon({ color }) {
     return (
         <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-            <Path d="M6 9L12 15L18 9" stroke={color} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+            <Path
+                d="M6 9L12 15L18 9"
+                stroke={color}
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
         </Svg>
     );
 }
@@ -91,13 +103,16 @@ export default function ChatScreen() {
         isAtBottomRef.current = true;
     }, []);
 
-    const handleScroll = useCallback((event) => {
-        const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-        const distFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
-        const atBottom = distFromBottom < 80;
-        isAtBottomRef.current = atBottom;
-        if (atBottom && showJumpButton) setShowJumpButton(false);
-    }, [showJumpButton]);
+    const handleScroll = useCallback(
+        (event) => {
+            const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+            const distFromBottom = contentSize.height - layoutMeasurement.height - contentOffset.y;
+            const atBottom = distFromBottom < 80;
+            isAtBottomRef.current = atBottom;
+            if (atBottom && showJumpButton) setShowJumpButton(false);
+        },
+        [showJumpButton],
+    );
 
     // Auto-scroll when a new completed message arrives (always if at bottom)
     useEffect(() => {
@@ -133,7 +148,7 @@ export default function ChatScreen() {
     const handleDeleteChat = async (chatId) => {
         if (activeChat?.id === chatId) {
             await deleteActiveChat();
-            const remaining = chats.filter(c => c.id !== chatId);
+            const remaining = chats.filter((c) => c.id !== chatId);
             if (remaining.length > 0) {
                 await openChat(remaining[0].id);
             } else {
@@ -145,22 +160,26 @@ export default function ChatScreen() {
     // ─── Render ───────────────────────────────────────────────────────────────
 
     // Only pass isStreaming to the live streaming row — all other rows are memo-stable
-    const renderItem = useCallback(({ item }) => (
-        <ChatBubble message={item} />
-    ), []);
+    const renderItem = useCallback(({ item }) => <ChatBubble message={item} />, []);
 
     // Synthetic streaming message appended while stream is active.
     // status: 'streaming' tells ChatBubble to render as plain Text (no Markdown).
     const displayMessages = isStreaming
-        ? [...messages, {
-            id: '__streaming__',
-            role: 'assistant',
-            content: streamingText || '',
-            status: 'streaming',
-        }]
+        ? [
+              ...messages,
+              {
+                  id: '__streaming__',
+                  role: 'assistant',
+                  content: streamingText || '',
+                  status: 'streaming',
+              },
+          ]
         : messages;
 
-    const imageSource = theme === darkColor ? require('../../assets/planova/planova-chat-dark.png') : require('../../assets/planova/planova-chat-light.png');
+    const imageSource =
+        theme === darkColor
+            ? require('../../assets/planova/planova-chat-dark.png')
+            : require('../../assets/planova/planova-chat-light.png');
 
     return (
         <View style={[styles.screen, { backgroundColor: theme.BACKGROUND }]}>
@@ -175,20 +194,24 @@ export default function ChatScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 keyboardVerticalOffset={0}
             >
-                {
-                    (displayMessages.length === 0 && !isStreaming) && (
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <Image source={imageSource} style={{ width: 240, height: 240, }} />
-                            <Text style={{ color: theme.FOREGROUND, fontSize: 16, fontFamily: 'Albert Sans' }}>
-                                How can I help you plan today?
-                            </Text>
-                        </View>
-                    )
-                }
+                {displayMessages.length === 0 && !isStreaming && (
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        <Image source={imageSource} style={{ width: 240, height: 240 }} />
+                        <Text
+                            style={{
+                                color: theme.FOREGROUND,
+                                fontSize: 16,
+                                fontFamily: 'Albert Sans',
+                            }}
+                        >
+                            How can I help you plan today?
+                        </Text>
+                    </View>
+                )}
                 <FlatList
                     ref={flatListRef}
                     data={displayMessages}
-                    keyExtractor={item => item.id}
+                    keyExtractor={(item) => item.id}
                     renderItem={renderItem}
                     contentContainerStyle={styles.messageList}
                     showsVerticalScrollIndicator={false}
@@ -242,7 +265,7 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        paddingBottom: 16
+        paddingBottom: 16,
     },
     flex: {
         flex: 1,

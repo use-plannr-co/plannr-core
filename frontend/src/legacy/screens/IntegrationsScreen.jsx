@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Alert } from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    Dimensions,
+    TouchableOpacity,
+    Alert,
+} from 'react-native';
 import { useAppState } from '../context/AppStateContext.js';
 import { useAuthenticatedAPI } from '../api/index.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
@@ -16,28 +24,35 @@ import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 WebBrowser.maybeCompleteAuthSession();
 
 const { width, height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const IntegrationsScreen = ({ navigation }) => {
     const { appState } = useAppState();
-    const { checkGoogleCalendarStatus, getUserIntegrations, updateUserIntegrations } = useAuthenticatedAPI();
+    const { checkGoogleCalendarStatus, getUserIntegrations, updateUserIntegrations } =
+        useAuthenticatedAPI();
     const { logUserAction, logScreenView } = useActionLogger('Integrations');
     const { startSSOFlow } = useSSO();
-    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
-    
+    const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
+
     const [integrations, setIntegrations] = useState({
         googleCalendar: false,
         todoist: false,
         notion: false,
         googleTasks: false,
-        microsoftTodo: false
+        microsoftTodo: false,
     });
     const [loading, setLoading] = useState(true);
 
     // Screen view logging
     useEffect(() => {
         logScreenView({
-            userHasIntegrations: integrations.googleCalendar || integrations.todoist || integrations.notion || integrations.googleTasks || integrations.microsoftTodo
+            userHasIntegrations:
+                integrations.googleCalendar ||
+                integrations.todoist ||
+                integrations.notion ||
+                integrations.googleTasks ||
+                integrations.microsoftTodo,
         });
     }, [integrations]);
 
@@ -46,13 +61,12 @@ const IntegrationsScreen = ({ navigation }) => {
         const checkIntegrations = async () => {
             try {
                 setLoading(true);
-                
+
                 // Get all integrations from backend
                 const userIntegrations = await getUserIntegrations();
                 setIntegrations(userIntegrations);
-                
+
                 logUserAction('integrations_status_checked', userIntegrations);
-                
             } catch (error) {
                 console.error('Error checking integration statuses:', error);
                 logUserAction('integrations_check_failed', { error: error.message });
@@ -70,7 +84,7 @@ const IntegrationsScreen = ({ navigation }) => {
             Alert.alert(
                 'Already Connected',
                 'Google Calendar is already connected to your account.',
-                [{ text: 'OK' }]
+                [{ text: 'OK' }],
             );
             return;
         }
@@ -86,7 +100,7 @@ const IntegrationsScreen = ({ navigation }) => {
                 additionalParameters: {
                     prompt: 'consent',
                     access_type: 'offline',
-                    include_granted_scopes: 'true'
+                    include_granted_scopes: 'true',
                 },
 
                 scopes: [
@@ -102,11 +116,11 @@ const IntegrationsScreen = ({ navigation }) => {
 
             if (createdSessionId) {
                 await setActive({ session: createdSessionId });
-                
+
                 // Update integration status in backend
                 try {
                     await updateUserIntegrations({ googleCalendar: true });
-                    setIntegrations(prev => ({ ...prev, googleCalendar: true }));
+                    setIntegrations((prev) => ({ ...prev, googleCalendar: true }));
                     logUserAction('google_calendar_connected_successfully');
                 } catch (updateError) {
                     console.error('Failed to update integration status:', updateError);
@@ -116,10 +130,9 @@ const IntegrationsScreen = ({ navigation }) => {
                 Alert.alert(
                     'Google Calendar Connected',
                     'Plannr can now add and read calendar events.',
-                    [{ text: 'OK' }]
+                    [{ text: 'OK' }],
                 );
             }
-
         } catch (error) {
             console.error('Google Calendar OAuth error:', error);
             logUserAction('google_calendar_connect_failed', { error: error.message });
@@ -127,7 +140,7 @@ const IntegrationsScreen = ({ navigation }) => {
             Alert.alert(
                 'Connection Failed',
                 error?.message ?? 'Unable to connect Google Calendar. Please try again.',
-                [{ text: 'OK' }]
+                [{ text: 'OK' }],
             );
         }
     };
@@ -135,49 +148,62 @@ const IntegrationsScreen = ({ navigation }) => {
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <View style={styles.titleContainer}>
-                <TouchableOpacity 
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                     <GoBackIcon width={24} height={24} color={theme.FOREGROUND} />
                 </TouchableOpacity>
                 <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Integrations</Text>
             </View>
-            <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND}}>
-                
+            <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND }}>
                 {/* Calendar Services Section */}
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Calendar Integrations</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                    Calendar Integrations
+                </Text>
                 {/* Google Calendar Integration */}
-                    <TouchableOpacity 
-                        style={{ ...styles.integrationItem, ...styles.card, backgroundColor: theme.COMP_COLOR }}
-                    >
-                        <View style={styles.integrationLeft}>
-                            <View style={[styles.iconContainer, { backgroundColor: theme.COMP_COLOR }]}>
-                                <Google width={24} height={24} />
-                            </View>
-                            <View style={styles.integrationInfo}>
-                                <Text style={[styles.integrationTitle, { color: theme.FOREGROUND }]}>
-                                    Google Calendar
-                                </Text>
-                            </View>
+                <TouchableOpacity
+                    style={{
+                        ...styles.integrationItem,
+                        ...styles.card,
+                        backgroundColor: theme.COMP_COLOR,
+                    }}
+                >
+                    <View style={styles.integrationLeft}>
+                        <View style={[styles.iconContainer, { backgroundColor: theme.COMP_COLOR }]}>
+                            <Google width={24} height={24} />
                         </View>
-                        <TouchableOpacity 
-                            style={styles.connectionButtonComingSoon}
-                        >
-                            <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, fontSize: typography.bodySize, marginBottom: 0 }}>
-                                Coming Soon
+                        <View style={styles.integrationInfo}>
+                            <Text style={[styles.integrationTitle, { color: theme.FOREGROUND }]}>
+                                Google Calendar
                             </Text>
-                        </TouchableOpacity>
+                        </View>
+                    </View>
+                    <TouchableOpacity style={styles.connectionButtonComingSoon}>
+                        <Text
+                            style={{
+                                ...styles.subHeading,
+                                color: theme.FOREGROUND,
+                                fontSize: typography.bodySize,
+                                marginBottom: 0,
+                            }}
+                        >
+                            Coming Soon
+                        </Text>
                     </TouchableOpacity>
+                </TouchableOpacity>
 
                 {/* Available Integrations Section */}
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, marginTop: SPACE * 2 }}>
+                <Text
+                    style={{ ...styles.subHeading, color: theme.FOREGROUND, marginTop: SPACE * 2 }}
+                >
                     Tasks Integrations
                 </Text>
-                
+
                 {/* Todoist Integration */}
-                <TouchableOpacity 
-                    style={{ ...styles.integrationItem, ...styles.card, backgroundColor: theme.COMP_COLOR }}
+                <TouchableOpacity
+                    style={{
+                        ...styles.integrationItem,
+                        ...styles.card,
+                        backgroundColor: theme.COMP_COLOR,
+                    }}
                 >
                     <View style={styles.integrationLeft}>
                         <View style={styles.integrationInfo}>
@@ -186,18 +212,27 @@ const IntegrationsScreen = ({ navigation }) => {
                             </Text>
                         </View>
                     </View>
-                    <TouchableOpacity 
-                        style={styles.connectionButtonComingSoon}
-                    >
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, fontSize: typography.bodySize, marginBottom: 0 }}>
+                    <TouchableOpacity style={styles.connectionButtonComingSoon}>
+                        <Text
+                            style={{
+                                ...styles.subHeading,
+                                color: theme.FOREGROUND,
+                                fontSize: typography.bodySize,
+                                marginBottom: 0,
+                            }}
+                        >
                             Coming Soon
                         </Text>
                     </TouchableOpacity>
                 </TouchableOpacity>
 
                 {/* Notion Integration */}
-                <TouchableOpacity 
-                    style={{ ...styles.integrationItem, ...styles.card, backgroundColor: theme.COMP_COLOR }}
+                <TouchableOpacity
+                    style={{
+                        ...styles.integrationItem,
+                        ...styles.card,
+                        backgroundColor: theme.COMP_COLOR,
+                    }}
                 >
                     <View style={styles.integrationLeft}>
                         <View style={styles.integrationInfo}>
@@ -206,18 +241,27 @@ const IntegrationsScreen = ({ navigation }) => {
                             </Text>
                         </View>
                     </View>
-                    <TouchableOpacity 
-                        style={styles.connectionButtonComingSoon}
-                    >
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, fontSize: typography.bodySize, marginBottom: 0 }}>
+                    <TouchableOpacity style={styles.connectionButtonComingSoon}>
+                        <Text
+                            style={{
+                                ...styles.subHeading,
+                                color: theme.FOREGROUND,
+                                fontSize: typography.bodySize,
+                                marginBottom: 0,
+                            }}
+                        >
                             Coming Soon
                         </Text>
                     </TouchableOpacity>
                 </TouchableOpacity>
 
                 {/* Google Tasks Integration */}
-                <TouchableOpacity 
-                    style={{ ...styles.integrationItem, ...styles.card, backgroundColor: theme.COMP_COLOR }}
+                <TouchableOpacity
+                    style={{
+                        ...styles.integrationItem,
+                        ...styles.card,
+                        backgroundColor: theme.COMP_COLOR,
+                    }}
                 >
                     <View style={styles.integrationLeft}>
                         <View style={styles.integrationInfo}>
@@ -226,18 +270,27 @@ const IntegrationsScreen = ({ navigation }) => {
                             </Text>
                         </View>
                     </View>
-                    <TouchableOpacity 
-                        style={styles.connectionButtonComingSoon}
-                    >
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, fontSize: typography.bodySize, marginBottom: 0 }}>
+                    <TouchableOpacity style={styles.connectionButtonComingSoon}>
+                        <Text
+                            style={{
+                                ...styles.subHeading,
+                                color: theme.FOREGROUND,
+                                fontSize: typography.bodySize,
+                                marginBottom: 0,
+                            }}
+                        >
                             Coming Soon
                         </Text>
                     </TouchableOpacity>
                 </TouchableOpacity>
 
                 {/* Microsoft To Do Integration */}
-                <TouchableOpacity 
-                    style={{ ...styles.integrationItem, ...styles.card, backgroundColor: theme.COMP_COLOR }}
+                <TouchableOpacity
+                    style={{
+                        ...styles.integrationItem,
+                        ...styles.card,
+                        backgroundColor: theme.COMP_COLOR,
+                    }}
                 >
                     <View style={styles.integrationLeft}>
                         <View style={styles.integrationInfo}>
@@ -246,15 +299,19 @@ const IntegrationsScreen = ({ navigation }) => {
                             </Text>
                         </View>
                     </View>
-                    <TouchableOpacity 
-                        style={styles.connectionButtonComingSoon}
-                    >
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, fontSize: typography.bodySize, marginBottom: 0 }}>
+                    <TouchableOpacity style={styles.connectionButtonComingSoon}>
+                        <Text
+                            style={{
+                                ...styles.subHeading,
+                                color: theme.FOREGROUND,
+                                fontSize: typography.bodySize,
+                                marginBottom: 0,
+                            }}
+                        >
                             Coming Soon
                         </Text>
                     </TouchableOpacity>
                 </TouchableOpacity>
-
             </ScrollView>
         </View>
     );
@@ -355,10 +412,10 @@ const styles = StyleSheet.create({
         lineHeight: 20,
     },
     connectionButtonConnect: {
-        paddingVertical: 8, 
+        paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 8,
-        backgroundColor: '#000000'
+        backgroundColor: '#000000',
     },
     connectionButtonConnected: {
         paddingVertical: 8,
@@ -375,7 +432,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(128, 128, 128, 0.3)',
         outlineColor: 'gray',
         outlineWidth: 1,
-    }
+    },
 });
 
 export default IntegrationsScreen;

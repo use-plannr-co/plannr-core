@@ -16,7 +16,7 @@ export const spacing = {
     SPACING_14: 56,
     SPACING_15: 60,
     SPACING_16: 64,
-}
+};
 
 export const padding = {
     SCREEN_PADDING: 16,
@@ -33,4 +33,4 @@ export const padding = {
     PADDING_10: 40,
     PADDING_11: 44,
     PADDING_12: 48,
-}
+};

@@ -3,11 +3,13 @@
 ### 🔄 **What We Changed:**
 
 **Replaced Custom Modal with Native Alert:**
+
 - ❌ Removed: `src/components/ForceUpdateModal.jsx` (custom modal component)
 - ✅ Added: Native `Alert` implementation in `App.js`
 - ✅ Simplified: Update context and state management
 
 **Key Benefits of Native Alert:**
+
 - 🎯 **Native Feel**: Uses OS-native alert styling and behavior
 - 🚫 **Cannot Be Dismissed**: `cancelable: false` prevents accidental dismissal
 - 🔗 **Direct App Store**: "Update Now" button opens App Store immediately
@@ -17,21 +19,23 @@
 ### 📱 **Current Implementation:**
 
 **Alert Configuration:**
+
 ```javascript
 Alert.alert(
-    'Update Required',                    // Title
-    'Please update Plannr to continue.',  // Message from backend
+    'Update Required', // Title
+    'Please update Plannr to continue.', // Message from backend
     [
         // Development only
         { text: 'Retry Check', style: 'cancel', onPress: retryCheck },
         // Production button
-        { text: 'Update Now', style: 'default', onPress: openAppStore }
+        { text: 'Update Now', style: 'default', onPress: openAppStore },
     ],
-    { cancelable: false }  // Cannot be dismissed
+    { cancelable: false }, // Cannot be dismissed
 );
 ```
 
 **App Store Integration:**
+
 - Backend provides update URL: `https://apps.apple.com/app/plannr/id[YOUR_APP_ID]`
 - Fallback URLs configured for both iOS and Android
 - Direct navigation via `Linking.openURL()`
@@ -39,12 +43,14 @@ Alert.alert(
 ### 🧪 **Testing:**
 
 **Current Scenario (Version 1.1.0):**
+
 - ⚠️ **Expected**: Native alert appears on startup
 - 🚫 **Behavior**: Cannot dismiss alert without action
 - 🔄 **Development**: Shows "Retry Check" button for testing
 - 📱 **Production**: Only shows "Update Now" button
 
 **Test Commands:**
+
 ```bash
 # Test version logic
 node test-version-check.js
@@ -63,6 +69,7 @@ npx expo start
 ### 🔧 **Quick Configuration:**
 
 **To Allow App (No Alert):**
+
 ```json
 // In app.json
 "expo": {
@@ -71,8 +78,9 @@ npx expo start
 ```
 
 **To Trigger Alert:**
+
 ```json
-// In app.json  
+// In app.json
 "expo": {
   "version": "1.1.0"  // < minimum required
 }

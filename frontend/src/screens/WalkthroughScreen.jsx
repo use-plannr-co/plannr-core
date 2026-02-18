@@ -1,21 +1,31 @@
-import React, { useState, useRef } from 'react'
-import { View, Text, StyleSheet, Dimensions, Image, TouchableOpacity, ScrollView, Animated } from 'react-native'
+import React, { useState, useRef } from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    Dimensions,
+    Image,
+    TouchableOpacity,
+    ScrollView,
+    Animated,
+} from 'react-native';
 
-import { useAppState } from '../context/AppStateContext.js'
-import { useActionLogger } from '../hooks/useActionLogger.js'
+import { useAppState } from '../context/AppStateContext.js';
+import { useActionLogger } from '../hooks/useActionLogger.js';
 
-import { typography } from '../design/typography.js'
-import { lightColor, darkColor } from '../design/colors.js'
-import { spacing, padding } from '../design/spacing.js'
-import WalkthroughBottomSheet from '../components/WalkthroughBottomSheet.jsx'
+import { typography } from '../design/typography.js';
+import { lightColor, darkColor } from '../design/colors.js';
+import { spacing, padding } from '../design/spacing.js';
+import WalkthroughBottomSheet from '../components/WalkthroughBottomSheet.jsx';
 const { width, height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
-const IMAGE_WIDTH = (height > 900) ? 260 : (height > 800) ? 220 : 200;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
+const IMAGE_WIDTH = height > 900 ? 260 : height > 800 ? 220 : 200;
 
 const WalkthroughScreen = () => {
     const { appState, setAppState } = useAppState();
     const { logAction, logScreenView } = useActionLogger('Walkthrough');
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
     const [currentStep, setCurrentStep] = useState(0);
     const walkthroughBottomSheetRef = useRef(null);
@@ -37,7 +47,13 @@ const WalkthroughScreen = () => {
             <View style={styles.header}>
                 <Image
                     source={require('../../assets/icon.png')}
-                    style={{ width: 48, height: 48, marginBottom: SPACE, position: 'absolute', left: 0 }}
+                    style={{
+                        width: 48,
+                        height: 48,
+                        marginBottom: SPACE,
+                        position: 'absolute',
+                        left: 0,
+                    }}
                 />
                 <Text style={{ ...styles.title, marginBottom: 0 }}>Plannr</Text>
                 <TouchableOpacity
@@ -45,13 +61,15 @@ const WalkthroughScreen = () => {
                     onPress={() => {
                         logAction('walkthrough_skipped', { currentStep: currentStep });
                         console.log('Skip Pressed');
-                        setAppState(prevState => ({
+                        setAppState((prevState) => ({
                             ...prevState,
                             // onboarded: true, // Uncomment when onboarding is added
                         }));
                     }}
                 >
-                    <Text style={{ ...styles.subHeading, color: '#fff', marginBottom: 0 }}>Skip</Text>
+                    <Text style={{ ...styles.subHeading, color: '#fff', marginBottom: 0 }}>
+                        Skip
+                    </Text>
                 </TouchableOpacity>
             </View>
             <ScrollView
@@ -60,192 +78,303 @@ const WalkthroughScreen = () => {
                 scrollEnabled={false}
                 style={{ width: '100%', zIndex: 0 }}
             >
-                <Animated.View style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX0 }] }}>
+                <Animated.View
+                    style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX0 }] }}
+                >
                     <Image
                         source={require('../../assets/walkthrough/Planzo.png')}
-                        style={{ width: 300, height: 350, marginBottom: SPACE, alignSelf: 'center' }}
+                        style={{
+                            width: 300,
+                            height: 350,
+                            marginBottom: SPACE,
+                            alignSelf: 'center',
+                        }}
                     />
                     <Text style={{ ...styles.title, marginBottom: SPACE }}>I'm Planzo</Text>
-                    <Text style={{ ...styles.subHeading, marginBottom: SPACE, width: width - (2 * padding.SCREEN_PADDING), textAlign: 'center' }}>I'm your personal planning assistant! P.S. I'm getting a crazy update soon :)</Text>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            marginBottom: SPACE,
+                            width: width - 2 * padding.SCREEN_PADDING,
+                            textAlign: 'center',
+                        }}
+                    >
+                        I'm your personal planning assistant! P.S. I'm getting a crazy update soon
+                        :)
+                    </Text>
                 </Animated.View>
-                <Animated.View style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX1 }] }}>
+                <Animated.View
+                    style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX1 }] }}
+                >
                     <View style={styles.imageView}>
                         <Image
                             source={require('../../assets/walkthrough/HomeScreen.png')}
-                            style={{ borderRadius: 12, width: IMAGE_WIDTH, height: 20/9*IMAGE_WIDTH, alignSelf: 'center' }}
+                            style={{
+                                borderRadius: 12,
+                                width: IMAGE_WIDTH,
+                                height: (20 / 9) * IMAGE_WIDTH,
+                                alignSelf: 'center',
+                            }}
                         />
                     </View>
                     <Text style={{ ...styles.title, marginBottom: SPACE }}>Home Screen</Text>
-                    <Text style={{ ...styles.subHeading, marginBottom: SPACE, width: width - (2 * padding.SCREEN_PADDING), textAlign: 'center' }}>This is your home base where you can quickly access your tasks, schedules, and preferences.</Text>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            marginBottom: SPACE,
+                            width: width - 2 * padding.SCREEN_PADDING,
+                            textAlign: 'center',
+                        }}
+                    >
+                        This is your home base where you can quickly access your tasks, schedules,
+                        and preferences.
+                    </Text>
                 </Animated.View>
-                <Animated.View style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX2 }] }}>
+                <Animated.View
+                    style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX2 }] }}
+                >
                     <View style={styles.imageView}>
                         <Image
                             source={require('../../assets/walkthrough/TodaysTasks.png')}
-                            style={{ borderRadius: 12, width: IMAGE_WIDTH, height: 20/9*IMAGE_WIDTH, alignSelf: 'center' }}
+                            style={{
+                                borderRadius: 12,
+                                width: IMAGE_WIDTH,
+                                height: (20 / 9) * IMAGE_WIDTH,
+                                alignSelf: 'center',
+                            }}
                         />
                     </View>
                     <Text style={{ ...styles.title, marginBottom: SPACE }}>Today's Tasks</Text>
-                    <Text style={{ ...styles.subHeading, marginBottom: SPACE, width: width - (2 * padding.SCREEN_PADDING), textAlign: 'center' }}>This is your home base where you can quickly access your tasks, schedules, and preferences.</Text>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            marginBottom: SPACE,
+                            width: width - 2 * padding.SCREEN_PADDING,
+                            textAlign: 'center',
+                        }}
+                    >
+                        This is your home base where you can quickly access your tasks, schedules,
+                        and preferences.
+                    </Text>
                 </Animated.View>
-                <Animated.View style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX3 }] }}>
+                <Animated.View
+                    style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX3 }] }}
+                >
                     <View style={styles.imageView}>
                         <Image
                             source={require('../../assets/walkthrough/PlannrCenter.png')}
-                            style={{ borderRadius: 12, width: IMAGE_WIDTH, height: 20/9*IMAGE_WIDTH, alignSelf: 'center' }}
+                            style={{
+                                borderRadius: 12,
+                                width: IMAGE_WIDTH,
+                                height: (20 / 9) * IMAGE_WIDTH,
+                                alignSelf: 'center',
+                            }}
                         />
                     </View>
                     <Text style={{ ...styles.title, marginBottom: SPACE }}>Plannr Center</Text>
-                    <Text style={{ ...styles.subHeading, marginBottom: SPACE, width: width - (2 * padding.SCREEN_PADDING), textAlign: 'center' }}>This is your home base where you can quickly access your tasks, schedules, and preferences.</Text>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            marginBottom: SPACE,
+                            width: width - 2 * padding.SCREEN_PADDING,
+                            textAlign: 'center',
+                        }}
+                    >
+                        This is your home base where you can quickly access your tasks, schedules,
+                        and preferences.
+                    </Text>
                 </Animated.View>
-                <Animated.View style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX4 }] }}>
+                <Animated.View
+                    style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX4 }] }}
+                >
                     <View style={styles.imageView}>
                         <Image
                             source={require('../../assets/walkthrough/SavedSchedules.png')}
-                            style={{ borderRadius: 12, width: IMAGE_WIDTH, height: 20/9*IMAGE_WIDTH, alignSelf: 'center' }}
+                            style={{
+                                borderRadius: 12,
+                                width: IMAGE_WIDTH,
+                                height: (20 / 9) * IMAGE_WIDTH,
+                                alignSelf: 'center',
+                            }}
                         />
                     </View>
                     <Text style={{ ...styles.title, marginBottom: SPACE }}>Saved Schedules</Text>
-                    <Text style={{ ...styles.subHeading, marginBottom: SPACE, width: width - (2 * padding.SCREEN_PADDING), textAlign: 'center' }}>This is your home base where you can quickly access your tasks, schedules, and preferences.</Text>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            marginBottom: SPACE,
+                            width: width - 2 * padding.SCREEN_PADDING,
+                            textAlign: 'center',
+                        }}
+                    >
+                        This is your home base where you can quickly access your tasks, schedules,
+                        and preferences.
+                    </Text>
                 </Animated.View>
-                <Animated.View style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX5 }] }}>
+                <Animated.View
+                    style={{ ...styles.walkthroughView, transform: [{ translateX: indicatorX5 }] }}
+                >
                     <View style={styles.imageView}>
                         <Image
                             source={require('../../assets/walkthrough/Preferences.png')}
-                            style={{ borderRadius: 12, width: IMAGE_WIDTH, height: 20/9*IMAGE_WIDTH, alignSelf: 'center' }}
+                            style={{
+                                borderRadius: 12,
+                                width: IMAGE_WIDTH,
+                                height: (20 / 9) * IMAGE_WIDTH,
+                                alignSelf: 'center',
+                            }}
                         />
                     </View>
                     <Text style={{ ...styles.title, marginBottom: SPACE }}>Preferences</Text>
-                    <Text style={{ ...styles.subHeading, marginBottom: SPACE, width: width - (2 * padding.SCREEN_PADDING), textAlign: 'center' }}>This is your home base where you can quickly access your tasks, schedules, and preferences.</Text>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            marginBottom: SPACE,
+                            width: width - 2 * padding.SCREEN_PADDING,
+                            textAlign: 'center',
+                        }}
+                    >
+                        This is your home base where you can quickly access your tasks, schedules,
+                        and preferences.
+                    </Text>
                 </Animated.View>
             </ScrollView>
-            <View style={{ width: '100%', position: 'absolute', bottom: 32, }}>
+            <View style={{ width: '100%', position: 'absolute', bottom: 32 }}>
                 <Animated.Image
                     source={require('../../assets/walkthrough/PlanzoPeep.png')}
-                    style={{ width: 80, height: 72, alignSelf: 'center', marginBottom: -18, zIndex: 1, opacity: fadeAnim, alignSelf: 'flex-end', marginRight: 12 }}
+                    style={{
+                        width: 80,
+                        height: 72,
+                        alignSelf: 'center',
+                        marginBottom: -18,
+                        zIndex: 1,
+                        opacity: fadeAnim,
+                        alignSelf: 'flex-end',
+                        marginRight: 12,
+                    }}
                 />
                 <TouchableOpacity
                     style={styles.button2}
                     onPress={() => {
-                        logAction('walkthrough_next_pressed', { 
+                        logAction('walkthrough_next_pressed', {
                             fromStep: currentStep,
-                            toStep: currentStep + 1 
+                            toStep: currentStep + 1,
                         });
                         console.log(currentStep, 'Next Pressed');
                         if (currentStep === 0) {
                             Animated.timing(indicatorX0, {
-                                toValue: -(width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -(width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(fadeAnim, {
                                 toValue: 1,
                                 duration: 500,
                                 useNativeDriver: true,
                             }).start();
                             Animated.timing(indicatorX1, {
-                                toValue: -(width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -(width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX2, {
-                                toValue: -(width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -(width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX3, {
-                                toValue: -(width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -(width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX4, {
-                                toValue: -(width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -(width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX5, {
-                                toValue: -(width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -(width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             setCurrentStep(1);
                         } else if (currentStep === 1) {
                             Animated.timing(indicatorX1, {
-                                toValue: -2 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -2 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX2, {
-                                toValue: -2 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -2 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX3, {
-                                toValue: -2 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -2 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX4, {
-                                toValue: -2 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -2 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX5, {
-                                toValue: -2 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -2 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             setCurrentStep(2);
                         } else if (currentStep === 2) {
                             Animated.timing(indicatorX2, {
-                                toValue: -3 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -3 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX3, {
-                                toValue: -3 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -3 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX4, {
-                                toValue: -3 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -3 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX5, {
-                                toValue: -3 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -3 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             setCurrentStep(3);
                         } else if (currentStep === 3) {
                             Animated.timing(indicatorX3, {
-                                toValue: -4 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -4 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX4, {
-                                toValue: -4 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -4 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX5, {
-                                toValue: -4 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -4 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             setCurrentStep(4);
                         } else if (currentStep === 4) {
                             Animated.timing(indicatorX4, {
-                                toValue: -5 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -5 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             Animated.timing(indicatorX5, {
-                                toValue: -5 * (width - (2 * padding.SCREEN_PADDING)),
+                                toValue: -5 * (width - 2 * padding.SCREEN_PADDING),
                                 duration: 500,
                                 useNativeDriver: true,
-                            }).start()
+                            }).start();
                             setCurrentStep(5);
                         } else if (currentStep === 5) {
                             Animated.timing(fadeAnim, {
@@ -257,14 +386,16 @@ const WalkthroughScreen = () => {
                         }
                     }}
                 >
-                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+                    <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>
+                        Next
+                    </Text>
                 </TouchableOpacity>
             </View>
-            
+
             <WalkthroughBottomSheet ref={walkthroughBottomSheetRef} theme={theme} />
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -308,7 +439,7 @@ const styles = StyleSheet.create({
     },
     button1: {
         borderRadius: 12,
-        backgroundColor: '#000' ,
+        backgroundColor: '#000',
         paddingVertical: 12,
         paddingHorizontal: 16,
         flexDirection: 'row',
@@ -319,7 +450,7 @@ const styles = StyleSheet.create({
     button2: {
         width: '100%',
         borderRadius: 12,
-        backgroundColor: '#000' ,
+        backgroundColor: '#000',
         paddingVertical: 12,
         paddingHorizontal: 16,
         flexDirection: 'row',
@@ -327,10 +458,10 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     walkthroughView: {
-        width: width - (2 * padding.SCREEN_PADDING),
+        width: width - 2 * padding.SCREEN_PADDING,
         justifyContent: 'center',
         alignItems: 'center',
-    }
+    },
 });
 
 export default WalkthroughScreen;

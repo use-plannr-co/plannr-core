@@ -20,10 +20,10 @@ export const createSession = async (sessionData) => {
                 llmModel: sessionData.llmModel,
                 llmTokensIn: sessionData.llmTokensIn,
                 llmTokensOut: sessionData.llmTokensOut,
-                parseLatencyMs: sessionData.parseLatencyMs
+                parseLatencyMs: sessionData.parseLatencyMs,
             })
             .returning();
-        
+
         return session;
     } catch (error) {
         console.error('Error creating text-to-tasks session:', error);
@@ -37,11 +37,11 @@ export const getSessionById = async (sessionId, userId = null) => {
             .select()
             .from(textToTasksSessions)
             .where(eq(textToTasksSessions.id, sessionId));
-        
+
         if (userId) {
             query = query.where(eq(textToTasksSessions.userId, userId));
         }
-        
+
         const [session] = await query;
         return session || null;
     } catch (error) {
@@ -56,11 +56,11 @@ export const updateSession = async (sessionId, updates) => {
             .update(textToTasksSessions)
             .set({
                 ...updates,
-                updatedAt: new Date()
+                updatedAt: new Date(),
             })
             .where(eq(textToTasksSessions.id, sessionId))
             .returning();
-        
+
         return updated;
     } catch (error) {
         console.error('Error updating text-to-tasks session:', error);
@@ -76,7 +76,7 @@ export const getUserSessions = async (userId, limit = 10) => {
             .where(eq(textToTasksSessions.userId, userId))
             .orderBy(desc(textToTasksSessions.createdAt))
             .limit(limit);
-        
+
         return sessions;
     } catch (error) {
         console.error('Error getting user sessions:', error);
@@ -89,12 +89,9 @@ export const createDrafts = async (draftsData) => {
         if (!Array.isArray(draftsData) || draftsData.length === 0) {
             return [];
         }
-        
-        const drafts = await db
-            .insert(textToTasksDrafts)
-            .values(draftsData)
-            .returning();
-        
+
+        const drafts = await db.insert(textToTasksDrafts).values(draftsData).returning();
+
         return drafts;
     } catch (error) {
         console.error('Error creating text-to-tasks drafts:', error);
@@ -108,11 +105,11 @@ export const getDraftsBySessionId = async (sessionId, includeExcluded = false) =
             .select()
             .from(textToTasksDrafts)
             .where(eq(textToTasksDrafts.sessionId, sessionId));
-        
+
         if (!includeExcluded) {
             query = query.where(eq(textToTasksDrafts.included, true));
         }
-        
+
         const drafts = await query.orderBy(textToTasksDrafts.orderIndex);
         return drafts;
     } catch (error) {
@@ -127,11 +124,11 @@ export const updateDraft = async (draftId, updates) => {
             .update(textToTasksDrafts)
             .set({
                 ...updates,
-                updatedAt: new Date()
+                updatedAt: new Date(),
             })
             .where(eq(textToTasksDrafts.id, draftId))
             .returning();
-        
+
         return updated;
     } catch (error) {
         console.error('Error updating draft:', error);
@@ -142,23 +139,23 @@ export const updateDraft = async (draftId, updates) => {
 export const updateMultipleDrafts = async (updates) => {
     try {
         const results = [];
-        
+
         // Process updates in transaction if needed
         for (const { id, ...updateData } of updates) {
             const [updated] = await db
                 .update(textToTasksDrafts)
                 .set({
                     ...updateData,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
                 })
                 .where(eq(textToTasksDrafts.id, id))
                 .returning();
-            
+
             if (updated) {
                 results.push(updated);
             }
         }
-        
+
         return results;
     } catch (error) {
         console.error('Error updating multiple drafts:', error);
@@ -168,10 +165,8 @@ export const updateMultipleDrafts = async (updates) => {
 
 export const deleteDraft = async (draftId) => {
     try {
-        await db
-            .delete(textToTasksDrafts)
-            .where(eq(textToTasksDrafts.id, draftId));
-        
+        await db.delete(textToTasksDrafts).where(eq(textToTasksDrafts.id, draftId));
+
         return true;
     } catch (error) {
         console.error('Error deleting draft:', error);
@@ -186,15 +181,14 @@ export const deleteSession = async (sessionId, userId) => {
         if (!session) {
             throw new Error('Session not found or access denied');
         }
-        
+
         // Delete session (drafts will cascade delete)
         await db
             .delete(textToTasksSessions)
-            .where(and(
-                eq(textToTasksSessions.id, sessionId),
-                eq(textToTasksSessions.userId, userId)
-            ));
-        
+            .where(
+                and(eq(textToTasksSessions.id, sessionId), eq(textToTasksSessions.userId, userId))
+            );
+
         return true;
     } catch (error) {
         console.error('Error deleting session:', error);
@@ -208,12 +202,12 @@ export const getSessionWithDrafts = async (sessionId, userId, includeExcluded = 
         if (!session) {
             return null;
         }
-        
+
         const drafts = await getDraftsBySessionId(sessionId, includeExcluded);
-        
+
         return {
             ...session,
-            drafts
+            drafts,
         };
     } catch (error) {
         console.error('Error getting session with drafts:', error);
@@ -225,14 +219,14 @@ export const getSessionWithDrafts = async (sessionId, userId, includeExcluded = 
 export const deleteExpiredSessions = async () => {
     try {
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        
-        const result = await db
-            .delete(textToTasksSessions)
-            .where(and(
-                eq(textToTasksSessions.status, 'failed'),
+
+        const result = await db.delete(textToTasksSessions).where(
+            and(
+                eq(textToTasksSessions.status, 'failed')
                 // Only delete failed sessions older than 24 hours
-            ));
-        
+            )
+        );
+
         return result;
     } catch (error) {
         console.error('Error cleaning up expired sessions:', error);

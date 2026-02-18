@@ -24,7 +24,7 @@ export const AppUpdateProvider = ({ children }) => {
             return; // Prevent duplicate checks
         }
 
-        setUpdateState(prev => ({ ...prev, checking: true }));
+        setUpdateState((prev) => ({ ...prev, checking: true }));
 
         try {
             console.log('🔄 Starting app compatibility check...');
@@ -32,7 +32,7 @@ export const AppUpdateProvider = ({ children }) => {
 
             if (result.compatible) {
                 console.log('✅ App is compatible');
-                setUpdateState(prev => ({
+                setUpdateState((prev) => ({
                     ...prev,
                     checking: false,
                     hasChecked: true,
@@ -41,7 +41,7 @@ export const AppUpdateProvider = ({ children }) => {
                 }));
             } else {
                 console.warn('⚠️ App update required:', result.updateInfo);
-                setUpdateState(prev => ({
+                setUpdateState((prev) => ({
                     ...prev,
                     checking: false,
                     hasChecked: true,
@@ -52,7 +52,7 @@ export const AppUpdateProvider = ({ children }) => {
         } catch (error) {
             console.error('❌ App compatibility check failed:', error);
             // On error, allow app to proceed
-            setUpdateState(prev => ({
+            setUpdateState((prev) => ({
                 ...prev,
                 checking: false,
                 hasChecked: true,
@@ -67,7 +67,7 @@ export const AppUpdateProvider = ({ children }) => {
      */
     const triggerForceUpdate = (updateInfo) => {
         console.warn('🚨 Force update triggered by API response:', updateInfo);
-        setUpdateState(prev => ({
+        setUpdateState((prev) => ({
             ...prev,
             forceUpdate: true,
             updateInfo,
@@ -79,7 +79,7 @@ export const AppUpdateProvider = ({ children }) => {
      * This allows the alert to be shown again if needed
      */
     const resetUpdateState = () => {
-        setUpdateState(prev => ({
+        setUpdateState((prev) => ({
             ...prev,
             forceUpdate: false,
             updateInfo: null,
@@ -90,7 +90,7 @@ export const AppUpdateProvider = ({ children }) => {
      * Retry compatibility check
      */
     const retryCheck = () => {
-        setUpdateState(prev => ({
+        setUpdateState((prev) => ({
             ...prev,
             hasChecked: false,
             forceUpdate: false,
@@ -102,7 +102,7 @@ export const AppUpdateProvider = ({ children }) => {
     // Register global update handler for API calls
     useEffect(() => {
         setGlobalUpdateHandler(triggerForceUpdate);
-        
+
         // Cleanup on unmount
         return () => {
             setGlobalUpdateHandler(null);
@@ -129,11 +129,7 @@ export const AppUpdateProvider = ({ children }) => {
         resetUpdateState,
     };
 
-    return (
-        <AppUpdateContext.Provider value={contextValue}>
-            {children}
-        </AppUpdateContext.Provider>
-    );
+    return <AppUpdateContext.Provider value={contextValue}>{children}</AppUpdateContext.Provider>;
 };
 
 /**

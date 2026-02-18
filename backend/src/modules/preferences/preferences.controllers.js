@@ -10,33 +10,33 @@ import { mapFrontendToBackend, mapBackendToFrontend } from './preferences.valida
 export const getPreferences = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'] || req.query.clerkUserId;
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
         const userPreferences = await repo.getPreferencesByClerkId(clerkUserId);
-        
+
         if (!userPreferences) {
             // If no preferences exist, create default ones
             const user = await userRepo.getUserByClerkId(clerkUserId);
             if (!user) {
                 return res.status(404).json({
                     success: false,
-                    message: 'User not found'
+                    message: 'User not found',
                 });
             }
 
             const defaultPreferences = await repo.createPreferences(user.id);
             const frontendPrefs = mapBackendToFrontend(defaultPreferences);
-            
+
             return res.status(200).json({
                 success: true,
                 data: frontendPrefs,
-                message: 'Default preferences created and retrieved successfully'
+                message: 'Default preferences created and retrieved successfully',
             });
         }
 
@@ -46,7 +46,7 @@ export const getPreferences = async (req, res, next) => {
         res.status(200).json({
             success: true,
             data: frontendPrefs,
-            message: 'Preferences retrieved successfully'
+            message: 'Preferences retrieved successfully',
         });
     } catch (error) {
         next(error);
@@ -56,11 +56,11 @@ export const getPreferences = async (req, res, next) => {
 export const updatePreferences = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'] || req.query.clerkUserId;
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
@@ -68,7 +68,7 @@ export const updatePreferences = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
@@ -84,14 +84,17 @@ export const updatePreferences = async (req, res, next) => {
 
         // Check if preferences exist
         let userPreferences = await repo.getPreferencesByUserId(user.id);
-        
+
         if (!userPreferences) {
             console.log('📝 Creating new preferences...');
             // Create new preferences if they don't exist
             userPreferences = await repo.createPreferences(user.id, req.validatedData);
         } else {
             console.log('🔄 Updating existing preferences...');
-            console.log('🔍 Before update - existing prefs:', JSON.stringify(userPreferences, null, 2));
+            console.log(
+                '🔍 Before update - existing prefs:',
+                JSON.stringify(userPreferences, null, 2)
+            );
             // Update existing preferences
             userPreferences = await repo.updatePreferences(user.id, backendPrefs);
             console.log('✅ After update - new prefs:', JSON.stringify(userPreferences, null, 2));
@@ -105,7 +108,7 @@ export const updatePreferences = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: 'Preferences updated successfully',
-            data: frontendPrefs
+            data: frontendPrefs,
         });
     } catch (error) {
         console.error('💥 Error in updatePreferences:', error);
@@ -116,11 +119,11 @@ export const updatePreferences = async (req, res, next) => {
 export const resetPreferences = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'] || req.query.clerkUserId;
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
@@ -128,13 +131,13 @@ export const resetPreferences = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
         // Check if preferences exist
         const existingPrefs = await repo.getPreferencesByUserId(user.id);
-        
+
         let resetPreferences;
         if (!existingPrefs) {
             // Create default preferences if they don't exist
@@ -150,7 +153,7 @@ export const resetPreferences = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: 'Preferences reset successfully',
-            data: frontendPrefs
+            data: frontendPrefs,
         });
     } catch (error) {
         next(error);

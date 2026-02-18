@@ -15,12 +15,10 @@ export const parseBreak = (rawObj) => {
     if (!rawObj || rawObj.duration == null || rawObj.startTime == null || rawObj.endTime == null) {
         return null;
     }
-  
+
     return new Break(
         rawObj.duration,
         parseTime24(rawObj.startTime).toInt(),
-        parseTime24(rawObj.endTime).toInt()
+        parseTime24(rawObj.endTime).toInt(),
     );
 };
-
-

@@ -1,5 +1,16 @@
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
-import { Animated, Dimensions, PanResponder, View, Pressable, StyleSheet, ScrollView, TouchableOpacity, Text, Image } from 'react-native';
+import {
+    Animated,
+    Dimensions,
+    PanResponder,
+    View,
+    Pressable,
+    StyleSheet,
+    ScrollView,
+    TouchableOpacity,
+    Text,
+    Image,
+} from 'react-native';
 import { spacing } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 import { getAvatarList } from '../utils/avatarUtils.js';
@@ -7,7 +18,12 @@ import { getAvatarList } from '../utils/avatarUtils.js';
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const MAX_TRANSLATE_Y = SCREEN_HEIGHT * 0.6;
 
-const SPACE = (SCREEN_HEIGHT > 900) ? spacing.SPACING_4 : (SCREEN_HEIGHT > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const SPACE =
+    SCREEN_HEIGHT > 900
+        ? spacing.SPACING_4
+        : SCREEN_HEIGHT > 800
+          ? spacing.SPACING_3
+          : spacing.SPACING_2;
 
 const AvatarPickerBottomSheet = forwardRef(({ theme, selectedAvatar, onAvatarSelect }, ref) => {
     const translateY = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
@@ -31,7 +47,7 @@ const AvatarPickerBottomSheet = forwardRef(({ theme, selectedAvatar, onAvatarSel
                     }).start();
                 }
             },
-        })
+        }),
     ).current;
 
     const show = () => {
@@ -114,8 +130,25 @@ const AvatarPickerBottomSheet = forwardRef(({ theme, selectedAvatar, onAvatarSel
                         paddingVertical: 10,
                     }}
                 >
-                    <View style={{ height: 8, width: 40, backgroundColor: theme.INPUT, marginBottom: SPACE, alignSelf: 'center', borderRadius: 12 }} />
-                    <Text style={{ fontSize: typography.headingSize, fontFamily: 'AlbertSans', color: theme.FOREGROUND, marginBottom: SPACE, alignSelf: 'center' }}>
+                    <View
+                        style={{
+                            height: 8,
+                            width: 40,
+                            backgroundColor: theme.INPUT,
+                            marginBottom: SPACE,
+                            alignSelf: 'center',
+                            borderRadius: 12,
+                        }}
+                    />
+                    <Text
+                        style={{
+                            fontSize: typography.headingSize,
+                            fontFamily: 'AlbertSans',
+                            color: theme.FOREGROUND,
+                            marginBottom: SPACE,
+                            alignSelf: 'center',
+                        }}
+                    >
                         Choose Your Avatar
                     </Text>
                 </View>
@@ -128,16 +161,16 @@ const AvatarPickerBottomSheet = forwardRef(({ theme, selectedAvatar, onAvatarSel
                                 style={[
                                     styles.avatarOption,
                                     { backgroundColor: theme.INPUT },
-                                    selectedAvatar === avatar.name && { 
-                                        ...styles.selectedAvatarOption, 
+                                    selectedAvatar === avatar.name && {
+                                        ...styles.selectedAvatarOption,
                                         borderColor: theme.SELECTION,
-                                        backgroundColor: theme.SELECTION + '20' 
-                                    }
+                                        backgroundColor: theme.SELECTION + '20',
+                                    },
                                 ]}
                                 onPress={() => handleAvatarSelect(avatar.name)}
                             >
-                                <Image 
-                                    source={avatar.image} 
+                                <Image
+                                    source={avatar.image}
                                     style={styles.avatarImage}
                                     resizeMode="cover"
                                 />

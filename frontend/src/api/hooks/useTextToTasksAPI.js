@@ -5,6 +5,11 @@ export const useTextToTasksAPI = () => {
     const { makeAuthenticatedRequest } = useApiCore();
     return {
         parseTextToFlexibleEvents: (todoListText, defaultDeadline, preferences) =>
-            textToTasksApi.parseTextToFlexibleEvents(makeAuthenticatedRequest, todoListText, defaultDeadline, preferences),
+            textToTasksApi.parseTextToFlexibleEvents(
+                makeAuthenticatedRequest,
+                todoListText,
+                defaultDeadline,
+                preferences,
+            ),
     };
 };

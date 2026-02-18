@@ -11,7 +11,7 @@ const ActivityType = {
     RECREATIONAL: 'RECREATIONAL',
     ERRAND: 'ERRAND',
     OTHER: 'OTHER',
-    BREAK: 'BREAK'
+    BREAK: 'BREAK',
 };
-  
+
 export default ActivityType;

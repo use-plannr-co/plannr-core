@@ -1,6 +1,5 @@
 // List all chats (sidebar)
-export const getChats = (makeAuthenticatedRequest) =>
-    makeAuthenticatedRequest('/api/chat/chats');
+export const getChats = (makeAuthenticatedRequest) => makeAuthenticatedRequest('/api/chat/chats');
 
 // Create a new chat
 export const createChat = (makeAuthenticatedRequest, title) =>
@@ -21,11 +20,36 @@ export const deleteChat = (makeAuthenticatedRequest, chatId) =>
  * Send a message (SSE stream).
  * Returns a Promise<abortFn>.
  */
-export const sendMessage = (makeStreamingRequest, chatId, message, onEvent, onDone, onError) =>
-    makeStreamingRequest(
+export const sendMessage = (makeStreamingRequest, chatId, message, onEvent, onDone, onError) => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return makeStreamingRequest(
         `/api/chat/chats/${chatId}/messages`,
-        { method: 'POST', body: JSON.stringify({ message }) },
+        { method: 'POST', body: JSON.stringify({ message, timezone }) },
         onEvent,
         onDone,
         onError,
     );
+};
+
+/**
+ * Submit the result of a confirmed action (SSE stream).
+ * Triggers Claude's confirmation response without incrementing daily usage.
+ */
+export const submitActionResult = (
+    makeStreamingRequest,
+    chatId,
+    actionType,
+    summary,
+    onEvent,
+    onDone,
+    onError,
+) => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return makeStreamingRequest(
+        `/api/chat/chats/${chatId}/action-result`,
+        { method: 'POST', body: JSON.stringify({ actionType, summary, timezone }) },
+        onEvent,
+        onDone,
+        onError,
+    );
+};

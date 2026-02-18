@@ -1,32 +1,58 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Animated, StyleSheet } from 'react-native';
+import { View, Animated, Easing, StyleSheet } from 'react-native';
+
+const BOUNCE_HEIGHT = -7; // px upward travel
+const UP_DURATION = 220; // ms rising
+const DOWN_DURATION = 220; // ms falling
+const STAGGER = 150; // ms between each dot
+const TOTAL_CYCLE = 1000; // ms for full loop iteration
 
 export default function ChatTypingIndicator({ color = '#888' }) {
-    const dot1 = useRef(new Animated.Value(0.3)).current;
-    const dot2 = useRef(new Animated.Value(0.3)).current;
-    const dot3 = useRef(new Animated.Value(0.3)).current;
+    const dot1 = useRef(new Animated.Value(0)).current;
+    const dot2 = useRef(new Animated.Value(0)).current;
+    const dot3 = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        const pulse = (dot, delay) => Animated.loop(
-            Animated.sequence([
-                Animated.delay(delay),
-                Animated.timing(dot, { toValue: 1, duration: 300, useNativeDriver: true }),
-                Animated.timing(dot, { toValue: 0.3, duration: 300, useNativeDriver: true }),
-                Animated.delay(600),
-            ])
-        ).start();
+        const bounce = (dot, staggerDelay) =>
+            Animated.loop(
+                Animated.sequence([
+                    Animated.delay(staggerDelay),
+                    Animated.timing(dot, {
+                        toValue: BOUNCE_HEIGHT,
+                        duration: UP_DURATION,
+                        easing: Easing.out(Easing.quad),
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(dot, {
+                        toValue: 0,
+                        duration: DOWN_DURATION,
+                        easing: Easing.in(Easing.quad),
+                        useNativeDriver: true,
+                    }),
+                    Animated.delay(TOTAL_CYCLE - staggerDelay - UP_DURATION - DOWN_DURATION),
+                ]),
+            ).start();
 
-        pulse(dot1, 0);
-        pulse(dot2, 250);
-        pulse(dot3, 500);
-    }, [dot1, dot2, dot3]);
+        bounce(dot1, 0);
+        bounce(dot2, STAGGER);
+        bounce(dot3, STAGGER * 2);
+
+        return () => {
+            dot1.stopAnimation();
+            dot2.stopAnimation();
+            dot3.stopAnimation();
+        };
+    }, []);
 
     return (
         <View style={styles.row}>
             {[dot1, dot2, dot3].map((dot, i) => (
                 <Animated.View
                     key={i}
-                    style={[styles.dot, { backgroundColor: color, opacity: dot }]}
+                    style={[
+                        styles.dot,
+                        { backgroundColor: color, transform: [{ translateY: dot }] },
+                    ]}
                 />
             ))}
         </View>
@@ -37,12 +63,12 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 4,
-        gap: 6,
+        gap: 5,
+        marginTop: 4,
     },
     dot: {
-        width: 8,
-        height: 8,
+        width: 7,
+        height: 7,
         borderRadius: 4,
     },
 });

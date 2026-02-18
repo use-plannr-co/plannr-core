@@ -1,8 +1,8 @@
-import EventDependencies from "../model/EventDependencies.js";
-import RigidEvent from "../model/RigidEvent.js";
-import FlexibleEvent from "../model/FlexibleEvent.js";
-import { serializeRigidEvent, parseRigidEvent } from "./RigidEventHandler.js";
-import { serializeFlexibleEvent, parseFlexibleEvent } from "./FlexibleEventHandler.js";
+import EventDependencies from '../model/EventDependencies.js';
+import RigidEvent from '../model/RigidEvent.js';
+import FlexibleEvent from '../model/FlexibleEvent.js';
+import { serializeRigidEvent, parseRigidEvent } from './RigidEventHandler.js';
+import { serializeFlexibleEvent, parseFlexibleEvent } from './FlexibleEventHandler.js';
 
 export const serializeEventDependencies = (eventDeps) => {
     if (!eventDeps) return null;
@@ -47,7 +47,12 @@ export const parseEventDependencies = (rawArr) => {
         let event = null;
         if (rawEvent && rawEvent.deadline != null) {
             event = parseFlexibleEvent(rawEvent);
-        } else if (rawEvent && rawEvent.date != null && rawEvent.startTime != null && rawEvent.endTime != null) {
+        } else if (
+            rawEvent &&
+            rawEvent.date != null &&
+            rawEvent.startTime != null &&
+            rawEvent.endTime != null
+        ) {
             event = parseRigidEvent(rawEvent);
         }
         if (!event) continue;
@@ -57,7 +62,12 @@ export const parseEventDependencies = (rawArr) => {
             let dep = null;
             if (rawDep && rawDep.deadline != null) {
                 dep = parseFlexibleEvent(rawDep);
-            } else if (rawDep && rawDep.date != null && rawDep.startTime != null && rawDep.endTime != null) {
+            } else if (
+                rawDep &&
+                rawDep.date != null &&
+                rawDep.startTime != null &&
+                rawDep.endTime != null
+            ) {
                 dep = parseRigidEvent(rawDep);
             }
             if (dep) depsList.push(dep);

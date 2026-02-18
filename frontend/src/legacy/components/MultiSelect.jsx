@@ -8,56 +8,74 @@ import { typography } from '../design/typography.js';
 
 const MultiSelect = ({ currentSelected, items, selectedItems, onSelect }) => {
     const { appState } = useAppState();
-    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
     const [checkedItems, setCheckedItems] = useState([]);
     const [showOptions, setShowOptions] = useState(false);
 
     return (
         <View>
-            <View style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}>
+            <View
+                style={{ ...styles.input, backgroundColor: theme.INPUT, color: theme.FOREGROUND }}
+            >
                 <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: theme.FOREGROUND }}>
                     Select prerequisites
                 </Text>
                 <TouchableOpacity onPress={() => setShowOptions(!showOptions)}>
-                    <DropDownIcon width={24} height={24} color={theme.FOREGROUND}/>
+                    <DropDownIcon width={24} height={24} color={theme.FOREGROUND} />
                 </TouchableOpacity>
             </View>
-            { showOptions && (
+            {showOptions && (
                 <FlatList
-                    data={items.filter(item => item.id !== currentSelected?.id)}
+                    data={items.filter((item) => item.id !== currentSelected?.id)}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => {
-                        const isChecked = selectedItems.some(i => i.id === item.id);
+                        const isChecked = selectedItems.some((i) => i.id === item.id);
                         return (
-                            <View 
-                                style={{ padding: 8, borderBottomWidth: 1, borderColor: (theme.FOREGROUND + '1A'), flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+                            <View
+                                style={{
+                                    padding: 8,
+                                    borderBottomWidth: 1,
+                                    borderColor: theme.FOREGROUND + '1A',
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                }}
                             >
-                                <Text style={{ fontFamily: 'AlbertSans', fontSize: 16, color: theme.FOREGROUND }}>{item.name}</Text>
-                                <Checkbox 
+                                <Text
+                                    style={{
+                                        fontFamily: 'AlbertSans',
+                                        fontSize: 16,
+                                        color: theme.FOREGROUND,
+                                    }}
+                                >
+                                    {item.name}
+                                </Text>
+                                <Checkbox
                                     onChange={() => {
                                         const updated = isChecked
-                                          ? selectedItems.filter(i => i.id !== item.id)
-                                          : [...selectedItems, item];
+                                            ? selectedItems.filter((i) => i.id !== item.id)
+                                            : [...selectedItems, item];
                                         onSelect(updated);
-                                    }} 
-                                    checked={checkedItems.includes(item)} 
-                                    needAbsolute={false} 
+                                    }}
+                                    checked={checkedItems.includes(item)}
+                                    needAbsolute={false}
                                 />
                             </View>
-                    )}}
+                        );
+                    }}
                     style={{ maxHeight: 200, borderRadius: 12, marginTop: 8 }}
-                />) 
-            }
+                />
+            )}
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     input: {
         width: 300,
         height: 40,
-        borderRadius: 12, 
+        borderRadius: 12,
         fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
@@ -65,7 +83,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 16
+        marginBottom: 16,
     },
 });
 

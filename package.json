@@ -20,8 +20,8 @@
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && npm run build",
     
-    "frontend": "cd frontend && npm start",
-    "backend": "cd backend && npm run dev",
+    "ui": "cd frontend && npm start",
+    "server": "cd backend && npm run dev",
     
     "ios": "cd frontend && npm run ios",
     "android": "cd frontend && npm run android",
@@ -34,6 +34,13 @@
     "lint": "npm run lint:frontend && npm run lint:backend",
     "lint:frontend": "cd frontend && npm run lint",
     "lint:backend": "cd backend && npm run lint",
+
+    "format": "npm run format:backend && npm run format:frontend",
+    "format:frontend": "cd frontend && npm run format",
+    "format:backend": "cd backend && npm run format",
+    "format:check": "npm run format:check:backend && npm run format:check:frontend",
+    "format:check:frontend": "cd frontend && npm run format:check",
+    "format:check:backend": "cd backend && npm run format:check",
     
     "test": "npm run test:frontend && npm run test:backend",
     "test:frontend": "cd frontend && npm test",

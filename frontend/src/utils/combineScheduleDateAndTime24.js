@@ -9,8 +9,8 @@ const combineScheduleDateAndTime24 = (scheduleDate, time24) => {
 
     const { date, month, year } = scheduleDate;
     const { hour, minute } = time24;
-  
+
     return new Date(year, month - 1, date, hour, minute, 0, 0);
 };
-  
-export default combineScheduleDateAndTime24;  
+
+export default combineScheduleDateAndTime24;

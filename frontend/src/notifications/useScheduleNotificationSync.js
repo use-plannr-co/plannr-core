@@ -17,13 +17,13 @@ export default function useScheduleNotificationSync(activeSchedule, userPreferen
                 for (const task of tasks) {
                     if (task.completed) continue;
                     const leadMinutes = parseInt(userPreferences.leadMinutes) || 10;
-                    (task.type === 'break') 
+                    task.type === 'break'
                         ? NotificationService.scheduleBreakReminder(task, leadMinutes)
                         : NotificationService.scheduleTaskReminder(task, leadMinutes);
                 }
             }
 
-            console.log("🔁 Notifications synced with active schedule.");
+            console.log('🔁 Notifications synced with active schedule.');
         };
 
         syncNotifications();

@@ -1,5 +1,15 @@
 import React, { useRef, useImperativeHandle, forwardRef } from 'react';
-import { Animated, Dimensions, PanResponder, View, Pressable, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
+import {
+    Animated,
+    Dimensions,
+    PanResponder,
+    View,
+    Pressable,
+    StyleSheet,
+    ScrollView,
+    TouchableOpacity,
+    Text,
+} from 'react-native';
 import { spacing } from '../design/spacing.js';
 import { useAppState } from '../context/AppStateContext.js';
 import { typography } from '../design/typography.js';
@@ -9,7 +19,12 @@ import Apple from '../../assets/auth/Apple.svg';
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const MAX_TRANSLATE_Y = SCREEN_HEIGHT * 0.4;
 
-const SPACE = (SCREEN_HEIGHT > 900) ? spacing.SPACING_4 : (SCREEN_HEIGHT > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const SPACE =
+    SCREEN_HEIGHT > 900
+        ? spacing.SPACING_4
+        : SCREEN_HEIGHT > 800
+          ? spacing.SPACING_3
+          : spacing.SPACING_2;
 
 const ExportCalendarBottomSheet = forwardRef(({ onExportGoogle, onExportApple, theme }, ref) => {
     const { appState } = useAppState();
@@ -33,7 +48,7 @@ const ExportCalendarBottomSheet = forwardRef(({ onExportGoogle, onExportApple, t
                     }).start();
                 }
             },
-        })
+        }),
     ).current;
 
     const show = () => {
@@ -119,15 +134,40 @@ const ExportCalendarBottomSheet = forwardRef(({ onExportGoogle, onExportApple, t
                         paddingVertical: 10,
                     }}
                 >
-                    <View style={{ height: 8, width: 40, backgroundColor: theme.INPUT, marginBottom: SPACE, alignSelf: 'center', borderRadius: 12 }} />
-                    <Text style={{ fontSize: typography.headingSize, fontFamily: 'AlbertSans', color: theme.FOREGROUND, marginBottom: SPACE, alignSelf: 'center' }}>
+                    <View
+                        style={{
+                            height: 8,
+                            width: 40,
+                            backgroundColor: theme.INPUT,
+                            marginBottom: SPACE,
+                            alignSelf: 'center',
+                            borderRadius: 12,
+                        }}
+                    />
+                    <Text
+                        style={{
+                            fontSize: typography.headingSize,
+                            fontFamily: 'AlbertSans',
+                            color: theme.FOREGROUND,
+                            marginBottom: SPACE,
+                            alignSelf: 'center',
+                        }}
+                    >
                         Export Schedule
                     </Text>
-                    <Text style={{ fontSize: typography.bodySize, fontFamily: 'AlbertSans', color: theme.FOREGROUND, marginBottom: SPACE * 2, alignSelf: 'center' }}>
+                    <Text
+                        style={{
+                            fontSize: typography.bodySize,
+                            fontFamily: 'AlbertSans',
+                            color: theme.FOREGROUND,
+                            marginBottom: SPACE * 2,
+                            alignSelf: 'center',
+                        }}
+                    >
                         Choose where to export your schedule
                     </Text>
                 </View>
-                
+
                 <ScrollView style={{ borderRadius: 12 }}>
                     {/* Google Calendar Option */}
                     <TouchableOpacity
@@ -142,7 +182,9 @@ const ExportCalendarBottomSheet = forwardRef(({ onExportGoogle, onExportApple, t
                                 <Text style={[styles.optionTitle, { color: theme.FOREGROUND }]}>
                                     Google Calendar
                                 </Text>
-                                <Text style={[styles.optionDescription, { color: theme.FOREGROUND }]}>
+                                <Text
+                                    style={[styles.optionDescription, { color: theme.FOREGROUND }]}
+                                >
                                     Export to your Google Calendar
                                 </Text>
                             </View>
@@ -162,7 +204,9 @@ const ExportCalendarBottomSheet = forwardRef(({ onExportGoogle, onExportApple, t
                                 <Text style={[styles.optionTitle, { color: theme.FOREGROUND }]}>
                                     Apple Calendar
                                 </Text>
-                                <Text style={[styles.optionDescription, { color: theme.FOREGROUND }]}>
+                                <Text
+                                    style={[styles.optionDescription, { color: theme.FOREGROUND }]}
+                                >
                                     Export to your device calendar
                                 </Text>
                             </View>

@@ -16,7 +16,8 @@ import useCurrentTime from '../utils/useCurrentTime.js';
 import GoBackIcon from '../../assets/system-icons/GoBackIcon.svg';
 
 const { width, height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const ProductivityAnalyticsScreen = ({ navigation }) => {
     const { appState, storageLoaded } = useAppState();
@@ -36,17 +37,11 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
     const todaysDate = convertDateToScheduleDate(currentTime);
 
     return (
-        <ProGate 
-            navigation={navigation} 
-            featureKey="productivity_analytics"
-        >
+        <ProGate navigation={navigation} featureKey="productivity_analytics">
             <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
                 {/* Header with back button */}
                 <View style={styles.header}>
-                    <TouchableOpacity 
-                        onPress={() => navigation.goBack()}
-                        style={styles.backButton}
-                    >
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                         <GoBackIcon width={24} height={24} color={theme.FOREGROUND} />
                     </TouchableOpacity>
                 </View>

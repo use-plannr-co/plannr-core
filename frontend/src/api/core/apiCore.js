@@ -23,22 +23,31 @@ export const setGlobalUpdateHandler = (handler) => {
  * @returns {Function} abort — call to cancel the in-flight request
  */
 export const makeStreamingRequest = async (
-    getToken, userId, endpoint, options = {},
-    onEvent, onDone, onError
+    getToken,
+    userId,
+    endpoint,
+    options = {},
+    onEvent,
+    onDone,
+    onError,
 ) => {
     const controller = new AbortController();
 
     // Internal helper — makes the HTTP request with a given auth token.
     // Returns the Response on success, or throws on non-429/non-retryable errors.
     const doRequest = async (authToken, clerkUserId, allowDevRetry) => {
-        const response = await apiClient.makeRequest(endpoint, {
-            ...options,
-            headers: {
-                'x-clerk-user-id': clerkUserId,
-                ...options.headers,
+        const response = await apiClient.makeRequest(
+            endpoint,
+            {
+                ...options,
+                headers: {
+                    'x-clerk-user-id': clerkUserId,
+                    ...options.headers,
+                },
+                signal: controller.signal,
             },
-            signal: controller.signal,
-        }, authToken);
+            authToken,
+        );
 
         if (!response.ok) {
             // Dev-only 401 retry with dev token (mirrors makeAuthenticatedRequest behaviour)
@@ -51,7 +60,9 @@ export const makeStreamingRequest = async (
             }
             const errorText = await response.text();
             let parsed;
-            try { parsed = JSON.parse(errorText); } catch (_) {}
+            try {
+                parsed = JSON.parse(errorText);
+            } catch (_) {}
             if (response.status === 429) {
                 const err = new Error(parsed?.message || 'Rate limit exceeded');
                 err.code = parsed?.error;
@@ -65,7 +76,8 @@ export const makeStreamingRequest = async (
 
     try {
         const token = await getToken();
-        const authToken = token || (__DEV__ ? 'dev:frontend-user-123:frontend-dev@plannr.app' : null);
+        const authToken =
+            token || (__DEV__ ? 'dev:frontend-user-123:frontend-dev@plannr.app' : null);
         if (!authToken) {
             onError?.(new Error('Authentication required.'));
             return () => {};
@@ -87,7 +99,9 @@ export const makeStreamingRequest = async (
                 if (line.startsWith('event: ')) {
                     currentEvent = line.slice(7).trim();
                 } else if (line.startsWith('data: ') && currentEvent) {
-                    try { onEvent(currentEvent, JSON.parse(line.slice(6))); } catch (_) {}
+                    try {
+                        onEvent(currentEvent, JSON.parse(line.slice(6)));
+                    } catch (_) {}
                     currentEvent = null;
                 }
             }
@@ -109,7 +123,10 @@ export const makeStreamingRequest = async (
                 try {
                     while (true) {
                         const { done, value } = await reader.read();
-                        if (done) { onDone?.(); break; }
+                        if (done) {
+                            onDone?.();
+                            break;
+                        }
                         buffer += decoder.decode(value, { stream: true });
                         const lines = buffer.split('\n');
                         buffer = lines.pop(); // keep incomplete last line
@@ -142,13 +159,17 @@ export const makeAuthenticatedRequest = async (getToken, userId, endpoint, optio
             }
         }
 
-        const response = await apiClient.makeRequest(endpoint, {
-            ...options,
-            headers: {
-                'x-clerk-user-id': userId || (__DEV__ ? 'dev-user-id' : null),
-                ...options.headers,
+        const response = await apiClient.makeRequest(
+            endpoint,
+            {
+                ...options,
+                headers: {
+                    'x-clerk-user-id': userId || (__DEV__ ? 'dev-user-id' : null),
+                    ...options.headers,
+                },
             },
-        }, authToken);
+            authToken,
+        );
 
         // Check if response indicates update requirement
         const updateCheck = await apiClient.checkForUpdateRequirement(response.clone());
@@ -172,13 +193,17 @@ export const makeAuthenticatedRequest = async (getToken, userId, endpoint, optio
             if (response.status === 401 && token && authToken === token && __DEV__) {
                 console.log('🔧 Clerk token failed with 401, retrying with development auth');
 
-                const retryResponse = await apiClient.makeRequest(endpoint, {
-                    ...options,
-                    headers: {
-                        'x-clerk-user-id': 'dev-user-id',
-                        ...options.headers,
+                const retryResponse = await apiClient.makeRequest(
+                    endpoint,
+                    {
+                        ...options,
+                        headers: {
+                            'x-clerk-user-id': 'dev-user-id',
+                            ...options.headers,
+                        },
                     },
-                }, 'dev:frontend-user-123:frontend-dev@plannr.app');
+                    'dev:frontend-user-123:frontend-dev@plannr.app',
+                );
 
                 if (!retryResponse.ok) {
                     const retryErrorData = await retryResponse.text();
@@ -192,7 +217,10 @@ export const makeAuthenticatedRequest = async (getToken, userId, endpoint, optio
 
             // Handle specific error codes from backend
             if (parsedError && parsedError.error) {
-                if (parsedError.error === 'GOOGLE_ACCOUNT_REAUTH_NEEDED' || parsedError.error === 'GOOGLE_ACCOUNT_NOT_FOUND') {
+                if (
+                    parsedError.error === 'GOOGLE_ACCOUNT_REAUTH_NEEDED' ||
+                    parsedError.error === 'GOOGLE_ACCOUNT_NOT_FOUND'
+                ) {
                     const specificError = new Error(parsedError.error);
                     specificError.message = parsedError.message || specificError.message;
                     specificError.errorCode = parsedError.error;
@@ -207,7 +235,9 @@ export const makeAuthenticatedRequest = async (getToken, userId, endpoint, optio
                 try {
                     const errorJson = JSON.parse(errorData);
                     if (errorJson.message?.includes('text-to-tasks')) {
-                        rateLimitError = new Error('TOO_MANY_REQUESTS: Text-to-tasks rate limit exceeded');
+                        rateLimitError = new Error(
+                            'TOO_MANY_REQUESTS: Text-to-tasks rate limit exceeded',
+                        );
                     } else {
                         rateLimitError = new Error('TOO_MANY_REQUESTS: Rate limit exceeded');
                     }

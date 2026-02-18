@@ -38,7 +38,7 @@ const deriveSubscriptionState = (customerInfo) => {
 export const SubscriptionProvider = ({ children }) => {
     const { isSignedIn, user } = useUser();
     const { getToken, userId } = useAuth();
-    
+
     // Subscription state
     const [subscriptionState, setSubscriptionState] = useState({
         isPro: false,
@@ -86,22 +86,28 @@ export const SubscriptionProvider = ({ children }) => {
                 rc_app_user_id: userId,
                 is_pro: subscriptionData.isPro || false,
                 entitlement_active: subscriptionData.isPro || false,
-                expiration_at: subscriptionData.expirationAt ? new Date(subscriptionData.expirationAt).toISOString() : null,
+                expiration_at: subscriptionData.expirationAt
+                    ? new Date(subscriptionData.expirationAt).toISOString()
+                    : null,
                 product_id: subscriptionData.productId || null,
                 store: 'app_store',
                 metadata: {
-                    last_app_sync: new Date().toISOString()
-                }
+                    last_app_sync: new Date().toISOString(),
+                },
             };
 
-            const response = await apiClient.makeRequest('/api/subscriptions/sync', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-clerk-user-id': userId,
+            const response = await apiClient.makeRequest(
+                '/api/subscriptions/sync',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-clerk-user-id': userId,
+                    },
+                    body: JSON.stringify(payload),
                 },
-                body: JSON.stringify(payload),
-            }, token);
+                token,
+            );
 
             if (response.ok) {
                 const result = await response.json();
@@ -141,7 +147,9 @@ export const SubscriptionProvider = ({ children }) => {
             // Check for API key
             const apiKey = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
             if (!apiKey) {
-                console.error('❌ SubscriptionProvider: EXPO_PUBLIC_REVENUECAT_IOS_API_KEY not configured');
+                console.error(
+                    '❌ SubscriptionProvider: EXPO_PUBLIC_REVENUECAT_IOS_API_KEY not configured',
+                );
                 setError('Subscription configuration missing');
                 setIsLoading(false);
                 setIsReady(true); // Still mark as ready to not block app
@@ -173,17 +181,22 @@ export const SubscriptionProvider = ({ children }) => {
                 // Setup listener for customer info updates
                 // Wrap in try-catch to handle potential NativeEventEmitter errors
                 try {
-                    unsubscribe = SubscriptionService.addCustomerInfoListener((updatedCustomerInfo) => {
-                        console.log('📱 SubscriptionProvider: Customer info updated');
-                        const derivedState = deriveSubscriptionState(updatedCustomerInfo);
-                        setCustomerInfo(updatedCustomerInfo);
-                        setSubscriptionState(derivedState);
+                    unsubscribe = SubscriptionService.addCustomerInfoListener(
+                        (updatedCustomerInfo) => {
+                            console.log('📱 SubscriptionProvider: Customer info updated');
+                            const derivedState = deriveSubscriptionState(updatedCustomerInfo);
+                            setCustomerInfo(updatedCustomerInfo);
+                            setSubscriptionState(derivedState);
 
-                        // Sync with backend when subscription changes
-                        syncSubscriptionWithBackend(derivedState);
-                    });
+                            // Sync with backend when subscription changes
+                            syncSubscriptionWithBackend(derivedState);
+                        },
+                    );
                 } catch (listenerError) {
-                    console.warn('⚠️ SubscriptionProvider: Could not set up listener:', listenerError.message);
+                    console.warn(
+                        '⚠️ SubscriptionProvider: Could not set up listener:',
+                        listenerError.message,
+                    );
                     // Continue without listener - state updates will happen on manual refresh
                 }
 
@@ -292,12 +305,12 @@ export const SubscriptionProvider = ({ children }) => {
         // Subscription state
         ...subscriptionState,
         customerInfo,
-        
+
         // Status flags
         isLoading,
         isReady,
         error,
-        
+
         // Actions
         refreshSubscription,
         purchasePackage,
@@ -307,9 +320,7 @@ export const SubscriptionProvider = ({ children }) => {
     };
 
     return (
-        <SubscriptionContext.Provider value={contextValue}>
-            {children}
-        </SubscriptionContext.Provider>
+        <SubscriptionContext.Provider value={contextValue}>{children}</SubscriptionContext.Provider>
     );
 };
 
@@ -319,10 +330,10 @@ export const SubscriptionProvider = ({ children }) => {
  */
 export const useSubscription = () => {
     const context = useContext(SubscriptionContext);
-    
+
     if (!context) {
         throw new Error('useSubscription must be used within SubscriptionProvider');
     }
-    
+
     return context;
 };

@@ -1,17 +1,28 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { Text, View, Animated, Image, StyleSheet, Dimensions, TextInput, TouchableOpacity, ScrollView } from 'react-native'
-import * as Font from 'expo-font'
+import React, { useState, useRef, useEffect } from 'react';
+import {
+    Text,
+    View,
+    Animated,
+    Image,
+    StyleSheet,
+    Dimensions,
+    TextInput,
+    TouchableOpacity,
+    ScrollView,
+} from 'react-native';
+import * as Font from 'expo-font';
 
-import { useAppState } from '../../context/AppStateContext'
-import { useActionLogger } from '../../hooks/useActionLogger.js'
+import { useAppState } from '../../context/AppStateContext';
+import { useActionLogger } from '../../hooks/useActionLogger.js';
 
-import { lightColor, darkColor } from '../../design/colors.js'
-import { spacing, padding } from '../../design/spacing.js'
-import { typography  } from '../../design/typography.js'
-import { getAvatarList, getRandomAvatar } from '../../utils/avatarUtils.js'
-import { useAuthenticatedAPI } from '../api/index.js'
+import { lightColor, darkColor } from '../../design/colors.js';
+import { spacing, padding } from '../../design/spacing.js';
+import { typography } from '../../design/typography.js';
+import { getAvatarList, getRandomAvatar } from '../../utils/avatarUtils.js';
+import { useAuthenticatedAPI } from '../api/index.js';
 const { width, height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const OnboardingScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
@@ -19,8 +30,8 @@ const OnboardingScreen = ({ navigation }) => {
     const { logAction, logScreenView, logError } = useActionLogger('Onboarding');
 
     const [fontsLoaded] = Font.useFonts({
-            'PinkSunset': require('../../assets/fonts/PinkSunset-Regular.ttf'),
-            'AlbertSans': require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
+        PinkSunset: require('../../assets/fonts/PinkSunset-Regular.ttf'),
+        AlbertSans: require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
     });
 
     const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
@@ -35,7 +46,7 @@ const OnboardingScreen = ({ navigation }) => {
         } else if (currentStep === 3) {
             return false;
         }
-    }
+    };
 
     // Y-coordinate for Logo
     const indicatorYLogo = useRef(new Animated.Value(0)).current;
@@ -44,7 +55,7 @@ const OnboardingScreen = ({ navigation }) => {
     const [name, setName] = useState('');
     const indicatorXName = useRef(new Animated.Value(0)).current;
     const fadeAnim = useRef(new Animated.Value(0)).current;
-    
+
     // Information for Avatar Card
     const [selectedAvatar, setSelectedAvatar] = useState('');
     const indicatorXAvatar = useRef(new Animated.Value(0)).current;
@@ -60,8 +71,8 @@ const OnboardingScreen = ({ navigation }) => {
 
     const enterName = (name) => {
         logAction('onboarding_name_entered', { nameLength: name.trim().length });
-        
-        setAppState(prevState => ({
+
+        setAppState((prevState) => ({
             ...prevState,
             name: name.trim(),
         }));
@@ -80,18 +91,18 @@ const OnboardingScreen = ({ navigation }) => {
 
     const enterAvatar = (avatar) => {
         logAction('onboarding_avatar_selected', { avatarName: avatar });
-        
-        setAppState(prevState => ({
+
+        setAppState((prevState) => ({
             ...prevState,
             avatarName: avatar,
         }));
         Animated.timing(indicatorXAvatar, {
-            toValue: -(2*width),
+            toValue: -(2 * width),
             duration: 500,
             useNativeDriver: true,
         }).start();
         Animated.timing(indicatorXStrategy, {
-            toValue: -(2*width),
+            toValue: -(2 * width),
             duration: 500,
             useNativeDriver: true,
         }).start();
@@ -100,21 +111,21 @@ const OnboardingScreen = ({ navigation }) => {
 
     const enterStrategy = (strategy) => {
         logAction('onboarding_strategy_selected', { strategy: strategy });
-        
-        setAppState(prevState => ({
+
+        setAppState((prevState) => ({
             ...prevState,
             userPreferences: {
                 ...prevState.userPreferences,
                 defaultStrategy: strategy,
-            }
+            },
         }));
         Animated.timing(indicatorXStrategy, {
-            toValue: -(3*width),
+            toValue: -(3 * width),
             duration: 500,
             useNativeDriver: true,
         }).start();
         Animated.timing(indicatorXReminders, {
-            toValue: -(3*width),
+            toValue: -(3 * width),
             duration: 500,
             useNativeDriver: true,
         }).start();
@@ -123,9 +134,9 @@ const OnboardingScreen = ({ navigation }) => {
 
     useEffect(() => {
         logScreenView({ currentStep: currentStep });
-        
+
         if (!fontsLoaded) return;
-        
+
         const timeout = setTimeout(() => {
             Animated.timing(indicatorYLogo, {
                 toValue: -250,
@@ -142,12 +153,19 @@ const OnboardingScreen = ({ navigation }) => {
 
         return () => clearTimeout(timeout);
     }, [fontsLoaded, indicatorYLogo, fadeAnim]);
-    
+
     if (!fontsLoaded) return null;
 
     return (
         <View style={styles.container}>
-            <Animated.View style={{ justifyContent: 'center', alignItems: 'center', position: 'absolute', transform: [{ translateY: indicatorYLogo }] }}>
+            <Animated.View
+                style={{
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    position: 'absolute',
+                    transform: [{ translateY: indicatorYLogo }],
+                }}
+            >
                 <Image
                     source={require('../../assets/icon.png')}
                     style={{ width: 180, height: 180, marginBottom: SPACE, alignSelf: 'center' }}
@@ -156,21 +174,64 @@ const OnboardingScreen = ({ navigation }) => {
                 <Text style={styles.title}>Plannr</Text>
             </Animated.View>
             <ScrollView horizontal scrollEnabled={false} style={{ width: '100%' }}>
-                <Animated.View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR, transform: [{ translateX: indicatorXName }], opacity: fadeAnim }}>
-                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize }}>🙋🏻‍♂️ What's your name, friend?</Text>
+                <Animated.View
+                    style={{
+                        ...styles.card,
+                        backgroundColor: lightColor.COMP_COLOR,
+                        transform: [{ translateX: indicatorXName }],
+                        opacity: fadeAnim,
+                    }}
+                >
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            color: lightColor.FOREGROUND,
+                            fontSize: typography.subHeadingSize,
+                        }}
+                    >
+                        🙋🏻‍♂️ What's your name, friend?
+                    </Text>
                     <TextInput
-                        style={{ ...styles.input, backgroundColor: lightColor.INPUT, color: lightColor.FOREGROUND }}
+                        style={{
+                            ...styles.input,
+                            backgroundColor: lightColor.INPUT,
+                            color: lightColor.FOREGROUND,
+                        }}
                         value={name}
                         autoCorrect={false}
-                        autoCapitalize='words'
-                        onChange={ ({ nativeEvent }) => { 
-                            setName(nativeEvent.text)
-                        } }
+                        autoCapitalize="words"
+                        onChange={({ nativeEvent }) => {
+                            setName(nativeEvent.text);
+                        }}
                     />
-                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize - 2, marginBottom: 0, marginTop: SPACE }}>You can change this later, don't worry</Text>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            color: lightColor.FOREGROUND,
+                            fontSize: typography.subHeadingSize - 2,
+                            marginBottom: 0,
+                            marginTop: SPACE,
+                        }}
+                    >
+                        You can change this later, don't worry
+                    </Text>
                 </Animated.View>
-                <Animated.View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR, transform: [{ translateX: indicatorXAvatar }] }}>
-                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize }}>🐾 Pick your avatar!</Text>
+                <Animated.View
+                    style={{
+                        ...styles.card,
+                        backgroundColor: lightColor.COMP_COLOR,
+                        transform: [{ translateX: indicatorXAvatar }],
+                    }}
+                >
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            color: lightColor.FOREGROUND,
+                            fontSize: typography.subHeadingSize,
+                        }}
+                    >
+                        🐾 Pick your avatar!
+                    </Text>
                     <View style={styles.avatarGrid}>
                         {avatarList.map((avatar) => (
                             <TouchableOpacity
@@ -178,84 +239,260 @@ const OnboardingScreen = ({ navigation }) => {
                                 style={[
                                     styles.avatarOption,
                                     { backgroundColor: lightColor.INPUT },
-                                    selectedAvatar === avatar.name && { 
-                                        ...styles.selectedAvatarOption, 
+                                    selectedAvatar === avatar.name && {
+                                        ...styles.selectedAvatarOption,
                                         borderColor: '#000',
-                                        backgroundColor: '#000' + '20' 
-                                    }
+                                        backgroundColor: '#000' + '20',
+                                    },
                                 ]}
                                 onPress={() => setSelectedAvatar(avatar.name)}
                             >
-                                <Image 
-                                    source={avatar.image} 
+                                <Image
+                                    source={avatar.image}
                                     style={styles.avatarImage}
                                     resizeMode="cover"
                                 />
-                                <Text style={{ ...styles.avatarText, color: lightColor.FOREGROUND }}>
+                                <Text
+                                    style={{ ...styles.avatarText, color: lightColor.FOREGROUND }}
+                                >
                                     {avatar.displayName}
                                 </Text>
                             </TouchableOpacity>
                         ))}
                     </View>
-                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize - 2, marginBottom: 0, marginTop: 0 }}>You can change this later, don't worry</Text>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            color: lightColor.FOREGROUND,
+                            fontSize: typography.subHeadingSize - 2,
+                            marginBottom: 0,
+                            marginTop: 0,
+                        }}
+                    >
+                        You can change this later, don't worry
+                    </Text>
                 </Animated.View>
-                <Animated.View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR, transform: [{ translateX: indicatorXStrategy }] }}>
-                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize }}>How do you like to get your work done?</Text>
-                    <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'space-between' }}>
-                        <TouchableOpacity 
-                            style={{ ...styles.choiceButton, backgroundColor: (preferredStrategy == 'earliest-fit') ? '#000' : lightColor.INPUT, marginBottom: 0, width: (width - padding.SCREEN_PADDING * 2) / 3 - 20 }}
-                            onPress={() => { setPreferredStrategy('earliest-fit') }}
+                <Animated.View
+                    style={{
+                        ...styles.card,
+                        backgroundColor: lightColor.COMP_COLOR,
+                        transform: [{ translateX: indicatorXStrategy }],
+                    }}
+                >
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            color: lightColor.FOREGROUND,
+                            fontSize: typography.subHeadingSize,
+                        }}
+                    >
+                        How do you like to get your work done?
+                    </Text>
+                    <View
+                        style={{ flexDirection: 'row', gap: 12, justifyContent: 'space-between' }}
+                    >
+                        <TouchableOpacity
+                            style={{
+                                ...styles.choiceButton,
+                                backgroundColor:
+                                    preferredStrategy == 'earliest-fit' ? '#000' : lightColor.INPUT,
+                                marginBottom: 0,
+                                width: (width - padding.SCREEN_PADDING * 2) / 3 - 20,
+                            }}
+                            onPress={() => {
+                                setPreferredStrategy('earliest-fit');
+                            }}
                         >
-                            <Text style={{ ...styles.subHeading, marginBottom: 0, textAlign: 'center' }}>⚡</Text>
-                            <Text style={{ ...styles.subHeading, fontSize: typography.subHeadingSize * 0.8, marginBottom: 0, textAlign: 'center', color: (preferredStrategy == 'earliest-fit') ? '#FFF' : '#000' }}>Get it done early</Text>
+                            <Text
+                                style={{
+                                    ...styles.subHeading,
+                                    marginBottom: 0,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                ⚡
+                            </Text>
+                            <Text
+                                style={{
+                                    ...styles.subHeading,
+                                    fontSize: typography.subHeadingSize * 0.8,
+                                    marginBottom: 0,
+                                    textAlign: 'center',
+                                    color: preferredStrategy == 'earliest-fit' ? '#FFF' : '#000',
+                                }}
+                            >
+                                Get it done early
+                            </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity 
-                            style={{ ...styles.choiceButton, backgroundColor: (preferredStrategy == 'balanced-work') ? '#000' : lightColor.INPUT, marginBottom: 0, width: (width - padding.SCREEN_PADDING * 2) / 3 - 20 }}
-                            onPress={() => { setPreferredStrategy('balanced-work') }}
+                        <TouchableOpacity
+                            style={{
+                                ...styles.choiceButton,
+                                backgroundColor:
+                                    preferredStrategy == 'balanced-work'
+                                        ? '#000'
+                                        : lightColor.INPUT,
+                                marginBottom: 0,
+                                width: (width - padding.SCREEN_PADDING * 2) / 3 - 20,
+                            }}
+                            onPress={() => {
+                                setPreferredStrategy('balanced-work');
+                            }}
                         >
-                            <Text style={{ ...styles.subHeading, marginBottom: 0, textAlign: 'center' }}>⚖️</Text>
-                            <Text style={{ ...styles.subHeading, fontSize: typography.subHeadingSize * 0.8, marginBottom: 0, textAlign: 'center', color: (preferredStrategy == 'balanced-work') ? '#FFF' : '#000' }}>Spread my work out</Text>
+                            <Text
+                                style={{
+                                    ...styles.subHeading,
+                                    marginBottom: 0,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                ⚖️
+                            </Text>
+                            <Text
+                                style={{
+                                    ...styles.subHeading,
+                                    fontSize: typography.subHeadingSize * 0.8,
+                                    marginBottom: 0,
+                                    textAlign: 'center',
+                                    color: preferredStrategy == 'balanced-work' ? '#FFF' : '#000',
+                                }}
+                            >
+                                Spread my work out
+                            </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity 
-                            style={{ ...styles.choiceButton, backgroundColor: (preferredStrategy == 'deadline-oriented') ? '#000' : lightColor.INPUT, marginBottom: 0, width: (width - padding.SCREEN_PADDING * 2) / 3 - 20 }}
-                            onPress={() => { setPreferredStrategy('deadline-oriented') }}
+                        <TouchableOpacity
+                            style={{
+                                ...styles.choiceButton,
+                                backgroundColor:
+                                    preferredStrategy == 'deadline-oriented'
+                                        ? '#000'
+                                        : lightColor.INPUT,
+                                marginBottom: 0,
+                                width: (width - padding.SCREEN_PADDING * 2) / 3 - 20,
+                            }}
+                            onPress={() => {
+                                setPreferredStrategy('deadline-oriented');
+                            }}
                         >
-                            <Text style={{ ...styles.subHeading, marginBottom: 0, textAlign: 'center' }}>🚨</Text>
-                            <Text style={{ ...styles.subHeading, fontSize: typography.subHeadingSize * 0.8, marginBottom: 0, textAlign: 'center', color: (preferredStrategy == 'deadline-oriented') ? '#FFF' : '#000' }}>Deadlines get me going</Text>
+                            <Text
+                                style={{
+                                    ...styles.subHeading,
+                                    marginBottom: 0,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                🚨
+                            </Text>
+                            <Text
+                                style={{
+                                    ...styles.subHeading,
+                                    fontSize: typography.subHeadingSize * 0.8,
+                                    marginBottom: 0,
+                                    textAlign: 'center',
+                                    color:
+                                        preferredStrategy == 'deadline-oriented' ? '#FFF' : '#000',
+                                }}
+                            >
+                                Deadlines get me going
+                            </Text>
                         </TouchableOpacity>
                     </View>
-                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize - 2, marginBottom: 0, marginTop: SPACE }}>You can change this later, don't worry</Text>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            color: lightColor.FOREGROUND,
+                            fontSize: typography.subHeadingSize - 2,
+                            marginBottom: 0,
+                            marginTop: SPACE,
+                        }}
+                    >
+                        You can change this later, don't worry
+                    </Text>
                 </Animated.View>
-                <Animated.View style={{ ...styles.card, backgroundColor: lightColor.COMP_COLOR, transform: [{ translateX: indicatorXReminders }] }}>
-                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize }}>Would you like task reminders?</Text>
-                        <TouchableOpacity 
-                            style={{ ...styles.choiceButton, backgroundColor: (remindersOn == true) ? '#000' : lightColor.INPUT }}
-                            onPress={() => { setRemindersOn(true); }}
+                <Animated.View
+                    style={{
+                        ...styles.card,
+                        backgroundColor: lightColor.COMP_COLOR,
+                        transform: [{ translateX: indicatorXReminders }],
+                    }}
+                >
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            color: lightColor.FOREGROUND,
+                            fontSize: typography.subHeadingSize,
+                        }}
+                    >
+                        Would you like task reminders?
+                    </Text>
+                    <TouchableOpacity
+                        style={{
+                            ...styles.choiceButton,
+                            backgroundColor: remindersOn == true ? '#000' : lightColor.INPUT,
+                        }}
+                        onPress={() => {
+                            setRemindersOn(true);
+                        }}
+                    >
+                        <Text
+                            style={{
+                                ...styles.subHeading,
+                                fontSize: typography.subHeadingSize,
+                                marginBottom: 0,
+                                textAlign: 'center',
+                                color: remindersOn == true ? '#FFF' : '#000',
+                            }}
                         >
-                            <Text style={{ ...styles.subHeading, fontSize: typography.subHeadingSize, marginBottom: 0, textAlign: 'center', color: (remindersOn == true) ? '#FFF' : '#000' }}>⏰ Yes! I'd like reminders</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                            style={{ ...styles.choiceButton, backgroundColor: (remindersOn == false) ? '#000' : lightColor.INPUT, marginBottom: 0 }}
-                            onPress={() => { setRemindersOn(false); }}
+                            ⏰ Yes! I'd like reminders
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={{
+                            ...styles.choiceButton,
+                            backgroundColor: remindersOn == false ? '#000' : lightColor.INPUT,
+                            marginBottom: 0,
+                        }}
+                        onPress={() => {
+                            setRemindersOn(false);
+                        }}
+                    >
+                        <Text
+                            style={{
+                                ...styles.subHeading,
+                                fontSize: typography.subHeadingSize * 0.8,
+                                marginBottom: 0,
+                                textAlign: 'center',
+                                color: remindersOn == false ? '#FFF' : '#000',
+                            }}
                         >
-                            <Text style={{ ...styles.subHeading, fontSize: typography.subHeadingSize * 0.8, marginBottom: 0, textAlign: 'center', color: (remindersOn == false) ? '#FFF' : '#000' }}>👎 No</Text>
-                        </TouchableOpacity>
-                    <Text style={{ ...styles.subHeading, color: lightColor.FOREGROUND, fontSize: typography.subHeadingSize - 2, marginBottom: 0, marginTop: SPACE }}>You can change this later, don't worry</Text>
+                            👎 No
+                        </Text>
+                    </TouchableOpacity>
+                    <Text
+                        style={{
+                            ...styles.subHeading,
+                            color: lightColor.FOREGROUND,
+                            fontSize: typography.subHeadingSize - 2,
+                            marginBottom: 0,
+                            marginTop: SPACE,
+                        }}
+                    >
+                        You can change this later, don't worry
+                    </Text>
                 </Animated.View>
             </ScrollView>
             <AnimatedTouchable
-                style={{ 
-                    ...styles.button, 
+                style={{
+                    ...styles.button,
                     opacity: fadeAnim,
-                    backgroundColor: isButtonDisabled() ? '#888' : '#000'
+                    backgroundColor: isButtonDisabled() ? '#888' : '#000',
                 }}
                 onPress={() => {
                     if (currentStep === 0) {
-                        enterName(name)
+                        enterName(name);
                     } else if (currentStep === 1) {
-                        enterAvatar(selectedAvatar)
+                        enterAvatar(selectedAvatar);
                     } else if (currentStep === 2) {
-                        enterStrategy(preferredStrategy)
+                        enterStrategy(preferredStrategy);
                     } else if (currentStep === 3) {
                         // Save all onboarding data to database
                         const saveOnboardingData = async () => {
@@ -264,31 +501,31 @@ const OnboardingScreen = ({ navigation }) => {
                                     name: name.trim(),
                                     selectedAvatar: selectedAvatar,
                                     preferredStrategy: preferredStrategy,
-                                    remindersEnabled: remindersOn
+                                    remindersEnabled: remindersOn,
                                 });
 
                                 console.log('💾 Saving onboarding data to database...');
-                                
+
                                 // Update user profile (name and avatar)
                                 await updateUserProfile({
                                     displayName: name.trim(),
-                                    avatarName: selectedAvatar
+                                    avatarName: selectedAvatar,
                                 });
                                 console.log('✅ User profile updated');
-                                
+
                                 // Update preferences (strategy and reminders)
                                 await updatePreferences({
                                     defaultStrategy: preferredStrategy,
-                                    notificationsEnabled: remindersOn
+                                    notificationsEnabled: remindersOn,
                                 });
                                 console.log('✅ User preferences updated');
-                                
+
                                 // Mark onboarding as complete
                                 await markOnboardingComplete();
                                 console.log('✅ Onboarding marked as complete');
-                                
+
                                 // Update local app state
-                                setAppState(prevState => ({
+                                setAppState((prevState) => ({
                                     ...prevState,
                                     name: name.trim(),
                                     avatarName: selectedAvatar,
@@ -299,37 +536,36 @@ const OnboardingScreen = ({ navigation }) => {
                                     },
                                     onboarded: true,
                                 }));
-                                
+
                                 logAction('onboarding_completed_successfully', {
                                     name: name.trim(),
                                     selectedAvatar: selectedAvatar,
                                     preferredStrategy: preferredStrategy,
-                                    remindersEnabled: remindersOn
+                                    remindersEnabled: remindersOn,
                                 });
-                                
+
                                 console.log('✅ All onboarding data saved successfully');
-                                
+
                                 // Navigate to main app
                                 console.log('🏠 Navigating to main app...');
                                 navigation.replace('MainTabs');
-                                
                             } catch (error) {
                                 logError('onboarding_completion_failed', error, {
                                     name: name.trim(),
                                     selectedAvatar: selectedAvatar,
                                     preferredStrategy: preferredStrategy,
-                                    remindersEnabled: remindersOn
+                                    remindersEnabled: remindersOn,
                                 });
-                                
+
                                 console.error('⚠️ Failed to save onboarding data:', error);
                                 // Still navigate to main app even if API calls fail
                                 console.log('📊 Current appState in error case:', {
                                     savedSchedulesCount: appState.savedSchedules?.length,
                                     activeSchedule: appState.activeSchedule?.name,
-                                    onboarded: appState.onboarded
+                                    onboarded: appState.onboarded,
                                 });
-                                
-                                setAppState(prevState => ({
+
+                                setAppState((prevState) => ({
                                     ...prevState,
                                     name: name.trim(),
                                     avatarName: selectedAvatar,
@@ -338,25 +574,27 @@ const OnboardingScreen = ({ navigation }) => {
                                         ...prevState.userPreferences,
                                         defaultStrategy: preferredStrategy,
                                         taskRemindersEnabled: remindersOn,
-                                    }
+                                    },
                                 }));
-                                
+
                                 // Navigate to main app even if there was an error
                                 console.log('🏠 Navigating to main app despite error...');
                                 navigation.replace('MainTabs');
                             }
                         };
-                        
+
                         saveOnboardingData();
                     }
                 }}
                 disabled={isButtonDisabled()}
             >
-                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>Next</Text>
+                <Text style={{ color: '#FFF', fontFamily: 'AlbertSans', alignSelf: 'center' }}>
+                    Next
+                </Text>
             </AnimatedTouchable>
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -396,7 +634,7 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 40,
-        borderRadius: 12, 
+        borderRadius: 12,
         fontSize: typography.subHeadingSize,
         fontFamily: 'AlbertSans',
         paddingHorizontal: 16,
@@ -405,7 +643,7 @@ const styles = StyleSheet.create({
     button: {
         width: '90%',
         borderRadius: 12,
-        backgroundColor: '#000' ,
+        backgroundColor: '#000',
         paddingVertical: 12,
         paddingHorizontal: 16,
         flexDirection: 'row',
@@ -418,7 +656,7 @@ const styles = StyleSheet.create({
     choiceButton: {
         width: '100%',
         borderRadius: 12,
-        backgroundColor: '#F0F0F0' ,
+        backgroundColor: '#F0F0F0',
         paddingVertical: 12,
         paddingHorizontal: 16,
         marginBottom: 12,

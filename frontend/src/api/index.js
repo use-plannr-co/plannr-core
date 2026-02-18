@@ -29,7 +29,8 @@ export const useAuthenticatedAPI = () => {
         makeAuthenticatedRequest,
 
         // Users
-        syncUserToBackend: () => usersApi.syncUserToBackend(makeAuthenticatedRequest, getToken, user),
+        syncUserToBackend: () =>
+            usersApi.syncUserToBackend(makeAuthenticatedRequest, getToken, user),
         getUserProfile: () => usersApi.getUserProfile(makeAuthenticatedRequest),
         updateUserProfile: (data) => usersApi.updateUserProfile(makeAuthenticatedRequest, data),
         updateUserEmail: (data) => usersApi.updateUserEmail(makeAuthenticatedRequest, data),
@@ -40,48 +41,102 @@ export const useAuthenticatedAPI = () => {
         // Schedules
         getSchedules: () => schedulesApi.getSchedules(makeAuthenticatedRequest),
         createSchedule: (data) => schedulesApi.createSchedule(makeAuthenticatedRequest, data),
-        getScheduleById: (id, includeBlocks) => schedulesApi.getScheduleById(makeAuthenticatedRequest, id, includeBlocks),
-        updateSchedule: (id, data) => schedulesApi.updateSchedule(makeAuthenticatedRequest, id, data),
+        getScheduleById: (id, includeBlocks) =>
+            schedulesApi.getScheduleById(makeAuthenticatedRequest, id, includeBlocks),
+        updateSchedule: (id, data) =>
+            schedulesApi.updateSchedule(makeAuthenticatedRequest, id, data),
         deleteSchedule: (id) => schedulesApi.deleteSchedule(makeAuthenticatedRequest, id),
         saveScheduleWithDays: (scheduleObject, name, strategy, startTime, endTime) =>
-            schedulesApi.saveScheduleWithDays(makeAuthenticatedRequest, scheduleObject, name, strategy, startTime, endTime),
+            schedulesApi.saveScheduleWithDays(
+                makeAuthenticatedRequest,
+                scheduleObject,
+                name,
+                strategy,
+                startTime,
+                endTime,
+            ),
         convertScheduleToAPIFormat: (scheduleObject) =>
             schedulesApi.convertScheduleToAPIFormat(scheduleObject),
 
         // Days
-        getDaysByScheduleId: (scheduleId) => daysApi.getDaysByScheduleId(makeAuthenticatedRequest, scheduleId),
-        createDay: (scheduleId, dayData) => daysApi.createDay(makeAuthenticatedRequest, scheduleId, dayData),
-        getDayById: (scheduleId, dayId, includeBlocks) => daysApi.getDayById(makeAuthenticatedRequest, scheduleId, dayId, includeBlocks),
-        updateDay: (scheduleId, dayId, data) => daysApi.updateDay(makeAuthenticatedRequest, scheduleId, dayId, data),
-        deleteDay: (scheduleId, dayId) => daysApi.deleteDay(makeAuthenticatedRequest, scheduleId, dayId),
+        getDaysByScheduleId: (scheduleId) =>
+            daysApi.getDaysByScheduleId(makeAuthenticatedRequest, scheduleId),
+        createDay: (scheduleId, dayData) =>
+            daysApi.createDay(makeAuthenticatedRequest, scheduleId, dayData),
+        getDayById: (scheduleId, dayId, includeBlocks) =>
+            daysApi.getDayById(makeAuthenticatedRequest, scheduleId, dayId, includeBlocks),
+        updateDay: (scheduleId, dayId, data) =>
+            daysApi.updateDay(makeAuthenticatedRequest, scheduleId, dayId, data),
+        deleteDay: (scheduleId, dayId) =>
+            daysApi.deleteDay(makeAuthenticatedRequest, scheduleId, dayId),
 
         // Blocks
-        getBlocksByDayId: (scheduleId, dayId) => blocksApi.getBlocksByDayId(makeAuthenticatedRequest, scheduleId, dayId),
-        addBlocksToDay: (scheduleId, dayId, blocks) => blocksApi.addBlocksToDay(makeAuthenticatedRequest, scheduleId, dayId, blocks),
-        updateBlockInDay: (scheduleId, dayId, blockId, data) => blocksApi.updateBlockInDay(makeAuthenticatedRequest, scheduleId, dayId, blockId, data),
-        deleteBlockFromDay: (scheduleId, dayId, blockId) => blocksApi.deleteBlockFromDay(makeAuthenticatedRequest, scheduleId, dayId, blockId),
-        markBlockCompleteInDay: (scheduleId, dayId, blockId, completed) => blocksApi.markBlockCompleteInDay(makeAuthenticatedRequest, scheduleId, dayId, blockId, completed),
+        getBlocksByDayId: (scheduleId, dayId) =>
+            blocksApi.getBlocksByDayId(makeAuthenticatedRequest, scheduleId, dayId),
+        addBlocksToDay: (scheduleId, dayId, blocks) =>
+            blocksApi.addBlocksToDay(makeAuthenticatedRequest, scheduleId, dayId, blocks),
+        updateBlockInDay: (scheduleId, dayId, blockId, data) =>
+            blocksApi.updateBlockInDay(makeAuthenticatedRequest, scheduleId, dayId, blockId, data),
+        deleteBlockFromDay: (scheduleId, dayId, blockId) =>
+            blocksApi.deleteBlockFromDay(makeAuthenticatedRequest, scheduleId, dayId, blockId),
+        markBlockCompleteInDay: (scheduleId, dayId, blockId, completed) =>
+            blocksApi.markBlockCompleteInDay(
+                makeAuthenticatedRequest,
+                scheduleId,
+                dayId,
+                blockId,
+                completed,
+            ),
 
         // Dependencies
         saveEventDependencies: (scheduleId, dependenciesMap) =>
-            dependenciesApi.saveEventDependencies(makeAuthenticatedRequest, scheduleId, dependenciesMap),
+            dependenciesApi.saveEventDependencies(
+                makeAuthenticatedRequest,
+                scheduleId,
+                dependenciesMap,
+            ),
         updateEventDependencies: (scheduleId, dependenciesId, dependenciesMap) =>
-            dependenciesApi.updateEventDependencies(makeAuthenticatedRequest, scheduleId, dependenciesId, dependenciesMap),
+            dependenciesApi.updateEventDependencies(
+                makeAuthenticatedRequest,
+                scheduleId,
+                dependenciesId,
+                dependenciesMap,
+            ),
         getEventDependencies: (scheduleId) =>
             dependenciesApi.getEventDependencies(makeAuthenticatedRequest, scheduleId),
 
         // Preferences
         getPreferences: () => preferencesApi.getPreferences(makeAuthenticatedRequest),
-        updatePreferences: (data) => preferencesApi.updatePreferences(makeAuthenticatedRequest, data),
+        updatePreferences: (data) =>
+            preferencesApi.updatePreferences(makeAuthenticatedRequest, data),
 
         // Integrations
-        checkGoogleCalendarStatus: () => integrationsApi.checkGoogleCalendarStatus(makeAuthenticatedRequest),
-        exportScheduleToGoogleCalendar: (schedule, userTimezone, accessToken, scheduleName, userName) =>
-            integrationsApi.exportScheduleToGoogleCalendar(makeAuthenticatedRequest, schedule, userTimezone, accessToken, scheduleName, userName),
+        checkGoogleCalendarStatus: () =>
+            integrationsApi.checkGoogleCalendarStatus(makeAuthenticatedRequest),
+        exportScheduleToGoogleCalendar: (
+            schedule,
+            userTimezone,
+            accessToken,
+            scheduleName,
+            userName,
+        ) =>
+            integrationsApi.exportScheduleToGoogleCalendar(
+                makeAuthenticatedRequest,
+                schedule,
+                userTimezone,
+                accessToken,
+                scheduleName,
+                userName,
+            ),
 
         // Text-to-Tasks
         parseTextToFlexibleEvents: (todoListText, defaultDeadline, preferences) =>
-            textToTasksApi.parseTextToFlexibleEvents(makeAuthenticatedRequest, todoListText, defaultDeadline, preferences),
+            textToTasksApi.parseTextToFlexibleEvents(
+                makeAuthenticatedRequest,
+                todoListText,
+                defaultDeadline,
+                preferences,
+            ),
 
         // App State (orchestration)
         loadCompleteAppStateWithSchedules: () =>

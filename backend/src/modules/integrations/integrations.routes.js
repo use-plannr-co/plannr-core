@@ -10,16 +10,9 @@ const router = express.Router();
  */
 
 // POST /integrations/google-calendar/export - Export events to Google Calendar
-router.post(
-    '/google-calendar/export', 
-    validateGoogleCalendarExport, 
-    ctrl.exportToGoogleCalendar
-);
+router.post('/google-calendar/export', validateGoogleCalendarExport, ctrl.exportToGoogleCalendar);
 
 // GET /integrations/google-calendar/status - Get Google Calendar connection status
-router.get(
-    '/google-calendar/status', 
-    ctrl.getGoogleCalendarStatus
-);
+router.get('/google-calendar/status', ctrl.getGoogleCalendarStatus);
 
 export default router;

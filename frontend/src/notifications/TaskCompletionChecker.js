@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { useAppState } from "../context/AppStateContext.js";
-import useCurrentTime from "../utils/useCurrentTime.js";
-import convertDateToScheduleDate from "../utils/dateConversion.js";
-import convertTimeToTime24 from "../utils/timeConversion.js";
-import NotificationService from "./NotificationService.js";
+import { useEffect, useState } from 'react';
+import { useAppState } from '../context/AppStateContext.js';
+import useCurrentTime from '../utils/useCurrentTime.js';
+import convertDateToScheduleDate from '../utils/dateConversion.js';
+import convertTimeToTime24 from '../utils/timeConversion.js';
+import NotificationService from './NotificationService.js';
 import Time24 from '../model/Time24.js';
 
 const TaskCompletionChecker = () => {
@@ -18,7 +18,7 @@ const TaskCompletionChecker = () => {
                 setScheduledSummaryToday(false);
             }
         }, 60000);
-      
+
         return () => clearInterval(timer);
     }, []);
 
@@ -27,7 +27,9 @@ const TaskCompletionChecker = () => {
 
         const todaysDate = convertDateToScheduleDate(currentTime).getId();
         if (appState.activeSchedule.schedule.getScheduleForDate(todaysDate) == null) return;
-        const todaysTasks = appState.activeSchedule.schedule.getScheduleForDate(todaysDate).getTimeBlocks();
+        const todaysTasks = appState.activeSchedule.schedule
+            .getScheduleForDate(todaysDate)
+            .getTimeBlocks();
         if (todaysTasks.length === 0) return;
 
         const currTime = convertTimeToTime24(currentTime);
@@ -37,7 +39,7 @@ const TaskCompletionChecker = () => {
 
         let allComplete = true;
         for (const task of todaysTasks) {
-            if (task.name != "Break" && !task.completed) {
+            if (task.name != 'Break' && !task.completed) {
                 allComplete = false;
                 break;
             }
@@ -46,6 +48,6 @@ const TaskCompletionChecker = () => {
         NotificationService.scheduleDailySummary(allComplete);
         setScheduledSummaryToday(true);
     }, [currentTime, scheduledSummaryToday]);
-}
+};
 
 export default TaskCompletionChecker;

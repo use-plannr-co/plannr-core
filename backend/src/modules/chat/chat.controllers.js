@@ -75,7 +75,8 @@ export async function sendMessage(req, res, next) {
     try {
         const { userId } = req.auth;
         const { chatId } = req.validated?.params || req.params;
-        const { message } = req.validated?.body || req.body;
+        const { message, timezone } = req.validated?.body || req.body;
+        const tz = timezone || 'UTC';
 
         console.log('[Chat] sendMessage called - userId:', userId, 'chatId:', chatId);
 
@@ -114,13 +115,17 @@ export async function sendMessage(req, res, next) {
         const claudeMessages = buildClaudeMessages(storedMessages);
 
         // 7. Build system prompt
-        const [userRow] = await db.select({ displayName: users.displayName }).from(users)
-            .where(eq(users.id, userId)).limit(1);
+        const [userRow] = await db
+            .select({ displayName: users.displayName })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
 
         const systemPrompt = buildSystemPrompt({
             hasActiveSchedule: true, // optimistic; tools will handle the no-schedule case
             isPro,
             userName: userRow?.displayName || null,
+            timezone: tz,
         });
 
         // 8. Set SSE headers
@@ -130,7 +135,52 @@ export async function sendMessage(req, res, next) {
         res.flushHeaders();
 
         // 9. Run streaming loop
-        await runStreamingLoop(res, claudeMessages, systemPrompt, userId, chatId);
+        await runStreamingLoop(res, claudeMessages, systemPrompt, userId, chatId, tz);
+    } catch (err) {
+        next(err);
+    }
+}
+
+export async function submitActionResult(req, res, next) {
+    try {
+        const { userId } = req.auth;
+        const { chatId } = req.validated?.params || req.params;
+        const { actionType, summary, timezone } = req.validated?.body || req.body;
+        const tz = timezone || 'UTC';
+
+        const chat = await repo.getChatById(chatId, userId);
+        if (!chat) return res.status(404).json({ success: false, error: 'Chat not found' });
+
+        // Save system message (NOT counted against daily usage)
+        await repo.insertMessage({
+            chatId,
+            role: 'system',
+            content: `[Action completed] ${actionType}: ${summary}`,
+        });
+
+        // Build Claude context
+        const storedMessages = await repo.getMessages(chatId, 30);
+        const claudeMessages = buildClaudeMessages(storedMessages);
+        const [userRow] = await db
+            .select({ displayName: users.displayName })
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
+        const subscription = await getSubscriptionByUserId(userId);
+        const systemPrompt = buildSystemPrompt({
+            hasActiveSchedule: true,
+            isPro: subscription?.isPro === true,
+            userName: userRow?.displayName || null,
+            timezone: tz,
+        });
+
+        // Stream Claude's confirmation
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+
+        await runStreamingLoop(res, claudeMessages, systemPrompt, userId, chatId, tz);
     } catch (err) {
         next(err);
     }
@@ -138,7 +188,7 @@ export async function sendMessage(req, res, next) {
 
 // ─── Streaming Loop ───────────────────────────────────────────────────────────
 
-async function runStreamingLoop(res, messages, systemPrompt, userId, chatId) {
+async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, timezone) {
     try {
         const stream = claudeClient.createStreamingMessage(messages, tools, systemPrompt);
 
@@ -176,7 +226,6 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId) {
                 finalInputTokens = event.usage?.input_tokens || finalInputTokens;
                 finalOutputTokens = event.usage?.output_tokens || finalOutputTokens;
             }
-
         }
 
         // Get final message for stop_reason and usage
@@ -187,9 +236,9 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId) {
 
         if (stopReason === 'tool_use') {
             // Extract tool use blocks from final message
-            const toolUseBlocks = finalMsg.content.filter(b => b.type === 'tool_use');
-            const textBlocks = finalMsg.content.filter(b => b.type === 'text');
-            const textContent = textBlocks.map(b => b.text).join('');
+            const toolUseBlocks = finalMsg.content.filter((b) => b.type === 'tool_use');
+            const textBlocks = finalMsg.content.filter((b) => b.type === 'text');
+            const textContent = textBlocks.map((b) => b.text).join('');
 
             // Save assistant message with tool calls
             await repo.insertMessage({
@@ -206,13 +255,26 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId) {
             for (const toolBlock of toolUseBlocks) {
                 writeSSE(res, 'tool_executing', { toolName: toolBlock.name });
 
-                const result = await executeTool(toolBlock.name, toolBlock.input, userId);
+                const result = await executeTool(toolBlock.name, toolBlock.input, userId, timezone);
+                const parsedResult = JSON.parse(result);
 
                 writeSSE(res, 'tool_result', {
                     toolUseId: toolBlock.id,
                     toolName: toolBlock.name,
-                    result: JSON.parse(result),
+                    result: parsedResult,
                 });
+
+                // For proposal tools: emit structured action proposal for button rendering
+                if (
+                    toolBlock.name.startsWith('propose_') &&
+                    !parsedResult.error &&
+                    parsedResult.count !== 0
+                ) {
+                    writeSSE(res, 'action_proposal', {
+                        proposalId: toolBlock.id,
+                        actions: [parsedResult],
+                    });
+                }
 
                 toolResultContents.push({
                     type: 'tool_result',
@@ -244,7 +306,7 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId) {
                 content: toolResultContents,
             };
             const nextClaudeMessages = [...messages, assistantTurn, toolResultTurn];
-            await runStreamingLoop(res, nextClaudeMessages, systemPrompt, userId, chatId);
+            await runStreamingLoop(res, nextClaudeMessages, systemPrompt, userId, chatId, timezone);
         } else {
             // end_turn — save final message and close
             await repo.insertMessage({
@@ -255,7 +317,10 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId) {
                 outputTokens: finalOutputTokens,
             });
             await repo.touchChat(chatId);
-            writeSSE(res, 'message_stop', { inputTokens: finalInputTokens, outputTokens: finalOutputTokens });
+            writeSSE(res, 'message_stop', {
+                inputTokens: finalInputTokens,
+                outputTokens: finalOutputTokens,
+            });
             res.end();
         }
     } catch (err) {
@@ -288,6 +353,9 @@ function buildClaudeMessages(storedMessages) {
             } else {
                 result.push({ role: 'user', content: msg.content });
             }
+        } else if (msg.role === 'system') {
+            // Map system action-result notifications to user role so Claude understands context
+            result.push({ role: 'user', content: msg.content });
         } else if (msg.role === 'assistant') {
             if (msg.toolCalls && msg.toolCalls.length > 0) {
                 // Only include tool_use blocks if the very next stored message is
@@ -324,8 +392,12 @@ function buildClaudeMessages(storedMessages) {
         const prev = merged[merged.length - 1];
         if (prev && prev.role === turn.role) {
             // Merge into previous turn
-            const prevContent = Array.isArray(prev.content) ? prev.content : [{ type: 'text', text: prev.content }];
-            const thisContent = Array.isArray(turn.content) ? turn.content : [{ type: 'text', text: turn.content }];
+            const prevContent = Array.isArray(prev.content)
+                ? prev.content
+                : [{ type: 'text', text: prev.content }];
+            const thisContent = Array.isArray(turn.content)
+                ? turn.content
+                : [{ type: 'text', text: turn.content }];
             prev.content = [...prevContent, ...thisContent];
         } else {
             merged.push({ ...turn });

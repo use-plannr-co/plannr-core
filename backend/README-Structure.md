@@ -41,9 +41,11 @@ src/
 ## Current API Endpoints
 
 ### Health Check
+
 - `GET /api/health` - Server health check
 
 ### Users (`/api/users`)
+
 - `POST /users` - Create new user (registration)
 - `GET /users/profile` - Get current user profile
 - `PUT /users/profile` - Update user profile
@@ -53,6 +55,7 @@ src/
 - `POST /users/auth/refresh` - Refresh auth token
 
 ### Schedules (`/api/schedules`)
+
 - `POST /schedules` - Create new schedule
 - `GET /schedules` - Get list of schedules (with query params: since, limit, cursor)
 - `GET /schedules/:id` - Get full schedule by id
@@ -64,6 +67,7 @@ src/
 - `POST /schedules/:id/ops` - Apply diff ops (add/update/delete multiple blocks)
 
 ### Preferences (`/api/preferences`)
+
 - `GET /preferences` - Get user preferences
 - `PUT /preferences` - Update user preferences
 - `POST /preferences/reset` - Reset preferences to default
@@ -90,6 +94,7 @@ src/
 The server is running on port 5001 (or your configured PORT).
 
 Test endpoints:
+
 - Health: `curl http://localhost:5001/api/health`
 - Create schedule: `curl -X POST http://localhost:5001/api/schedules -H "Content-Type: application/json" -d '{"title":"Test","periodStart":"2024-01-01","periodEnd":"2024-01-31","isActive":true}'`
 

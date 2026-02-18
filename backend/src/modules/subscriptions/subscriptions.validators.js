@@ -25,14 +25,14 @@ const validate = (schema) => {
                     message: 'Request body is required',
                 });
             }
-            
+
             console.log('[Validator] Validating request:', {
                 method: req.method,
                 path: req.path,
                 bodyKeys: Object.keys(req.body || {}),
                 body: req.body,
             });
-            
+
             const validated = schema.parse(req.body);
             req.validatedData = validated;
             next();
@@ -47,10 +47,10 @@ const validate = (schema) => {
                 return res.status(400).json({
                     success: false,
                     message: 'Validation error',
-                    errors: error.errors.map(e => ({
+                    errors: error.errors.map((e) => ({
                         path: e.path.join('.'),
-                        message: e.message
-                    }))
+                        message: e.message,
+                    })),
                 });
             }
             console.error('[Validator] Unexpected error:', {
@@ -96,7 +96,7 @@ const revenueCatWebhookSchema = z.object({
             'NON_RENEWING_PURCHASE',
             'UNCANCELLATION',
             'SUBSCRIPTION_PAUSED',
-            'SUBSCRIPTION_EXTENDED'
+            'SUBSCRIPTION_EXTENDED',
         ]),
         app_user_id: z.string(),
         product_id: z.string().optional(),

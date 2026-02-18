@@ -23,8 +23,17 @@ export const deleteBlockFromDay = (makeAuthenticatedRequest, scheduleId, dayId, 
         method: 'DELETE',
     });
 
-export const markBlockCompleteInDay = (makeAuthenticatedRequest, scheduleId, dayId, blockId, completed = true) =>
-    makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}/blocks/${blockId}/complete`, {
-        method: 'PATCH',
-        body: JSON.stringify({ completed }),
-    });
+export const markBlockCompleteInDay = (
+    makeAuthenticatedRequest,
+    scheduleId,
+    dayId,
+    blockId,
+    completed = true,
+) =>
+    makeAuthenticatedRequest(
+        `/api/schedules/${scheduleId}/days/${dayId}/blocks/${blockId}/complete`,
+        {
+            method: 'PATCH',
+            body: JSON.stringify({ completed }),
+        },
+    );

@@ -12,8 +12,8 @@ const TEST_SESSION_TOKEN = 'your_test_session_token_here';
 
 const headers = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${TEST_SESSION_TOKEN}`,
-    'x-clerk-user-id': 'your_test_clerk_user_id_here' // Add this header to match existing pattern
+    Authorization: `Bearer ${TEST_SESSION_TOKEN}`,
+    'x-clerk-user-id': 'your_test_clerk_user_id_here', // Add this header to match existing pattern
 };
 
 /**
@@ -26,7 +26,9 @@ const testIntegrations = async () => {
         // Test 1: Get Google Calendar status
         console.log('1. Testing GET /integrations/google-calendar/status');
         try {
-            const statusResponse = await axios.get(`${API_BASE}/google-calendar/status`, { headers });
+            const statusResponse = await axios.get(`${API_BASE}/google-calendar/status`, {
+                headers,
+            });
             console.log('✅ Status check successful:', statusResponse.data);
         } catch (error) {
             console.log('❌ Status check error:', error.response?.data || error.message);
@@ -36,7 +38,7 @@ const testIntegrations = async () => {
 
         // Test 2: Export sample events to Google Calendar
         console.log('2. Testing POST /integrations/google-calendar/export');
-        
+
         const sampleEvents = {
             events: [
                 {
@@ -45,7 +47,7 @@ const testIntegrations = async () => {
                     description: 'This is a test event created by Plannr integration',
                     start: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
                     end: new Date(Date.now() + 24 * 60 * 60 * 1000 + 60 * 60 * 1000).toISOString(), // Tomorrow + 1 hour
-                    timeZone: 'America/Vancouver'
+                    timeZone: 'America/Vancouver',
                 },
                 {
                     uid: 'test-event-2',
@@ -53,18 +55,21 @@ const testIntegrations = async () => {
                     description: 'Second test event',
                     start: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(), // Day after tomorrow
                     end: new Date(Date.now() + 48 * 60 * 60 * 1000 + 30 * 60 * 1000).toISOString(), // Day after tomorrow + 30 mins
-                    timeZone: 'America/Vancouver'
-                }
-            ]
+                    timeZone: 'America/Vancouver',
+                },
+            ],
         };
 
         try {
-            const exportResponse = await axios.post(`${API_BASE}/google-calendar/export`, sampleEvents, { headers });
+            const exportResponse = await axios.post(
+                `${API_BASE}/google-calendar/export`,
+                sampleEvents,
+                { headers }
+            );
             console.log('✅ Export successful:', exportResponse.data);
         } catch (error) {
             console.log('❌ Export error:', error.response?.data || error.message);
         }
-
     } catch (error) {
         console.error('❌ Test setup error:', error.message);
     }
@@ -79,16 +84,16 @@ const testValidation = async () => {
     try {
         // Test invalid event data
         console.log('3. Testing validation with invalid data');
-        
+
         const invalidEvents = {
             events: [
                 {
                     // Missing uid
                     title: 'Invalid Event',
                     start: 'invalid-date',
-                    end: 'invalid-date'
-                }
-            ]
+                    end: 'invalid-date',
+                },
+            ],
         };
 
         try {
@@ -110,15 +115,17 @@ const testValidation = async () => {
 const runTests = async () => {
     console.log('🚀 Starting Google Calendar Integration Tests\n');
     console.log('⚠️  Make sure to replace TEST_SESSION_TOKEN with a valid Clerk session token\n');
-    
+
     if (TEST_SESSION_TOKEN === 'your_test_session_token_here') {
-        console.log('❌ Please update TEST_SESSION_TOKEN in the test file with a valid session token');
+        console.log(
+            '❌ Please update TEST_SESSION_TOKEN in the test file with a valid session token'
+        );
         return;
     }
-    
+
     await testIntegrations();
     await testValidation();
-    
+
     console.log('\n✨ Tests completed!');
 };
 

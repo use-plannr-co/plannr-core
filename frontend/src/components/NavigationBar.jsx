@@ -16,18 +16,18 @@ import { Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
-const BAR_HEIGHT = (width > 400) ? 64 : (width > 380) ? 56 : 48; // 64px for 430px width screen
-const INDICATOR_DIM = 3 * BAR_HEIGHT / 4;
+const BAR_HEIGHT = width > 400 ? 64 : width > 380 ? 56 : 48; // 64px for 430px width screen
+const INDICATOR_DIM = (3 * BAR_HEIGHT) / 4;
 const TOUCHABLE_DIM = INDICATOR_DIM;
 const ICON_DIM = INDICATOR_DIM / 2;
-const PADDING_HORIZONTAL = 5/6 * ICON_DIM;
+const PADDING_HORIZONTAL = (5 / 6) * ICON_DIM;
 const OFFSET = (BAR_HEIGHT - INDICATOR_DIM) / 2;
 const WIDTH = width - padding.SCREEN_PADDING * 2;
 
 const NavigationBar = ({ state, descriptors, navigation }) => {
     const insets = useSafeAreaInsets();
     const { appState } = useAppState();
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
     const ICONS = {
         Home: HomeIcon,
@@ -35,14 +35,14 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
         Center: PlannrCenterIcon,
         // Saved: SavedIcon,
         // Preferences: PreferencesIcon,
-        Profile: ProfileIcon
+        Profile: ProfileIcon,
     };
 
     const indicatorX = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         const index = state.index;
-        const GAP = (WIDTH - (2 * PADDING_HORIZONTAL) - (4 * ICON_DIM)) / 3;
+        const GAP = (WIDTH - 2 * PADDING_HORIZONTAL - 4 * ICON_DIM) / 3;
         const xPosition = index * (GAP + ICON_DIM) + OFFSET;
         Animated.spring(indicatorX, {
             toValue: xPosition,
@@ -63,10 +63,7 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
         >
             <View style={{ ...styles.bar, backgroundColor: theme.NAVBAR }}>
                 <Animated.View
-                    style={[
-                        styles.indicator,
-                        { transform: [{ translateX: indicatorX }], },
-                    ]}
+                    style={[styles.indicator, { transform: [{ translateX: indicatorX }] }]}
                 >
                     <Indicator width={INDICATOR_DIM} height={INDICATOR_DIM} color={'white'} />
                 </Animated.View>
@@ -86,16 +83,25 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
                         <TouchableOpacity
                             key={route.key}
                             onPress={handleTabPress}
-                            style={{ width: TOUCHABLE_DIM, height: TOUCHABLE_DIM, justifyContent: 'center', alignItems: 'center' }}
+                            style={{
+                                width: TOUCHABLE_DIM,
+                                height: TOUCHABLE_DIM,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
                         >
-                            <Icon width={ICON_DIM} height={ICON_DIM} color={isActive ? '#000' : '#FFF'} />
+                            <Icon
+                                width={ICON_DIM}
+                                height={ICON_DIM}
+                                color={isActive ? '#000' : '#FFF'}
+                            />
                         </TouchableOpacity>
                     );
                 })}
             </View>
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     bar: {
@@ -113,7 +119,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 8,
         padding: OFFSET,
-
     },
     indicator: {
         position: 'absolute',
@@ -121,6 +126,6 @@ const styles = StyleSheet.create({
         left: 0,
         zIndex: -1,
     },
-})
+});
 
-export default NavigationBar
+export default NavigationBar;

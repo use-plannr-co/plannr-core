@@ -4,10 +4,10 @@ import Constants from 'expo-constants';
 
 /**
  * SubscriptionService
- * 
+ *
  * Centralized service for managing RevenueCat SDK interactions.
  * Handles initialization, purchases, restores, and customer info management.
- * 
+ *
  * Key principles:
  * - iOS-only for this implementation
  * - Uses Clerk user ID as RevenueCat App User ID
@@ -22,7 +22,7 @@ class SubscriptionService {
     /**
      * Initialize RevenueCat SDK
      * Must be called once after user authentication
-     * 
+     *
      * @param {Object} config
      * @param {string} config.apiKey - RevenueCat iOS API key
      * @param {string} config.appUserId - Clerk user ID
@@ -61,10 +61,13 @@ class SubscriptionService {
             // Login with Clerk user ID to ensure purchases map to correct customer
             console.log('📱 SubscriptionService: Logging in to RevenueCat...');
             const { customerInfo } = await Purchases.logIn(appUserId);
-            
+
             this._isInitialized = true;
             console.log('✅ SubscriptionService: Initialization complete');
-            console.log('📊 Active entitlements:', Object.keys(customerInfo?.entitlements?.active || {}));
+            console.log(
+                '📊 Active entitlements:',
+                Object.keys(customerInfo?.entitlements?.active || {}),
+            );
 
             return customerInfo;
         } catch (error) {
@@ -91,7 +94,7 @@ class SubscriptionService {
         try {
             console.log('📱 SubscriptionService: Fetching offerings...');
             const offerings = await Purchases.getOfferings();
-            
+
             if (offerings.current) {
                 console.log('✅ Current offering found:', offerings.current.identifier);
                 console.log('📦 Available packages:', offerings.current.availablePackages.length);
@@ -115,12 +118,19 @@ class SubscriptionService {
         this._ensureInitialized();
 
         try {
-            console.log('💳 SubscriptionService: Initiating purchase for:', packageToPurchase.identifier);
-            
-            const { customerInfo, productIdentifier } = await Purchases.purchasePackage(packageToPurchase);
-            
+            console.log(
+                '💳 SubscriptionService: Initiating purchase for:',
+                packageToPurchase.identifier,
+            );
+
+            const { customerInfo, productIdentifier } =
+                await Purchases.purchasePackage(packageToPurchase);
+
             console.log('✅ Purchase successful:', productIdentifier);
-            console.log('📊 Updated entitlements:', Object.keys(customerInfo?.entitlements?.active || {}));
+            console.log(
+                '📊 Updated entitlements:',
+                Object.keys(customerInfo?.entitlements?.active || {}),
+            );
 
             return { customerInfo, productIdentifier };
         } catch (error) {
@@ -144,14 +154,18 @@ class SubscriptionService {
 
         try {
             console.log('🔄 SubscriptionService: Restoring purchases...');
-            
+
             const customerInfo = await Purchases.restorePurchases();
-            
-            const hasActiveEntitlements = Object.keys(customerInfo?.entitlements?.active || {}).length > 0;
-            
+
+            const hasActiveEntitlements =
+                Object.keys(customerInfo?.entitlements?.active || {}).length > 0;
+
             if (hasActiveEntitlements) {
                 console.log('✅ Purchases restored successfully');
-                console.log('📊 Active entitlements:', Object.keys(customerInfo.entitlements.active));
+                console.log(
+                    '📊 Active entitlements:',
+                    Object.keys(customerInfo.entitlements.active),
+                );
             } else {
                 console.log('ℹ️ No active purchases found to restore');
             }
@@ -172,11 +186,14 @@ class SubscriptionService {
 
         try {
             console.log('🔄 SubscriptionService: Refreshing customer info...');
-            
+
             const customerInfo = await Purchases.getCustomerInfo();
-            
+
             console.log('✅ Customer info refreshed');
-            console.log('📊 Active entitlements:', Object.keys(customerInfo?.entitlements?.active || {}));
+            console.log(
+                '📊 Active entitlements:',
+                Object.keys(customerInfo?.entitlements?.active || {}),
+            );
 
             return customerInfo;
         } catch (error) {
@@ -205,8 +222,10 @@ class SubscriptionService {
             // Return unsubscribe function
             return () => {
                 console.log('🔇 SubscriptionService: Removing customer info listener');
-                this._customerInfoListeners = this._customerInfoListeners.filter(cb => cb !== callback);
-                
+                this._customerInfoListeners = this._customerInfoListeners.filter(
+                    (cb) => cb !== callback,
+                );
+
                 try {
                     Purchases.removeCustomerInfoUpdateListener(callback);
                 } catch (error) {
@@ -217,7 +236,9 @@ class SubscriptionService {
             console.error('❌ Failed to add customer info listener:', error);
             // Return a no-op unsubscribe function
             return () => {
-                this._customerInfoListeners = this._customerInfoListeners.filter(cb => cb !== callback);
+                this._customerInfoListeners = this._customerInfoListeners.filter(
+                    (cb) => cb !== callback,
+                );
             };
         }
     }
@@ -235,9 +256,9 @@ class SubscriptionService {
 
         try {
             console.log('👋 SubscriptionService: Logging out...');
-            
+
             const customerInfo = await Purchases.logOut();
-            
+
             console.log('✅ Logged out successfully');
             return customerInfo;
         } catch (error) {
@@ -284,15 +305,15 @@ class SubscriptionService {
         }
 
         const errorCode = error.code || error.message || '';
-        
+
         // Map common error codes to user-friendly messages
         const errorMessages = {
-            'PURCHASE_NOT_ALLOWED': 'Purchases are not allowed on this device',
-            'PURCHASE_INVALID': 'This purchase is not valid',
-            'PRODUCT_NOT_AVAILABLE': 'This subscription is currently unavailable',
-            'NETWORK_ERROR': 'Network error. Please check your connection and try again',
-            'STORE_PROBLEM': 'There was a problem connecting to the App Store',
-            'PAYMENT_PENDING': 'Your payment is pending approval',
+            PURCHASE_NOT_ALLOWED: 'Purchases are not allowed on this device',
+            PURCHASE_INVALID: 'This purchase is not valid',
+            PRODUCT_NOT_AVAILABLE: 'This subscription is currently unavailable',
+            NETWORK_ERROR: 'Network error. Please check your connection and try again',
+            STORE_PROBLEM: 'There was a problem connecting to the App Store',
+            PAYMENT_PENDING: 'Your payment is pending approval',
         };
 
         for (const [code, message] of Object.entries(errorMessages)) {

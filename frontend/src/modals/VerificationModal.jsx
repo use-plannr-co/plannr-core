@@ -1,5 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    Dimensions,
+    TouchableWithoutFeedback,
+    Keyboard,
+} from 'react-native';
 import Modal from 'react-native-modal';
 
 import { useAppState } from '../context/AppStateContext.js';
@@ -8,11 +17,12 @@ import { typography } from '../design/typography.js';
 import { spacing } from '../design/spacing.js';
 
 const { height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const VerificationModal = ({ isVisible, onVerifyCode, onClose, email, loading }) => {
     const { appState } = useAppState();
-    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
     const [code, setCode] = useState(['', '', '', '', '', '']);
     const [focusedIndex, setFocusedIndex] = useState(0);
@@ -38,7 +48,7 @@ const VerificationModal = ({ isVisible, onVerifyCode, onClose, email, loading })
     const handleCodeChange = (text, index) => {
         // Only allow single digit
         const digit = text.slice(-1);
-        
+
         const newCode = [...code];
         newCode[index] = digit;
         setCode(newCode);
@@ -75,10 +85,10 @@ const VerificationModal = ({ isVisible, onVerifyCode, onClose, email, loading })
 
     const handleResendCode = () => {
         // TODO: Add resend functionality
-        console.log("Resend code");
+        console.log('Resend code');
     };
 
-    const isCodeComplete = code.every(digit => digit !== '');
+    const isCodeComplete = code.every((digit) => digit !== '');
 
     return (
         <Modal
@@ -108,15 +118,16 @@ const VerificationModal = ({ isVisible, onVerifyCode, onClose, email, loading })
                         {code.map((digit, index) => (
                             <TextInput
                                 key={index}
-                                ref={(el) => inputRefs.current[index] = el}
+                                ref={(el) => (inputRefs.current[index] = el)}
                                 style={[
                                     styles.codeInput,
-                                    { 
+                                    {
                                         backgroundColor: theme.INPUT,
                                         color: theme.FOREGROUND,
-                                        borderColor: focusedIndex === index ? '#000' : 'transparent',
+                                        borderColor:
+                                            focusedIndex === index ? '#000' : 'transparent',
                                         borderWidth: focusedIndex === index ? 2 : 0,
-                                    }
+                                    },
                                 ]}
                                 value={digit}
                                 onChangeText={(text) => handleCodeChange(text, index)}
@@ -134,31 +145,25 @@ const VerificationModal = ({ isVisible, onVerifyCode, onClose, email, loading })
                     <TouchableOpacity
                         style={[
                             styles.button,
-                            { backgroundColor: isCodeComplete ? '#000' : '#888' }
+                            { backgroundColor: isCodeComplete ? '#000' : '#888' },
                         ]}
                         onPress={() => handleVerify()}
                         disabled={!isCodeComplete || loading}
                     >
                         <Text style={styles.buttonText}>
-                            {loading ? "Verifying..." : "Verify Code"}
+                            {loading ? 'Verifying...' : 'Verify Code'}
                         </Text>
                     </TouchableOpacity>
 
                     {/* Resend Code */}
-                    <TouchableOpacity
-                        style={styles.resendButton}
-                        onPress={handleResendCode}
-                    >
+                    <TouchableOpacity style={styles.resendButton} onPress={handleResendCode}>
                         <Text style={[styles.resendText, { color: theme.FOREGROUND + '80' }]}>
                             Didn't receive the code? Resend
                         </Text>
                     </TouchableOpacity>
 
                     {/* Cancel Button */}
-                    <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={onClose}
-                    >
+                    <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
                         <Text style={[styles.cancelText, { color: theme.FOREGROUND + '60' }]}>
                             Cancel
                         </Text>

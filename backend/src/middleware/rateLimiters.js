@@ -13,7 +13,7 @@ export const textToTasksRateLimit = rateLimit({
         message: `Too many text-to-tasks requests. You can make ${ENV.TEXT_TO_TASKS_RATE_LIMIT} requests per hour. Please try again later.`,
         retryAfter: '3600', // seconds
         limit: ENV.TEXT_TO_TASKS_RATE_LIMIT,
-        windowMs: 3600000
+        windowMs: 3600000,
     },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -28,7 +28,7 @@ export const textToTasksRateLimit = rateLimit({
     handler: (req, res, next) => {
         const userId = req.user?.id || req.headers['x-clerk-user-id'] || 'unknown';
         console.warn(`🚫 Rate limit exceeded for text-to-tasks - User: ${userId}`);
-        
+
         res.status(429).json({
             success: false,
             error: 'TOO_MANY_REQUESTS',
@@ -36,9 +36,9 @@ export const textToTasksRateLimit = rateLimit({
             retryAfter: Math.ceil((req.rateLimit.resetTime - Date.now()) / 1000),
             limit: ENV.TEXT_TO_TASKS_RATE_LIMIT,
             remaining: 0,
-            resetTime: new Date(req.rateLimit.resetTime).toISOString()
+            resetTime: new Date(req.rateLimit.resetTime).toISOString(),
         });
-    }
+    },
 });
 
 /**
@@ -51,7 +51,7 @@ export const generalApiRateLimit = rateLimit({
     message: {
         error: 'TOO_MANY_REQUESTS',
         message: 'Too many requests from this IP. Please try again later.',
-        retryAfter: '900' // 15 minutes in seconds
+        retryAfter: '900', // 15 minutes in seconds
     },
     standardHeaders: true,
     legacyHeaders: false,
@@ -62,7 +62,7 @@ export const generalApiRateLimit = rateLimit({
     skip: (req) => {
         // Skip rate limiting in development if configured
         return ENV.NODE_ENV === 'development' && ENV.SKIP_RATE_LIMITS;
-    }
+    },
 });
 
 /**
@@ -74,7 +74,7 @@ export const strictRateLimit = rateLimit({
     message: {
         error: 'TOO_MANY_REQUESTS',
         message: 'Too many sensitive requests. Please try again in an hour for security reasons.',
-        retryAfter: '3600'
+        retryAfter: '3600',
     },
     standardHeaders: true,
     legacyHeaders: false,
@@ -83,5 +83,5 @@ export const strictRateLimit = rateLimit({
     },
     skip: (req) => {
         return ENV.NODE_ENV === 'development' && ENV.SKIP_RATE_LIMITS;
-    }
+    },
 });

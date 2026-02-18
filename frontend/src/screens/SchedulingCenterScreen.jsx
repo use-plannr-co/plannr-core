@@ -9,13 +9,14 @@ import MenuButton from '../components/MenuButton.jsx';
 import Insights from '../components/Insights.jsx';
 const { width, height } = Dimensions.get('window');
 
-const WIDTH = width - (padding.SCREEN_PADDING * 2);
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
+const WIDTH = width - padding.SCREEN_PADDING * 2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const SchedulingCenterScreen = ({ navigation }) => {
     const { appState } = useAppState();
     const { logUserAction } = useActionLogger('SchedulingCenter');
-    let theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const bottomSheetRef = useRef();
 
     console.log(appState.activeSchedule);
@@ -24,33 +25,51 @@ const SchedulingCenterScreen = ({ navigation }) => {
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
             <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Plannr Center</Text>
             <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND }}>
-
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Your current schedule</Text>
-                {
-                (!appState.activeSchedule || !appState.activeSchedule.schedule)
-                    ? <View style={{ ...styles.card, backgroundColor: theme.COMP_COLOR, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, textAlign: 'center' }}>You currently have no active schedule.</Text>
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                    Your current schedule
+                </Text>
+                {!appState.activeSchedule || !appState.activeSchedule.schedule ? (
+                    <View
+                        style={{
+                            ...styles.card,
+                            backgroundColor: theme.COMP_COLOR,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                ...styles.subHeading,
+                                color: theme.FOREGROUND,
+                                textAlign: 'center',
+                            }}
+                        >
+                            You currently have no active schedule.
+                        </Text>
                     </View>
-                    : <View>
+                ) : (
+                    <View>
                         <View style={styles.horizontalGrid}>
-                            <Insights version={1} schedule={appState.activeSchedule.schedule}/>
-                            <Insights version={2} schedule={appState.activeSchedule.schedule}/>
+                            <Insights version={1} schedule={appState.activeSchedule.schedule} />
+                            <Insights version={2} schedule={appState.activeSchedule.schedule} />
                         </View>
                         <View style={styles.horizontalGrid}>
-                            <Insights version={3} schedule={appState.activeSchedule.schedule}/>
-                            <Insights version={4} schedule={appState.activeSchedule.schedule}/>
+                            <Insights version={3} schedule={appState.activeSchedule.schedule} />
+                            <Insights version={4} schedule={appState.activeSchedule.schedule} />
                         </View>
                     </View>
-                }
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>Manage your scheduling</Text>
-                <View style={{ gap: SPACE}}>
+                )}
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
+                    Manage your scheduling
+                </Text>
+                <View style={{ gap: SPACE }}>
                     <MenuButton
                         broad={true}
                         title="Generate a New Schedule"
                         icon="Generate"
-                        navTo={() => { 
+                        navTo={() => {
                             logUserAction('generate_schedule_clicked');
-                            navigation.navigate("Generate");
+                            navigation.navigate('Generate');
                         }}
                     />
                     {/* <MenuButton
@@ -66,7 +85,7 @@ const SchedulingCenterScreen = ({ navigation }) => {
             </ScrollView>
         </View>
     );
-}
+};
 
 const styles = StyleSheet.create({
     container: {
@@ -76,7 +95,6 @@ const styles = StyleSheet.create({
     subContainer: {
         height: '90%',
         paddingHorizontal: padding.SCREEN_PADDING,
-
     },
     title: {
         fontSize: typography.titleSize,
@@ -107,8 +125,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 12,
         padding: 16,
-        marginBottom: SPACE
-    }
+        marginBottom: SPACE,
+    },
 });
 
 export default SchedulingCenterScreen;

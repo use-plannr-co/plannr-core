@@ -14,9 +14,9 @@ import { ClerkProvider } from '@clerk/clerk-expo';
 import { tokenCache } from './cache.js';
 
 const DismissKeyboardWrapper = ({ children }) => (
-  <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-    <View style={{ flex: 1 }}>{children}</View>
-  </TouchableWithoutFeedback>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={{ flex: 1 }}>{children}</View>
+    </TouchableWithoutFeedback>
 );
 
 // Main app content component that has access to update context
@@ -27,8 +27,10 @@ const AppContent = () => {
     React.useEffect(() => {
         if (updateState.forceUpdate && updateState.updateInfo) {
             const { updateInfo } = updateState;
-            const message = updateInfo.message || 'Please update Plannr to the latest version to continue using the app.';
-            
+            const message =
+                updateInfo.message ||
+                'Please update Plannr to the latest version to continue using the app.';
+
             const buttons = [
                 {
                     text: 'Update Now',
@@ -38,13 +40,14 @@ const AppContent = () => {
                             Linking.openURL(updateInfo.updateUrl);
                         } else {
                             // Fallback to app store
-                            const appStoreUrl = Platform.OS === 'ios' 
-                                ? 'https://apps.apple.com/us/app/plannr-scheduling-made-easy/id6748265401'
-                                : 'https://play.google.com/store/apps/details?id=com.yourcompany.plannr';
+                            const appStoreUrl =
+                                Platform.OS === 'ios'
+                                    ? 'https://apps.apple.com/us/app/plannr-scheduling-made-easy/id6748265401'
+                                    : 'https://play.google.com/store/apps/details?id=com.yourcompany.plannr';
                             Linking.openURL(appStoreUrl);
                         }
-                    }
-                }
+                    },
+                },
             ];
 
             // Add retry button in development
@@ -52,7 +55,7 @@ const AppContent = () => {
                 buttons.unshift({
                     text: 'Retry Check',
                     style: 'cancel',
-                    onPress: retryCheck
+                    onPress: retryCheck,
                 });
             }
 
@@ -60,7 +63,7 @@ const AppContent = () => {
                 'Update Required',
                 message,
                 buttons,
-                { cancelable: false } // Cannot be dismissed
+                { cancelable: false }, // Cannot be dismissed
             );
         }
     }, [updateState.forceUpdate, updateState.updateInfo, retryCheck]);
@@ -86,7 +89,10 @@ export default function App() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <ClerkProvider tokenCache={tokenCache} publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+            <ClerkProvider
+                tokenCache={tokenCache}
+                publishableKey={process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY}
+            >
                 <AppUpdateProvider>
                     <AppContent />
                 </AppUpdateProvider>
@@ -94,4 +100,3 @@ export default function App() {
         </TouchableWithoutFeedback>
     );
 }
-  

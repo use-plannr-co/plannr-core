@@ -16,7 +16,7 @@ export const createUser = async (req, res, next) => {
             return res.status(409).json({
                 success: false,
                 message: 'User already exists',
-                data: { userId: existingUser.id }
+                data: { userId: existingUser.id },
             });
         }
 
@@ -44,7 +44,7 @@ export const createUser = async (req, res, next) => {
                 displayName: newUser.displayName,
                 avatarName: newUser.avatarName,
                 createdAt: newUser.createdAt,
-            }
+            },
         });
     } catch (error) {
         next(error);
@@ -56,20 +56,20 @@ export const getUserProfile = async (req, res, next) => {
         // In a real app, you'd get the user ID from the authenticated user (JWT/session)
         // For now, we'll expect it as a query parameter or from auth middleware
         const clerkUserId = req.headers['x-clerk-user-id'] || req.query.clerkUserId;
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
         const userWithPreferences = await repo.getUserByClerkId(clerkUserId);
-        
+
         if (!userWithPreferences) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
@@ -89,7 +89,7 @@ export const getUserProfile = async (req, res, next) => {
                 createdAt: fullUserData.createdAt,
                 updatedAt: fullUserData.updatedAt,
             },
-            message: 'User profile retrieved successfully'
+            message: 'User profile retrieved successfully',
         });
     } catch (error) {
         next(error);
@@ -99,20 +99,20 @@ export const getUserProfile = async (req, res, next) => {
 export const updateUserProfile = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'] || req.query.clerkUserId;
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
         const user = await repo.getUserByClerkId(clerkUserId);
-        
+
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
@@ -129,7 +129,7 @@ export const updateUserProfile = async (req, res, next) => {
                 avatarName: updatedUser.avatarName,
                 onboarded: updatedUser.onboarded,
                 updatedAt: updatedUser.updatedAt,
-            }
+            },
         });
     } catch (error) {
         next(error);
@@ -140,18 +140,18 @@ export const updateUserEmail = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'] || req.query.clerkUserId;
         const { email } = req.validatedData;
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: 'Email is required'
+                message: 'Email is required',
             });
         }
 
@@ -160,29 +160,30 @@ export const updateUserEmail = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
         try {
             // Get the current user from Clerk to find their primary email
             const clerkUser = await clerkClient.users.getUser(clerkUserId);
-            
+
             // Find the current primary email address
-            const currentPrimaryEmail = clerkUser.emailAddresses.find(email => 
-                email.id === clerkUser.primaryEmailAddressId
+            const currentPrimaryEmail = clerkUser.emailAddresses.find(
+                (email) => email.id === clerkUser.primaryEmailAddressId
             );
-            
+
             if (!currentPrimaryEmail) {
                 return res.status(400).json({
                     success: false,
-                    message: 'No primary email address found'
+                    message: 'No primary email address found',
                 });
             }
 
             // Check if the user has external accounts (social logins)
-            const hasExternalAccounts = clerkUser.externalAccounts && clerkUser.externalAccounts.length > 0;
-            
+            const hasExternalAccounts =
+                clerkUser.externalAccounts && clerkUser.externalAccounts.length > 0;
+
             if (hasExternalAccounts) {
                 // For users with social logins, we need to create a new email address
                 // instead of updating the existing one
@@ -191,15 +192,18 @@ export const updateUserEmail = async (req, res, next) => {
                     const newEmailAddress = await clerkClient.emailAddresses.createEmailAddress({
                         userId: clerkUserId,
                         emailAddress: email,
-                        verified: false
+                        verified: false,
                     });
-                    
+
                     // Then set it as primary
                     await clerkClient.users.updateUser(clerkUserId, {
-                        primaryEmailAddressId: newEmailAddress.id
+                        primaryEmailAddressId: newEmailAddress.id,
                     });
-                    
-                    console.log('Created new email address for social login user:', newEmailAddress.id);
+
+                    console.log(
+                        'Created new email address for social login user:',
+                        newEmailAddress.id
+                    );
                 } catch (createError) {
                     console.error('Failed to create new email address:', createError);
                     throw createError;
@@ -210,7 +214,7 @@ export const updateUserEmail = async (req, res, next) => {
                     currentPrimaryEmail.id,
                     {
                         emailAddress: email,
-                        verified: false // Will require verification
+                        verified: false, // Will require verification
                     }
                 );
             }
@@ -229,51 +233,55 @@ export const updateUserEmail = async (req, res, next) => {
                     avatarName: updatedUser.avatarName,
                     emailVerificationRequired: true,
                     updatedAt: updatedUser.updatedAt,
-                }
+                },
             });
         } catch (clerkError) {
             console.error('Clerk email update error:', clerkError);
-            
+
             // Handle specific Clerk errors
             if (clerkError.status === 422 || clerkError.errors) {
-                const errorMessage = clerkError.errors?.[0]?.message || clerkError.message || 'Invalid email address or email already in use';
+                const errorMessage =
+                    clerkError.errors?.[0]?.message ||
+                    clerkError.message ||
+                    'Invalid email address or email already in use';
                 return res.status(400).json({
                     success: false,
                     message: errorMessage,
-                    error: errorMessage
+                    error: errorMessage,
                 });
             }
-            
+
             if (clerkError.status === 403) {
                 return res.status(403).json({
                     success: false,
                     message: 'Not authorized to update this email address',
-                    error: clerkError.message
+                    error: clerkError.message,
                 });
             }
-            
+
             // Handle "Breaks instance invariant" error specifically
             if (clerkError.message && clerkError.message.includes('Breaks instance invariant')) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Cannot update email address. This may be because the account is linked to a social login (Google, Apple, etc.). Please contact support for assistance.',
-                    error: 'Email update not allowed for this account type'
+                    message:
+                        'Cannot update email address. This may be because the account is linked to a social login (Google, Apple, etc.). Please contact support for assistance.',
+                    error: 'Email update not allowed for this account type',
                 });
             }
-            
+
             // Handle email already in use
             if (clerkError.message && clerkError.message.toLowerCase().includes('email')) {
                 return res.status(400).json({
                     success: false,
                     message: 'This email address is already in use by another account',
-                    error: clerkError.message
+                    error: clerkError.message,
                 });
             }
-            
+
             return res.status(500).json({
                 success: false,
                 message: 'Failed to update email in authentication system',
-                error: clerkError.message || 'Unknown error occurred'
+                error: clerkError.message || 'Unknown error occurred',
             });
         }
     } catch (error) {
@@ -284,20 +292,20 @@ export const updateUserEmail = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'] || req.query.clerkUserId;
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
         const user = await repo.getUserByClerkId(clerkUserId);
-        
+
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
@@ -305,7 +313,7 @@ export const deleteUser = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: 'User deleted successfully'
+            message: 'User deleted successfully',
         });
     } catch (error) {
         next(error);
@@ -317,16 +325,16 @@ export const loginUser = async (req, res, next) => {
         // Since Clerk handles authentication, this endpoint mainly validates
         // the user exists in our database and returns user data
         const clerkUserId = req.headers['x-clerk-user-id'] || req.body.clerkUserId;
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
         let user = await repo.getUserByClerkId(clerkUserId);
-        
+
         // If user doesn't exist in our DB, create them
         if (!user) {
             const { email, displayName, avatarName } = req.body;
@@ -336,7 +344,7 @@ export const loginUser = async (req, res, next) => {
                 displayName,
                 avatarName,
             });
-            
+
             // Create default preferences
             await repo.createDefaultPreferences(user.id);
         }
@@ -355,7 +363,7 @@ export const loginUser = async (req, res, next) => {
                 avatarName: fullUserData.avatarName,
                 onboarded: fullUserData.onboarded,
                 preferences: fullUserData.preferences,
-            }
+            },
         });
     } catch (error) {
         next(error);
@@ -368,7 +376,7 @@ export const logoutUser = async (req, res, next) => {
         // This endpoint can be used for any server-side cleanup if needed
         res.status(200).json({
             success: true,
-            message: 'User logged out successfully'
+            message: 'User logged out successfully',
         });
     } catch (error) {
         next(error);
@@ -381,7 +389,7 @@ export const refreshToken = async (req, res, next) => {
         // In a real implementation, you might validate the refresh token with Clerk
         res.status(200).json({
             success: true,
-            message: 'Token refresh handled by Clerk'
+            message: 'Token refresh handled by Clerk',
         });
     } catch (error) {
         next(error);
@@ -392,7 +400,7 @@ export const refreshToken = async (req, res, next) => {
 export const handleClerkWebhook = async (req, res, next) => {
     try {
         console.log('🔗 Clerk webhook received:', req.body);
-        
+
         const { type, data } = req.validatedData;
         console.log(`📨 Webhook type: ${type}`);
 
@@ -425,11 +433,11 @@ export const handleClerkWebhook = async (req, res, next) => {
 export const syncUserFromClerk = async (req, res, next) => {
     try {
         const { clerkUserId, email, displayName, avatarName } = req.body;
-        
+
         if (!clerkUserId) {
             return res.status(400).json({
                 success: false,
-                message: 'clerkUserId is required'
+                message: 'clerkUserId is required',
             });
         }
 
@@ -439,7 +447,7 @@ export const syncUserFromClerk = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 message: 'User already exists',
-                data: { userId: existingUser.id }
+                data: { userId: existingUser.id },
             });
         }
 
@@ -470,7 +478,7 @@ export const syncUserFromClerk = async (req, res, next) => {
                 displayName: newUser.displayName,
                 avatarName: newUser.avatarName,
                 createdAt: newUser.createdAt,
-            }
+            },
         });
     } catch (error) {
         console.error('Sync user error:', error);
@@ -486,16 +494,18 @@ const getRandomAvatar = () => {
 
 const handleUserCreated = async (userData) => {
     console.log('📋 User data received:', userData);
-    
-    const primaryEmail = userData.email_addresses?.find(email => email.id === userData.primary_email_address_id);
-    
+
+    const primaryEmail = userData.email_addresses?.find(
+        (email) => email.id === userData.primary_email_address_id
+    );
+
     if (!primaryEmail) {
         console.error('❌ No primary email found for user:', userData.id);
         throw new Error('No primary email address found');
     }
 
     console.log(`📧 Creating user with email: ${primaryEmail.email_address}`);
-    
+
     try {
         const newUser = await repo.createUser({
             clerkUserId: userData.id,
@@ -503,10 +513,10 @@ const handleUserCreated = async (userData) => {
             displayName: userData.first_name || null, // Use first name as display name
             avatarName: getRandomAvatar(), // Assign random avatar instead of using profile image
         });
-        
+
         // Create default preferences
         await repo.createDefaultPreferences(newUser.id);
-        
+
         console.log(`✅ User created successfully: ${newUser.id}`);
     } catch (error) {
         console.error('❌ Error creating user:', error);
@@ -517,8 +527,10 @@ const handleUserCreated = async (userData) => {
 const handleUserUpdated = async (userData) => {
     const user = await repo.getUserByClerkId(userData.id);
     if (user) {
-        const primaryEmail = userData.email_addresses?.find(email => email.id === userData.primary_email_address_id);
-        
+        const primaryEmail = userData.email_addresses?.find(
+            (email) => email.id === userData.primary_email_address_id
+        );
+
         await repo.updateUser(user.id, {
             email: primaryEmail?.email_address || user.email,
             displayName: userData.first_name || user.displayName, // Use first name as display name
@@ -537,11 +549,11 @@ const handleUserDeleted = async (userData) => {
 export const updateAvatar = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'];
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
@@ -550,16 +562,26 @@ export const updateAvatar = async (req, res, next) => {
         if (!avatarName) {
             return res.status(400).json({
                 success: false,
-                message: 'Avatar name is required'
+                message: 'Avatar name is required',
             });
         }
 
         // Validate avatar name
-        const validAvatars = ['bear', 'bunny', 'cat', 'croc', 'fox', 'hen', 'lion', 'puppy', 'squirrel'];
+        const validAvatars = [
+            'bear',
+            'bunny',
+            'cat',
+            'croc',
+            'fox',
+            'hen',
+            'lion',
+            'puppy',
+            'squirrel',
+        ];
         if (!validAvatars.includes(avatarName)) {
             return res.status(400).json({
                 success: false,
-                message: 'Invalid avatar name'
+                message: 'Invalid avatar name',
             });
         }
 
@@ -568,13 +590,13 @@ export const updateAvatar = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
         // Update user's avatar name in database
         const updatedUser = await repo.updateUser(user.id, {
-            avatarName: avatarName
+            avatarName: avatarName,
         });
 
         res.status(200).json({
@@ -585,9 +607,9 @@ export const updateAvatar = async (req, res, next) => {
                 user: {
                     id: updatedUser.id,
                     clerkUserId: updatedUser.clerkUserId,
-                    avatarName: updatedUser.avatarName
-                }
-            }
+                    avatarName: updatedUser.avatarName,
+                },
+            },
         });
     } catch (error) {
         console.error('Error updating avatar:', error);
@@ -598,11 +620,11 @@ export const updateAvatar = async (req, res, next) => {
 export const markOnboardingComplete = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'];
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
@@ -611,7 +633,7 @@ export const markOnboardingComplete = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
@@ -625,8 +647,8 @@ export const markOnboardingComplete = async (req, res, next) => {
                 id: updatedUser.id,
                 clerkUserId: updatedUser.clerkUserId,
                 onboarded: updatedUser.onboarded,
-                updatedAt: updatedUser.updatedAt
-            }
+                updatedAt: updatedUser.updatedAt,
+            },
         });
     } catch (error) {
         console.error('Error marking onboarding complete:', error);
@@ -638,11 +660,11 @@ export const markOnboardingComplete = async (req, res, next) => {
 export const getUserIntegrations = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'];
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
@@ -651,7 +673,7 @@ export const getUserIntegrations = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
@@ -667,8 +689,8 @@ export const getUserIntegrations = async (req, res, next) => {
                 notion: integrations.notion,
                 googleTasks: integrations.googleTasks,
                 microsoftTodo: integrations.microsoftTodo,
-                updatedAt: integrations.updatedAt
-            }
+                updatedAt: integrations.updatedAt,
+            },
         });
     } catch (error) {
         console.error('Error getting user integrations:', error);
@@ -680,11 +702,11 @@ export const updateUserIntegrations = async (req, res, next) => {
     try {
         const clerkUserId = req.headers['x-clerk-user-id'];
         const integrationsData = req.validatedData;
-        
+
         if (!clerkUserId) {
             return res.status(401).json({
                 success: false,
-                message: 'Authentication required'
+                message: 'Authentication required',
             });
         }
 
@@ -693,7 +715,7 @@ export const updateUserIntegrations = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
             });
         }
 
@@ -709,8 +731,8 @@ export const updateUserIntegrations = async (req, res, next) => {
                 notion: updatedIntegrations.notion,
                 googleTasks: updatedIntegrations.googleTasks,
                 microsoftTodo: updatedIntegrations.microsoftTodo,
-                updatedAt: updatedIntegrations.updatedAt
-            }
+                updatedAt: updatedIntegrations.updatedAt,
+            },
         });
     } catch (error) {
         console.error('Error updating user integrations:', error);

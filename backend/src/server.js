@@ -33,16 +33,16 @@ app.use(errorHandler);
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).json({ 
-        success: false, 
-        message: 'Route not found' 
+    res.status(404).json({
+        success: false,
+        message: 'Route not found',
     });
 });
 
 app.listen(PORT, () => {
     console.log(`🚀 Plannr Backend Server is running on port ${PORT}`);
     console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
-    
+
     // Start cron jobs for keep-alive
     startCronJobs();
 });

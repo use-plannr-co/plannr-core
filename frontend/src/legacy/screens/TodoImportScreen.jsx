@@ -1,17 +1,18 @@
-import React, { useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native'
-import Modal from 'react-native-modal'
-import { SvgXml } from 'react-native-svg'
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
+import Modal from 'react-native-modal';
+import { SvgXml } from 'react-native-svg';
 
-import { useAppState } from '../context/AppStateContext.js'
-import { useActionLogger } from '../hooks/useActionLogger.js'
+import { useAppState } from '../context/AppStateContext.js';
+import { useActionLogger } from '../hooks/useActionLogger.js';
 
-import { lightColor, darkColor } from '../design/colors.js'
-import { spacing, padding } from '../design/spacing.js'
-import { typography } from '../design/typography.js'
+import { lightColor, darkColor } from '../design/colors.js';
+import { spacing, padding } from '../design/spacing.js';
+import { typography } from '../design/typography.js';
 
 const { width, height } = Dimensions.get('window');
-const SPACE = (height > 900) ? spacing.SPACING_4 : (height > 800) ? spacing.SPACING_3 : spacing.SPACING_2
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const FileAddIcon = `<svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -23,7 +24,7 @@ const FileAddIcon = `<svg width="120" height="120" viewBox="0 0 24 24" fill="non
 const TodoImportScreen = ({ navigation }) => {
     const { appState } = useAppState();
     const { logAction, logScreenView } = useActionLogger('TodoImport');
-    const theme = (appState.userPreferences.theme === 'light') ? lightColor : darkColor;
+    const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
     const [showImportModal, setShowImportModal] = useState(false);
     const [importing, setImporting] = useState(false);
@@ -37,46 +38,46 @@ const TodoImportScreen = ({ navigation }) => {
             id: 'todoist',
             name: 'Todoist',
             description: 'Import from your Todoist projects',
-            icon: require('../../assets/import-icons/todoist.png')
+            icon: require('../../assets/import-icons/todoist.png'),
         },
         {
             id: 'google',
             name: 'Google Tasks',
             description: 'Sync with Google Tasks',
-            icon: require('../../assets/import-icons/google-tasks.png')
+            icon: require('../../assets/import-icons/google-tasks.png'),
         },
         {
             id: 'microsoft',
             name: 'Microsoft To-Do',
             description: 'Import from Microsoft To-Do',
-            icon: require('../../assets/import-icons/microsoft-todo.png')
+            icon: require('../../assets/import-icons/microsoft-todo.png'),
         },
         {
             id: 'notion',
             name: 'Notion',
             description: 'Import from Notion databases',
-            icon: require('../../assets/import-icons/notion.png')
-        }
+            icon: require('../../assets/import-icons/notion.png'),
+        },
     ];
 
     const handleImportSource = (source) => {
-        logAction('todo_import_source_selected', { 
+        logAction('todo_import_source_selected', {
             sourceName: source.name,
-            sourceId: source.id 
+            sourceId: source.id,
         });
-        
+
         setImporting(true);
         setShowImportModal(false);
         console.log(`🚀 Starting import from ${source.name}`);
-        
+
         // LAUNCH VERSION: Import functionality disabled for iOS submission
         // Will be enabled after launch with proper backend integration
         setTimeout(() => {
             setImporting(false);
-            logAction('todo_import_completed', { 
+            logAction('todo_import_completed', {
                 sourceName: source.name,
                 sourceId: source.id,
-                isPlaceholder: true 
+                isPlaceholder: true,
             });
             // For launch, just navigate to Center after "importing" placeholder
             navigation.navigate('Center');
@@ -101,9 +102,7 @@ const TodoImportScreen = ({ navigation }) => {
         >
             <Image source={source.icon} style={styles.importIcon} />
             <View style={styles.importInfo}>
-                <Text style={[styles.importName, { color: theme.FOREGROUND }]}>
-                    {source.name}
-                </Text>
+                <Text style={[styles.importName, { color: theme.FOREGROUND }]}>{source.name}</Text>
                 <Text style={[styles.importDescription, { color: theme.FOREGROUND_SECONDARY }]}>
                     {source.description}
                 </Text>
@@ -114,9 +113,7 @@ const TodoImportScreen = ({ navigation }) => {
     return (
         <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
             {/* Header */}
-            <Text style={[styles.title, { color: theme.FOREGROUND }]}>
-                Import Tasks
-            </Text>
+            <Text style={[styles.title, { color: theme.FOREGROUND }]}>Import Tasks</Text>
             <Text style={[styles.subHeading, { color: theme.FOREGROUND_SECONDARY }]}>
                 One click to get all your to-do's into Plannr!
             </Text>
@@ -124,10 +121,10 @@ const TodoImportScreen = ({ navigation }) => {
             {/* Main Content Card */}
             <View style={[styles.mainCard, { backgroundColor: theme.COMP_COLOR }]}>
                 <View style={styles.iconContainer}>
-                    <SvgXml 
-                        xml={FileAddIcon} 
-                        width={120} 
-                        height={120} 
+                    <SvgXml
+                        xml={FileAddIcon}
+                        width={120}
+                        height={120}
                         color={theme.FOREGROUND_SECONDARY}
                     />
                 </View>
@@ -145,10 +142,7 @@ const TodoImportScreen = ({ navigation }) => {
             </View>
 
             {/* Skip Option */}
-            <TouchableOpacity 
-                style={styles.skipButton}
-                onPress={handleSkipImport}
-            >
+            <TouchableOpacity style={styles.skipButton} onPress={handleSkipImport}>
                 <Text style={[styles.skipText, { color: theme.FOREGROUND_SECONDARY }]}>
                     Skip and add tasks manually
                 </Text>
@@ -165,7 +159,12 @@ const TodoImportScreen = ({ navigation }) => {
                 <View style={[styles.modalContent, { backgroundColor: theme.BACKGROUND }]}>
                     {/* Modal Header */}
                     <View style={styles.modalHeader}>
-                        <View style={[styles.modalHandle, { backgroundColor: theme.FOREGROUND_SECONDARY }]} />
+                        <View
+                            style={[
+                                styles.modalHandle,
+                                { backgroundColor: theme.FOREGROUND_SECONDARY },
+                            ]}
+                        />
                         <Text style={[styles.modalTitle, { color: theme.FOREGROUND }]}>
                             Choose Import Source
                         </Text>

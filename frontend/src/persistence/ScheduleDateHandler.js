@@ -9,7 +9,6 @@ export const serializeScheduleDate = (dateObj) => {
         year: dateObj.year,
     };
 };
-  
 
 export const parseScheduleDate = (rawObj) => {
     if (!rawObj || rawObj.date == null || rawObj.month == null || rawObj.year == null) {

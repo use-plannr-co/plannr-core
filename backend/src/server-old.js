@@ -14,7 +14,7 @@ const PORT = ENV.PORT;
  * Health
  * --------------------------------
  */
-app.get("/api/health", (req, res) => {
+app.get('/api/health', (req, res) => {
     res.status(200).json({ success: true });
 });
 
@@ -23,23 +23,32 @@ app.get("/api/health", (req, res) => {
  * --------------------------------
  * POST   /schedules                         → create new schedule
  */
-app.post("/api/schedules", async (req, res) => {
+app.post('/api/schedules', async (req, res) => {
     try {
-        const { id, ownerId, title, periodStart, periodEnd, isActive, version, deletedAt, createdAt, updatedAt } = req.body;
+        const {
+            id,
+            ownerId,
+            title,
+            periodStart,
+            periodEnd,
+            isActive,
+            version,
+            deletedAt,
+            createdAt,
+            updatedAt,
+        } = req.body;
 
         if (!title || !periodStart || !periodEnd || !isActive) {
-            return res.status(400).json({ error: "Missing required fields" });
+            return res.status(400).json({ error: 'Missing required fields' });
         }
-    } catch {
-
-    }
+    } catch {}
 });
 
 /**
  * GET    /schedules                         → get list of schedules (optionally ?since, ?limit, ?cursor)
  */
 
-/** 
+/**
  * GET    /schedules/:id                     → get full schedule by id
  */
 
@@ -105,7 +114,6 @@ app.post("/api/schedules", async (req, res) => {
  * POST   /analytics/recompute      → (optional/admin) recompute aggregates for a range
  */
 
-
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-})
+});

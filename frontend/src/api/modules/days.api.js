@@ -13,7 +13,9 @@ export const createDay = (makeAuthenticatedRequest, scheduleId, dayData) =>
     });
 
 export const getDayById = (makeAuthenticatedRequest, scheduleId, dayId, includeBlocks = false) =>
-    makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}${includeBlocks ? '?includeBlocks=true' : ''}`);
+    makeAuthenticatedRequest(
+        `/api/schedules/${scheduleId}/days/${dayId}${includeBlocks ? '?includeBlocks=true' : ''}`,
+    );
 
 export const updateDay = (makeAuthenticatedRequest, scheduleId, dayId, data) =>
     makeAuthenticatedRequest(`/api/schedules/${scheduleId}/days/${dayId}`, {

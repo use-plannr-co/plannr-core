@@ -16,32 +16,37 @@ router.use(textToTasksRateLimit);
  */
 
 // Parse text into task drafts
-router.post('/parse', 
-    validate(textToTasksValidators.parseInputSchema), 
+router.post(
+    '/parse',
+    validate(textToTasksValidators.parseInputSchema),
     textToTasksControllers.parseText
 );
 
 // Get drafts for a session
-router.get('/sessions/:sessionId/drafts',
+router.get(
+    '/sessions/:sessionId/drafts',
     validate(textToTasksValidators.sessionIdParamSchema, 'params'),
     validate(textToTasksValidators.getDraftsQuerySchema, 'query'),
     textToTasksControllers.getDrafts
 );
 
 // Enrich drafts with defaults and overrides
-router.put('/sessions/:sessionId/enrich',
+router.put(
+    '/sessions/:sessionId/enrich',
     validate(textToTasksValidators.enrichInputSchema),
     textToTasksControllers.enrichDrafts
 );
 
 // Generate schedule from enriched drafts
-router.post('/sessions/:sessionId/generate-schedule',
+router.post(
+    '/sessions/:sessionId/generate-schedule',
     validate(textToTasksValidators.generateInputSchema),
     textToTasksControllers.generateSchedule
 );
 
 // Delete session and associated drafts
-router.delete('/sessions/:sessionId',
+router.delete(
+    '/sessions/:sessionId',
     validate(textToTasksValidators.sessionIdParamSchema, 'params'),
     textToTasksControllers.deleteSession
 );
