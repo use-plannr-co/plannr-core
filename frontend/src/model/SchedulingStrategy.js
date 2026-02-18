@@ -106,6 +106,66 @@ class SchedulingStrategy {
     }
 
     /**
+     * Sorts events by deadline ascending (earliest deadline first), with null
+     * deadlines placed at the end. This is the Earliest Deadline First (EDF)
+     * ordering used by reschedule() so that deadline-constrained events claim
+     * slots before unconstrained ones.
+     * @param {FlexibleEvent[]} events
+     * @returns {FlexibleEvent[]}
+     */
+    sortByDeadline(events) {
+        return [...events].sort((a, b) => {
+            const da = a.getDeadline();
+            const db = b.getDeadline();
+            if (!da && !db) return 0;
+            if (!da) return 1;
+            if (!db) return -1;
+            if (da.getYear() !== db.getYear()) return da.getYear() - db.getYear();
+            if (da.getMonth() !== db.getMonth()) return da.getMonth() - db.getMonth();
+            return da.getDate() - db.getDate();
+        });
+    }
+
+    /**
+     * Sorts events by urgency using a hierarchical comparator:
+     * 1. Deadline-constrained events before no-deadline events (preserves EDF guarantee)
+     * 2. Among deadline-constrained: sort by deadline date ASC (Earliest Deadline First)
+     * 3. Among same-deadline events: sort by priority DESC (HIGH → MEDIUM → LOW) as tiebreaker
+     * 4. Among no-deadline events: sort by priority DESC (HIGH → MEDIUM → LOW)
+     *
+     * This keeps the EDF correctness guarantee intact — a near-deadline LOW priority task
+     * always precedes a far-deadline HIGH priority task — while making priority meaningful
+     * for tasks that share a deadline or have no deadline at all.
+     * @param {FlexibleEvent[]} events
+     * @returns {FlexibleEvent[]}
+     */
+    sortByUrgency(events) {
+        const PRIORITY_RANK = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+        return [...events].sort((a, b) => {
+            const da = a.getDeadline();
+            const db = b.getDeadline();
+
+            // 1. Deadline-constrained before no-deadline
+            if (da && !db) return -1;
+            if (!da && db) return 1;
+
+            if (da && db) {
+                // 2. Sort by deadline date ASC (EDF)
+                if (da.getYear() !== db.getYear()) return da.getYear() - db.getYear();
+                if (da.getMonth() !== db.getMonth()) return da.getMonth() - db.getMonth();
+                if (da.getDate() !== db.getDate()) return da.getDate() - db.getDate();
+                // 3. Same deadline — tiebreak by priority DESC
+                return (
+                    (PRIORITY_RANK[b.getPriority()] ?? 1) - (PRIORITY_RANK[a.getPriority()] ?? 1)
+                );
+            }
+
+            // 4. Both have no deadline — sort by priority DESC
+            return (PRIORITY_RANK[b.getPriority()] ?? 1) - (PRIORITY_RANK[a.getPriority()] ?? 1);
+        });
+    }
+
+    /**
      * Returns a topologically sorted list of events.
      * @param {EventDependencies} eventDependencies
      * @param {FlexibleEvent[]} flexibleEvents

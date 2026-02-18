@@ -1,5 +1,6 @@
 import Rescheduler from '../model/Rescheduler';
 import FlexibleEvent from '../model/FlexibleEvent';
+import RigidEvent from '../model/RigidEvent';
 import ActivityType from '../model/ActivityType';
 import Priority from '../model/Priority';
 import ScheduleDate from '../model/ScheduleDate';
@@ -61,9 +62,21 @@ function mapPriority(priority) {
 }
 
 /**
- * Builds a FlexibleEvent from propose_add_task params.
+ * Builds a FlexibleEvent or RigidEvent from propose_add_task params.
+ * When params.isFixed is true (and date/startTime/endTime are provided), returns a RigidEvent.
  */
-function buildFlexibleEvent(params) {
+function buildEvent(params) {
+    if (params.isFixed && params.date && params.startTime != null && params.endTime != null) {
+        const [yyyy, mm, dd] = params.date.split('-').map(Number);
+        return new RigidEvent(
+            params.name,
+            mapCategory(params.category),
+            params.duration,
+            new ScheduleDate(dd, mm, yyyy),
+            params.startTime,
+            params.endTime,
+        );
+    }
     const deadline = params.deadline
         ? (() => {
               const [yyyy, mm, dd] = params.deadline.split('-').map(Number);
@@ -89,7 +102,7 @@ function formatBlockForAPI(tb) {
         endAt: tb.getEndTime().toInt(),
         duration: tb.getDuration(),
         type: tb.getType(),
-        activityType: tb.getActivityType(),
+        category: tb.getActivityType(),
         priority: tb.getPriority(),
         completed: tb.isCompleted(),
     };
@@ -136,10 +149,11 @@ async function persistScheduleChanges(oldSnapshot, newSchedule, scheduleBackendI
     for (const day of daysResp?.data || []) {
         dayIdByDate.set(day.date, day.id);
     }
+    console.log('[persistScheduleChanges] dayIdByDate:', [...dayIdByDate.entries()]);
 
     const processedBackendIds = new Set();
     const toUpdate = []; // { dayBackendId, backendId, startAt, endAt }
-    const toAddByDay = new Map(); // dayBackendId → block[]
+    const toAddByDay = new Map(); // dayBackendId → { blocks: block[], tbs: TimeBlock[] }
     const toDeleteCrossDayBackendIds = new Set(); // backendIds of blocks that moved dates (already handled via add)
 
     for (const dateId of newSchedule.getAllDatesInOrder()) {
@@ -147,7 +161,14 @@ async function persistScheduleChanges(oldSnapshot, newSchedule, scheduleBackendI
         if (!day) continue;
         const dateString = dateIdToString(dateId);
         const dayBackendId = dayIdByDate.get(dateString);
-        if (!dayBackendId) continue;
+        if (!dayBackendId) {
+            console.log(
+                '[persistScheduleChanges] No dayBackendId for date:',
+                dateString,
+                '(skipping)',
+            );
+            continue;
+        }
 
         for (const tb of day.getTimeBlocks()) {
             if (tb.getType() === 'break') continue;
@@ -181,7 +202,8 @@ async function persistScheduleChanges(oldSnapshot, newSchedule, scheduleBackendI
                     processedBackendIds.add(oldBid);
 
                     if (oldEntry.dateString === dateString) {
-                        // Same day — update start/end times
+                        // Same day — update start/end times; backendId now known
+                        tb.setBackendId(oldBid);
                         toUpdate.push({
                             dayBackendId,
                             backendId: oldBid,
@@ -191,17 +213,32 @@ async function persistScheduleChanges(oldSnapshot, newSchedule, scheduleBackendI
                     } else {
                         // Different day — delete from old day, add to new day
                         toDeleteCrossDayBackendIds.add(oldBid);
-                        if (!toAddByDay.has(dayBackendId)) toAddByDay.set(dayBackendId, []);
-                        toAddByDay.get(dayBackendId).push(formatBlockForAPI(tb));
+                        if (!toAddByDay.has(dayBackendId))
+                            toAddByDay.set(dayBackendId, { blocks: [], tbs: [] });
+                        const entry = toAddByDay.get(dayBackendId);
+                        entry.blocks.push(formatBlockForAPI(tb));
+                        entry.tbs.push(tb);
                     }
                 } else {
                     // Truly new block (e.g. from propose_add_task) — add
-                    if (!toAddByDay.has(dayBackendId)) toAddByDay.set(dayBackendId, []);
-                    toAddByDay.get(dayBackendId).push(formatBlockForAPI(tb));
+                    if (!toAddByDay.has(dayBackendId))
+                        toAddByDay.set(dayBackendId, { blocks: [], tbs: [] });
+                    const entry = toAddByDay.get(dayBackendId);
+                    entry.blocks.push(formatBlockForAPI(tb));
+                    entry.tbs.push(tb);
                 }
             }
         }
     }
+
+    console.log(
+        '[persistScheduleChanges] toUpdate:',
+        toUpdate.length,
+        '| toAddByDay:',
+        [...toAddByDay.entries()].map(([d, { blocks }]) => `${d}: ${blocks.length} blocks`),
+        '| toDelete cross-day:',
+        toDeleteCrossDayBackendIds.size,
+    );
 
     // Delete cross-day moved blocks from their original days
     for (const [backendId, { dateString }] of oldByBackendId) {
@@ -228,13 +265,17 @@ async function persistScheduleChanges(oldSnapshot, newSchedule, scheduleBackendI
         await api.updateBlockInDay(scheduleBackendId, dayBackendId, backendId, { startAt, endAt });
     }
 
-    // Apply additions
-    for (const [dayBackendId, blocks] of toAddByDay) {
-        await api.addBlocksToDay(scheduleBackendId, dayBackendId, blocks);
+    // Apply additions; set backendIds on the new in-memory TimeBlocks from the API response
+    for (const [dayBackendId, { blocks, tbs }] of toAddByDay) {
+        const resp = await api.addBlocksToDay(scheduleBackendId, dayBackendId, blocks);
+        const returned = Array.isArray(resp?.data) ? resp.data : [];
+        returned.forEach((newBlock, i) => {
+            if (tbs[i] && newBlock?.id) tbs[i].setBackendId(newBlock.id);
+        });
     }
 
     const updatedCount = toUpdate.length;
-    const addedCount = [...toAddByDay.values()].reduce((sum, arr) => sum + arr.length, 0);
+    const addedCount = [...toAddByDay.values()].reduce((sum, { blocks }) => sum + blocks.length, 0);
     const deletedCount =
         [...oldByBackendId.keys()].filter((bid) => !processedBackendIds.has(bid)).length +
         toDeleteCrossDayBackendIds.size;
@@ -274,8 +315,34 @@ export default function useScheduleActions() {
             updatedSchedule = rescheduler.missedTaskShifting(schedule);
             fallbackSummary = 'Missed tasks rescheduled';
         } else if (actionType === 'add_task') {
-            const newEvent = buildFlexibleEvent(params);
-            updatedSchedule = rescheduler.addNewTimeBlocks(schedule, [newEvent], [], [], null);
+            const newEvent = buildEvent(params);
+
+            if (newEvent instanceof RigidEvent) {
+                // RigidEvent: placed at a fixed time — always succeeds regardless of existing blocks
+                updatedSchedule = rescheduler.addNewTimeBlocks(schedule, [newEvent], [], [], null);
+            } else {
+                // FlexibleEvent: "make room" by collecting all incomplete flexible events,
+                // removing them from the schedule, then re-slotting them all together with
+                // the new task. This mirrors missedTaskShifting so there is always a slot.
+                const eventsToSlot = [newEvent];
+                schedule.getAllDatesInOrder().forEach((dateId) => {
+                    const day = schedule.getScheduleForDate(dateId);
+                    if (!day) return;
+                    day.getFlexibleEvents().forEach((event) => {
+                        const tb = schedule.locateTimeBlockForEvent(event);
+                        if (!tb || tb.isCompleted()) return;
+                        eventsToSlot.push(event);
+                        day.removeEvent(event);
+                    });
+                });
+                updatedSchedule = rescheduler.addNewTimeBlocks(
+                    schedule,
+                    eventsToSlot,
+                    [],
+                    [],
+                    null,
+                );
+            }
             fallbackSummary = `Added "${params.name}" to your schedule`;
         } else if (actionType === 'strategy_switch') {
             updatedSchedule = rescheduler.strategySwitch(schedule, params.newStrategy);

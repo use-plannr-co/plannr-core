@@ -31,12 +31,9 @@ export const parseTimeBlock = (rawObj) => {
         !rawObj ||
         rawObj.name == null ||
         rawObj.date == null ||
-        rawObj.activityType == null ||
-        rawObj.priority == null ||
         rawObj.startTime == null ||
         rawObj.endTime == null ||
         rawObj.duration == null ||
-        rawObj.deadline == null ||
         rawObj.type == null
     ) {
         return null;

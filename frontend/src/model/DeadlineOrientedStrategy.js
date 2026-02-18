@@ -223,9 +223,10 @@ class DeadlineOrientedStrategy extends SchedulingStrategy {
         const minGap = schedule.getScheduleForDate(schedule.getAllDatesInOrder()[0]).getMinGap();
 
         const scheduled = new Set();
-        let sorted = this.topologicalSortOfEvents(this.eventDependencies, events);
-        sorted = sorted.filter((e) => events.includes(e));
-        sorted.reverse();
+        // Sort by urgency (EDF + priority tiebreaker), then reverse so latest-deadline /
+        // lowest-priority events are processed first — they claim the latest slots,
+        // leaving early-deadline / high-priority events to fill in the earlier days.
+        const sorted = this.sortByUrgency(events).reverse();
 
         for (const event of sorted) {
             if (scheduled.has(event)) continue;

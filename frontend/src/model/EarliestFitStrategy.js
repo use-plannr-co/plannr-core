@@ -252,8 +252,7 @@ class EarliestFitStrategy extends SchedulingStrategy {
         const minGap = schedule.getScheduleForDate(schedule.getAllDatesInOrder()[0]).getMinGap();
 
         const scheduled = new Set();
-        let sorted = this.topologicalSortOfEvents(this.eventDependencies, events);
-        sorted = sorted.filter((e) => events.includes(e));
+        const sorted = this.sortByUrgency(events);
         for (const event of sorted) {
             if (!scheduled.has(event)) {
                 const deps = this.eventDependencies.getDependenciesForEvent(event);

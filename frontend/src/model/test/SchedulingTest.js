@@ -7,6 +7,7 @@ import EventDependencies from '../EventDependencies.js';
 import ActivityType from '../ActivityType.js';
 import Priority from '../Priority.js';
 import CircularDependencyError from '../exceptions/CircularDependencyError.js';
+import EarliestFitStrategy from '../EarliestFitStrategy.js';
 
 function schedulerTest1() {
     const scheduler = new Scheduler(7, new ScheduleDate(6, 4, 2025), 'Sunday', 30, 6);
@@ -270,4 +271,88 @@ function schedulerTest1() {
     // }
 }
 
+function sortByUrgencyTest() {
+    // Use a bare EarliestFitStrategy instance just to access sortByUrgency()
+    const strat = new EarliestFitStrategy(
+        {
+            numDays: 7,
+            breaks: [],
+            repeatedBreaks: [],
+            rigidEvents: [],
+            flexibleEvents: [],
+            eventDependencies: new EventDependencies(),
+        },
+        new ScheduleDate(6, 4, 2025),
+        'Sunday',
+        15,
+        8,
+    );
+
+    const dayA = new ScheduleDate(10, 4, 2025); // Apr 10
+    const dayB = new ScheduleDate(7, 4, 2025); // Apr 7 (earlier)
+    const dayC = new ScheduleDate(10, 4, 2025); // Apr 10 (same as A)
+
+    const highFarDeadline = new FlexibleEvent(
+        'HighFar',
+        ActivityType.WORK,
+        60,
+        Priority.HIGH,
+        dayA,
+    );
+    const lowNearDeadline = new FlexibleEvent('LowNear', ActivityType.WORK, 60, Priority.LOW, dayB);
+    const highSameDeadline = new FlexibleEvent(
+        'HighSame',
+        ActivityType.WORK,
+        60,
+        Priority.HIGH,
+        dayC,
+    );
+    const lowSameDeadline = new FlexibleEvent('LowSame', ActivityType.WORK, 60, Priority.LOW, dayC);
+    const highNoDeadline = new FlexibleEvent(
+        'HighNoDL',
+        ActivityType.WORK,
+        60,
+        Priority.HIGH,
+        null,
+    );
+    const lowNoDeadline = new FlexibleEvent('LowNoDL', ActivityType.WORK, 60, Priority.LOW, null);
+
+    let pass = true;
+
+    // --- Test 1: EDF guarantee — near-deadline LOW beats far-deadline HIGH ---
+    const sorted1 = strat.sortByUrgency([highFarDeadline, lowNearDeadline]);
+    const edfOk = sorted1[0] === lowNearDeadline && sorted1[1] === highFarDeadline;
+    console.log(
+        `[sortByUrgencyTest] EDF preserved (LOW Apr7 before HIGH Apr10): ${edfOk ? 'PASS' : 'FAIL'}`,
+    );
+    if (!edfOk) pass = false;
+
+    // --- Test 2: Same-deadline tiebreaker — HIGH before LOW ---
+    const sorted2 = strat.sortByUrgency([lowSameDeadline, highSameDeadline]);
+    const tiebreakerOk = sorted2[0] === highSameDeadline && sorted2[1] === lowSameDeadline;
+    console.log(
+        `[sortByUrgencyTest] Same-deadline tiebreaker (HIGH before LOW): ${tiebreakerOk ? 'PASS' : 'FAIL'}`,
+    );
+    if (!tiebreakerOk) pass = false;
+
+    // --- Test 3: No-deadline events sorted by priority — HIGH before LOW ---
+    const sorted3 = strat.sortByUrgency([lowNoDeadline, highNoDeadline]);
+    const noDlOk = sorted3[0] === highNoDeadline && sorted3[1] === lowNoDeadline;
+    console.log(
+        `[sortByUrgencyTest] No-deadline priority order (HIGH before LOW): ${noDlOk ? 'PASS' : 'FAIL'}`,
+    );
+    if (!noDlOk) pass = false;
+
+    // --- Test 4: Deadline-constrained events always precede no-deadline events ---
+    const sorted4 = strat.sortByUrgency([lowNoDeadline, lowNearDeadline]);
+    const dlBeforeNoDlOk = sorted4[0] === lowNearDeadline && sorted4[1] === lowNoDeadline;
+    console.log(
+        `[sortByUrgencyTest] Deadline before no-deadline (LOW Apr7 before LOW no-DL): ${dlBeforeNoDlOk ? 'PASS' : 'FAIL'}`,
+    );
+    if (!dlBeforeNoDlOk) pass = false;
+
+    console.log(`[sortByUrgencyTest] Overall: ${pass ? 'ALL PASS' : 'SOME FAILED'}`);
+}
+
 schedulerTest1();
+sortByUrgencyTest();

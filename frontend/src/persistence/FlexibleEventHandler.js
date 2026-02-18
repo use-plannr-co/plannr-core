@@ -17,14 +17,7 @@ export const serializeFlexibleEvent = (eventObj) => {
 };
 
 export const parseFlexibleEvent = (rawObj) => {
-    if (
-        !rawObj ||
-        rawObj.name == null ||
-        rawObj.type == null ||
-        rawObj.duration == null ||
-        rawObj.priority == null ||
-        rawObj.deadline == null
-    ) {
+    if (!rawObj || rawObj.name == null || rawObj.duration == null) {
         return null;
     }
 

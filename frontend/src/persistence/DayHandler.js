@@ -98,13 +98,13 @@ export const parseDaySchedule = (rawObj) => {
     } else {
         for (const event of rawObj.events) {
             let parsed = null;
-            if (event.deadline != null) {
-                parsed = parseFlexibleEvent(event);
-            } else if (event.date != null && event.startTime != null && event.endTime != null) {
+            if (event.date != null && event.startTime != null && event.endTime != null) {
                 parsed = parseRigidEvent(event);
+            } else {
+                parsed = parseFlexibleEvent(event);
             }
 
-            eventsList.push(parsed);
+            if (parsed != null) eventsList.push(parsed);
         }
 
         for (let i = 0; i < rawObj.breaks.length; i++) {
@@ -114,7 +114,8 @@ export const parseDaySchedule = (rawObj) => {
 
     let timeBlocksList = [];
     for (let i = 0; i < rawObj.timeBlocks.length; i++) {
-        timeBlocksList.push(parseTimeBlock(rawObj.timeBlocks[i]));
+        const tb = parseTimeBlock(rawObj.timeBlocks[i]);
+        if (tb != null) timeBlocksList.push(tb);
     }
 
     return new Day(
