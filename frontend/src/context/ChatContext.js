@@ -212,44 +212,45 @@ export const ChatProvider = ({ children }) => {
                 );
 
                 // 4. Stream Claude's confirmation
+                // Don't add a temp message to `messages` — ChatScreen's `displayMessages`
+                // appends the synthetic __streaming__ row whenever isStreaming is true,
+                // avoiding the double typing-indicator caused by having both a status:'streaming'
+                // message in the array AND the synthetic row.
                 setIsStreaming(true);
                 setStreamingText('');
                 streamingTextRef.current = '';
                 pendingActionsRef.current = null;
                 setError(null);
 
-                const confirmTempId = `tmp-confirm-${Date.now()}`;
-                setMessages((prev) => [
-                    ...prev,
-                    {
-                        id: confirmTempId,
-                        role: 'assistant',
-                        content: '',
-                        status: 'streaming',
-                    },
-                ]);
-
                 const onEvent = (eventType, data) => {
                     if (eventType === 'text_delta') {
                         streamingTextRef.current += data.text;
+                    } else if (eventType === 'action_proposal') {
+                        // Claude may propose another action (e.g. "now reschedule") during
+                        // the confirmation stream — capture it so the button attaches.
+                        pendingActionsRef.current = data.actions;
                     } else if (eventType === 'message_stop') {
                         const fullText = streamingTextRef.current;
+                        const pendingActions = pendingActionsRef.current;
                         let pos = 0;
                         revealIntervalRef.current = setInterval(() => {
                             pos = Math.min(pos + REVEAL_CHUNK, fullText.length);
                             setStreamingText(fullText.slice(0, pos));
                             if (pos >= fullText.length) {
                                 stopReveal();
-                                setMessages((prev) =>
-                                    prev.map((m) =>
-                                        m.id === confirmTempId
-                                            ? { ...m, content: fullText, status: undefined }
-                                            : m,
-                                    ),
-                                );
+                                const assistantMsg = {
+                                    id: `tmp-confirm-${Date.now()}`,
+                                    chatId: activeChat.id,
+                                    role: 'assistant',
+                                    content: fullText,
+                                    createdAt: new Date().toISOString(),
+                                    actions: pendingActions || null,
+                                };
+                                setMessages((prev) => [...prev, assistantMsg]);
                                 setStreamingText('');
                                 setIsStreaming(false);
                                 abortRef.current = null;
+                                pendingActionsRef.current = null;
                             }
                         }, REVEAL_TICK_MS);
                     } else if (eventType === 'error') {
@@ -258,7 +259,6 @@ export const ChatProvider = ({ children }) => {
                         setIsStreaming(false);
                         setStreamingText('');
                         abortRef.current = null;
-                        setMessages((prev) => prev.filter((m) => m.id !== confirmTempId));
                     }
                 };
 
@@ -272,7 +272,6 @@ export const ChatProvider = ({ children }) => {
                     setStreamingText('');
                     streamingTextRef.current = '';
                     abortRef.current = null;
-                    setMessages((prev) => prev.filter((m) => m.id !== confirmTempId));
                 };
 
                 const abort = await api.submitActionResult(

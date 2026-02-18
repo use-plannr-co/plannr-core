@@ -68,22 +68,46 @@ export const tools = [
     {
         name: 'propose_add_task',
         description:
-            "Proposes adding a new task to the user's schedule. Claude extracts the task details from the conversation.",
+            "Proposes adding a new event to the user's schedule. For flexible tasks (study, work, etc.) supply name/duration/category/priority/deadline. For fixed-time events like meetings or appointments, also supply isFixed=true, date (YYYY-MM-DD), startTime and endTime (24-hour integer, e.g. 1430 for 2:30 PM) — duration is still required and should match the difference.",
         input_schema: {
             type: 'object',
             properties: {
-                name: { type: 'string', description: 'Task name' },
+                name: { type: 'string', description: 'Event name' },
                 duration: { type: 'integer', description: 'Duration in minutes' },
                 category: {
                     type: 'string',
-                    description: 'Activity type (study, work, exercise, personal, break)',
+                    description:
+                        'Activity type (study, work, exercise, personal, break, meeting, travel, errand)',
                 },
                 priority: {
                     type: 'string',
                     enum: ['low', 'medium', 'high'],
-                    description: 'Task priority',
+                    description: 'Task priority (only relevant for flexible tasks)',
                 },
-                deadline: { type: 'string', description: 'Optional deadline date YYYY-MM-DD' },
+                deadline: {
+                    type: 'string',
+                    description: 'Optional deadline date YYYY-MM-DD (flexible tasks only)',
+                },
+                isFixed: {
+                    type: 'boolean',
+                    description:
+                        'Set to true for fixed-time events (meetings, appointments) that have a specific date and time.',
+                },
+                date: {
+                    type: 'string',
+                    description:
+                        'Required when isFixed=true. The date of the fixed event in YYYY-MM-DD format.',
+                },
+                startTime: {
+                    type: 'integer',
+                    description:
+                        'Required when isFixed=true. Start time as 24-hour integer (e.g. 1430 for 2:30 PM).',
+                },
+                endTime: {
+                    type: 'integer',
+                    description:
+                        'Required when isFixed=true. End time as 24-hour integer (e.g. 1630 for 4:30 PM).',
+                },
             },
             required: ['name', 'duration', 'category'],
         },

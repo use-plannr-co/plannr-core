@@ -332,11 +332,31 @@ export async function executeProposedAddTask(input, userId) {
     const schedule = await getActiveSchedule(userId);
     if (!schedule) return JSON.stringify({ error: 'No active schedule found.' });
 
-    const { name, duration, category, priority = 'medium', deadline } = input;
+    const {
+        name,
+        duration,
+        category,
+        priority = 'medium',
+        deadline,
+        isFixed,
+        date,
+        startTime,
+        endTime,
+    } = input;
+
+    const params = { name, duration, category, priority, deadline: deadline || null };
+    if (isFixed) {
+        params.isFixed = true;
+        params.date = date;
+        params.startTime = startTime;
+        params.endTime = endTime;
+    }
+
+    const timeLabel = isFixed && startTime != null ? ` at ${formatTime(startTime)}` : '';
     return JSON.stringify({
         type: 'add_task',
-        params: { name, duration, category, priority, deadline: deadline || null },
-        label: `Add "${name}" (${duration} min)`,
+        params,
+        label: `Add "${name}"${timeLabel} (${duration} min)`,
     });
 }
 

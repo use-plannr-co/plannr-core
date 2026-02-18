@@ -5,6 +5,8 @@ import DeadlineOrientedStrategy from './DeadlineOrientedStrategy.js';
 import convertDateToScheduleDate from '../utils/dateConversion.js';
 import Time24 from './Time24.js';
 import Break from './Break.js';
+import EventDependencies from './EventDependencies.js';
+import RigidEvent from './RigidEvent.js';
 
 /**
  * Manages the rescheduling of tasks on user request.
@@ -78,6 +80,9 @@ class Rescheduler {
      */
     _extractDependencies(schedule) {
         this.dependencies = schedule.eventDependencies;
+        if (!this.dependencies) {
+            this.dependencies = new EventDependencies();
+        }
     }
 
     /**

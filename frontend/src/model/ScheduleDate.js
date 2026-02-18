@@ -63,9 +63,10 @@ class ScheduleDate {
 
     /**
      * @param {ScheduleDate} other
-     * @returns {boolean} true if this date is before the other
+     * @returns {boolean} true if this date is before the other; false if other is null (no constraint)
      */
     isBefore(other) {
+        if (!other) return false;
         if (this.year < other.getYear()) return true;
         if (this.year === other.getYear()) {
             if (this.month < other.getMonth()) return true;
@@ -78,9 +79,10 @@ class ScheduleDate {
 
     /**
      * @param {ScheduleDate} other
-     * @returns {boolean} true if this date is after the other
+     * @returns {boolean} true if this date is after the other; false if other is null (no constraint)
      */
     isAfter(other) {
+        if (!other) return false;
         if (this.year > other.getYear()) return true;
         if (this.year === other.getYear()) {
             if (this.month > other.getMonth()) return true;

@@ -145,7 +145,8 @@ export async function submitActionResult(req, res, next) {
     try {
         const { userId } = req.auth;
         const { chatId } = req.validated?.params || req.params;
-        const { actionType, summary } = req.validated?.body || req.body;
+        const { actionType, summary, timezone } = req.validated?.body || req.body;
+        const tz = timezone || 'UTC';
 
         const chat = await repo.getChatById(chatId, userId);
         if (!chat) return res.status(404).json({ success: false, error: 'Chat not found' });
@@ -170,7 +171,7 @@ export async function submitActionResult(req, res, next) {
             hasActiveSchedule: true,
             isPro: subscription?.isPro === true,
             userName: userRow?.displayName || null,
-            timezone: 'UTC',
+            timezone: tz,
         });
 
         // Stream Claude's confirmation
@@ -179,7 +180,7 @@ export async function submitActionResult(req, res, next) {
         res.setHeader('Connection', 'keep-alive');
         res.flushHeaders();
 
-        await runStreamingLoop(res, claudeMessages, systemPrompt, userId, chatId, 'UTC');
+        await runStreamingLoop(res, claudeMessages, systemPrompt, userId, chatId, tz);
     } catch (err) {
         next(err);
     }

@@ -43,11 +43,13 @@ export const submitActionResult = (
     onEvent,
     onDone,
     onError,
-) =>
-    makeStreamingRequest(
+) => {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return makeStreamingRequest(
         `/api/chat/chats/${chatId}/action-result`,
-        { method: 'POST', body: JSON.stringify({ actionType, summary }) },
+        { method: 'POST', body: JSON.stringify({ actionType, summary, timezone }) },
         onEvent,
         onDone,
         onError,
     );
+};

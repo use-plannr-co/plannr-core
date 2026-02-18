@@ -166,6 +166,10 @@ function ChatBubble({ message }) {
     if (!message) return null;
 
     const { role, content, status } = message;
+
+    // System messages are stored for Claude's context only — never render them in the UI
+    if (role === 'system') return null;
+
     const isUser = role === 'user';
     const isStreaming = status === 'streaming';
 

@@ -16,4 +16,5 @@ export const chatIdParamSchema = z.object({
 export const actionResultSchema = z.object({
     actionType: z.enum(['missed_task_shift', 'add_task', 'strategy_switch']),
     summary: z.string().max(500),
+    timezone: z.string().optional(),
 });
