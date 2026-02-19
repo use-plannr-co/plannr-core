@@ -342,9 +342,7 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
     // Compute spacing so all points fit within the chart width without scrolling.
     // Available drawing area = chartWidth - yAxisLabelWidth (36).
     const lineChartW = CONTENT_WIDTH - spacing.SPACING_16 - 4;
-    const lineSpacing = lineData.length > 1
-        ? Math.max(1, Math.floor((lineChartW - 36) / lineData.length))
-        : 60;
+    const lineSpacing = 36;
     const barData = buildBarChartData(analyticsData?.dowStats || {}, theme);
     const heatmapBuckets = computeHourlyBuckets(analyticsData?.hourlyStats || {});
     const categoryEntries = Object.entries(analyticsData?.categoryStats || {})
