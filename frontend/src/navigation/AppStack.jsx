@@ -13,6 +13,7 @@ import SchedulingCenterScreen from '../screens/SchedulingCenterScreen.jsx';
 import GenerateScheduleScreen from '../screens/GenerateScheduleScreen.jsx';
 import ScheduleViewScreen from '../screens/ScheduleViewScreen.jsx';
 import ChatScreen from '../screens/ChatScreen.jsx';
+import ProductivityAnalyticsScreen from '../screens/ProductivityAnalyticsScreen.jsx';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -42,6 +43,7 @@ export default function AppStack() {
             <Stack.Screen name="View" component={ScheduleViewScreen} />
             <Stack.Screen name="Generate" component={GenerateScheduleScreen} />
             <Stack.Screen name="Chat" component={ChatScreen} />
+            <Stack.Screen name="Analytics" component={ProductivityAnalyticsScreen} />
         </Stack.Navigator>
     );
 }

@@ -25,7 +25,6 @@ import Time24 from '../model/Time24';
 import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
 import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
 import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg';
-import RescheduleIcon from '../../assets/system-icons/RescheduleIcon.svg';
 import ScheduleDate from '../model/ScheduleDate';
 
 const FinishingUpView = ({ onNext, buttonText = 'Generate Schedule' }) => {
