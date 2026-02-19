@@ -479,21 +479,23 @@ const ProPaywallScreen = ({ navigation, route }) => {
 
                     {/* Upgrade Button */}
                     <TouchableOpacity
-                        activeOpacity={0.9}
-                        onPress={handlePurchase}
-                        disabled={purchasing || loadingOfferings}
+                        activeOpacity={isPro ? 1 : 0.9}
+                        onPress={isPro ? undefined : handlePurchase}
+                        disabled={purchasing || loadingOfferings || isPro}
                         style={styles.upgradeButtonContainer}
                     >
                         <LinearGradient
                             colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
-                            style={styles.upgradeButton}
+                            style={[styles.upgradeButton, isPro && { opacity: 0.7 }]}
                         >
                             {purchasing ? (
                                 <ActivityIndicator color="#FFFFFF" />
                             ) : (
-                                <Text style={styles.upgradeButtonText}>Upgrade Now</Text>
+                                <Text style={styles.upgradeButtonText}>
+                                    {isPro ? "You're a Pro Member" : 'Upgrade Now'}
+                                </Text>
                             )}
                         </LinearGradient>
                     </TouchableOpacity>

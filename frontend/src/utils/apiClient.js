@@ -10,7 +10,7 @@ const PLATFORM_OS = Platform.OS; // 'ios' or 'android'
  */
 export class ApiClient {
     constructor(baseUrl) {
-        this.baseUrl = 'http://localhost:5001'; // baseUrl || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';
+        this.baseUrl = baseUrl || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5001';
     }
 
     /**
