@@ -58,11 +58,11 @@ const HomeScreen = ({ navigation }) => {
                 <View style={{ ...styles.horizontalGrid, backgroundColor: theme.BACKGROUND }}>
                     <MenuButton
                         broad={true}
-                        title="Plannr Center"
-                        icon="Center"
+                        title="Create a New Schedule"
+                        icon="Generate"
                         navTo={() => {
-                            logUserAction('plannr_center_clicked');
-                            navigation.navigate('Center');
+                            logUserAction('generate_schedule_clicked');
+                            navigation.navigate('Generate');
                         }}
                     />
                 </View>

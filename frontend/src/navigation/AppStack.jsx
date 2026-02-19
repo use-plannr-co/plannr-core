@@ -28,7 +28,6 @@ const MainTabs = () => {
             >
                 <Tab.Screen name="Home" component={HomeScreen} />
                 <Tab.Screen name="Tasks" component={TodaysTasksScreen} />
-                <Tab.Screen name="Center" component={SchedulingCenterScreen} />
                 <Tab.Screen name="Profile" component={UserProfileStack} />
             </Tab.Navigator>
             <FABChatButton onPress={() => navigation.navigate('Chat')} />
