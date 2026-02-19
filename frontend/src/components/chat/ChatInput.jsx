@@ -10,11 +10,16 @@ import {
     Easing,
 } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
+import {
+    ExpoSpeechRecognitionModule,
+    useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 import { lightColor, darkColor } from '../../design/colors.js';
 import { useAppState } from '../../context/AppStateContext.js';
 import SendIcon from '../../../assets/system-icons/SendIcon.svg';
 import VoiceIcon from '../../../assets/system-icons/VoiceIcon.svg';
 import { LinearGradient } from 'expo-linear-gradient';
+import DailyLimitModal from '../../modals/DailyLimitModal.jsx';
 
 const FREE_LIMIT = 5;
 
@@ -46,10 +51,22 @@ function CancelIcon({ color }) {
 export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage }) {
     const [text, setText] = useState('');
     const [isVoiceActive, setIsVoiceActive] = useState(false);
+    const [isListening, setIsListening] = useState(false);
     const [rowWidth, setRowWidth] = useState(0);
+    const [showLimitModal, setShowLimitModal] = useState(false);
+
     const { appState } = useAppState();
     const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const isDark = appState.userPreferences.theme !== 'light';
+
+    // Ref so event handlers always see the latest value without closure issues
+    const isListeningRef = useRef(false);
+    const textRef = useRef('');
+
+    const updateText = (val) => {
+        setText(val);
+        textRef.current = val;
+    };
 
     const hasText = text.trim().length > 0;
 
@@ -63,8 +80,8 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
             tension: 200,
             friction: 12,
         }).start();
-        // Auto-deactivate voice fill when user starts typing
-        if (hasText && isVoiceActive) {
+        // Auto-deactivate voice fill only when user manually types, not during speech
+        if (hasText && isVoiceActive && !isListeningRef.current) {
             animateFill(false);
             setIsVoiceActive(false);
         }
@@ -93,8 +110,6 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
     });
 
     // ── Voice press animation ─────────────────────────────────────────────────
-    // fillAnim:     0 = fill fully off-screen right, 1 = fill covering row
-    // rotationAnim: 0 → 1 one-shot counterclockwise spin on every voice press
     const fillAnim = useRef(new Animated.Value(0)).current;
     const rotationAnim = useRef(new Animated.Value(0)).current;
 
@@ -102,8 +117,6 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
         Animated.timing(fillAnim, {
             toValue: activate ? 1 : 0,
             duration: activate ? 600 : 450,
-            // Activate: ease-out (rushes in from the right, decelerates)
-            // Deactivate: ease-in (accelerates out to the right)
             easing: activate
                 ? Easing.bezier(0.25, 0.46, 0.45, 0.94)
                 : Easing.bezier(0.55, 0.06, 0.68, 0.19),
@@ -121,14 +134,7 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
         }).start();
     };
 
-    const handleVoicePress = () => {
-        spinButton();
-        const next = !isVoiceActive;
-        setIsVoiceActive(next);
-        animateFill(next);
-    };
-
-    // Fill slides from the right: starts at +rowWidth (off-screen), ends at 0
+    // Fill slides from the right
     const fillTranslateX = fillAnim.interpolate({
         inputRange: [0, 1],
         outputRange: [rowWidth, 0],
@@ -140,13 +146,70 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
         outputRange: ['0deg', '-360deg'],
     });
 
-    // ── Send / cancel ─────────────────────────────────────────────────────────
+    // ── Speech recognition events ─────────────────────────────────────────────
+
+    useSpeechRecognitionEvent('start', () => {
+        isListeningRef.current = true;
+        setIsListening(true);
+    });
+
+    useSpeechRecognitionEvent('result', (event) => {
+        const transcript = event.results[0]?.transcript ?? '';
+        updateText(transcript);
+    });
+
+    useSpeechRecognitionEvent('end', () => {
+        isListeningRef.current = false;
+        setIsListening(false);
+        setIsVoiceActive(false);
+        animateFill(false);
+    });
+
+    useSpeechRecognitionEvent('error', (event) => {
+        console.warn('Speech recognition error:', event.error, event.message);
+        isListeningRef.current = false;
+        setIsListening(false);
+        setIsVoiceActive(false);
+        animateFill(false);
+    });
+
+    // ── Handlers ─────────────────────────────────────────────────────────────
+
+    const handleVoicePress = async () => {
+        if (isListening) {
+            // Stop ongoing recognition — 'end' event handles cleanup
+            ExpoSpeechRecognitionModule.stop();
+            return;
+        }
+
+        const { granted } = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+        if (!granted) {
+            console.warn('Microphone/speech permission not granted');
+            return;
+        }
+
+        spinButton();
+        setIsVoiceActive(true);
+        animateFill(true);
+        updateText('');
+
+        ExpoSpeechRecognitionModule.start({
+            lang: 'en-US',
+            interimResults: true,
+            continuous: false,
+        });
+    };
+
     const canSend = hasText && !isStreaming;
 
     const handleSend = () => {
         if (!canSend) return;
+        if (remaining !== null && remaining <= 0) {
+            setShowLimitModal(true);
+            return;
+        }
         const msg = text.trim();
-        setText('');
+        updateText('');
         onSend(msg);
     };
 
@@ -154,8 +217,20 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
 
     const remaining = dailyUsage ? Math.max(0, FREE_LIMIT - (dailyUsage.messageCount || 0)) : null;
 
+    // ── Placeholder text ──────────────────────────────────────────────────────
+    const placeholder = isListening && !hasText
+        ? 'Listening...'
+        : !isVoiceActive
+          ? 'Ask about your schedule...'
+          : '';
+
     return (
         <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
+            <DailyLimitModal
+                isVisible={showLimitModal}
+                onClose={() => setShowLimitModal(false)}
+            />
+
             {remaining !== null && remaining <= FREE_LIMIT && (
                 <Text
                     style={[
@@ -188,14 +263,14 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
                 />
 
                 <TextInput
-                    style={[styles.input, { color: theme.FOREGROUND }]}
-                    placeholder={!isVoiceActive ? 'Ask about your schedule...' : ''}
-                    placeholderTextColor={isDark ? '#666' : '#999'}
+                    style={[styles.input, { color: isVoiceActive ? theme.SELECTED_TEXT : theme.FOREGROUND }]}
+                    placeholder={placeholder}
+                    placeholderTextColor={isListening ? theme.SELECTED_TEXT + '99' : isDark ? '#666' : '#999'}
                     value={text}
-                    onChangeText={setText}
+                    onChangeText={updateText}
                     multiline
                     maxHeight={100}
-                    editable={!isStreaming}
+                    editable={!isStreaming && !isListening}
                     returnKeyType="send"
                     onSubmitEditing={Platform.OS === 'ios' ? undefined : handleSend}
                 />
