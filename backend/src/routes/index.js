@@ -6,6 +6,7 @@ import integrationsRoutes from '../modules/integrations/integrations.routes.js';
 import textToTasksRoutes from '../modules/textToTasks/textToTasks.routes.js';
 import subscriptionsRoutes from '../modules/subscriptions/subscriptions.routes.js';
 import chatRoutes from '../modules/chat/chat.routes.js';
+import analyticsRoutes from '../modules/analytics/analytics.routes.js';
 import { getMinVersion, getUpdateUrl } from '../config/versionPolicy.js';
 
 const router = express.Router();
@@ -34,5 +35,6 @@ router.use('/integrations', integrationsRoutes);
 router.use('/text-to-tasks', textToTasksRoutes);
 router.use('/subscriptions', subscriptionsRoutes);
 router.use('/chat', chatRoutes);
+router.use('/analytics', analyticsRoutes);
 
 export default router;

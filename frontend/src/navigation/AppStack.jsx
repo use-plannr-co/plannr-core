@@ -13,6 +13,7 @@ import SchedulingCenterScreen from '../screens/SchedulingCenterScreen.jsx';
 import GenerateScheduleScreen from '../screens/GenerateScheduleScreen.jsx';
 import ScheduleViewScreen from '../screens/ScheduleViewScreen.jsx';
 import ChatScreen from '../screens/ChatScreen.jsx';
+import ProductivityAnalyticsScreen from '../screens/ProductivityAnalyticsScreen.jsx';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -27,7 +28,6 @@ const MainTabs = () => {
             >
                 <Tab.Screen name="Home" component={HomeScreen} />
                 <Tab.Screen name="Tasks" component={TodaysTasksScreen} />
-                <Tab.Screen name="Center" component={SchedulingCenterScreen} />
                 <Tab.Screen name="Profile" component={UserProfileStack} />
             </Tab.Navigator>
             <FABChatButton onPress={() => navigation.navigate('Chat')} />
@@ -42,6 +42,7 @@ export default function AppStack() {
             <Stack.Screen name="View" component={ScheduleViewScreen} />
             <Stack.Screen name="Generate" component={GenerateScheduleScreen} />
             <Stack.Screen name="Chat" component={ChatScreen} />
+            <Stack.Screen name="Analytics" component={ProductivityAnalyticsScreen} />
         </Stack.Navigator>
     );
 }

@@ -42,7 +42,7 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
 
     useEffect(() => {
         const index = state.index;
-        const GAP = (WIDTH - 2 * PADDING_HORIZONTAL - 4 * ICON_DIM) / 3;
+        const GAP = (WIDTH - 2 * PADDING_HORIZONTAL - 3 * ICON_DIM) / 2;
         const xPosition = index * (GAP + ICON_DIM) + OFFSET;
         Animated.spring(indicatorX, {
             toValue: xPosition,

@@ -299,3 +299,35 @@ export const chatDailyUsage = pgTable(
     },
     (t) => [uniqueIndex('chat_daily_usage_user_date_idx').on(t.userId, t.date)]
 );
+
+// ─── Analytics ────────────────────────────────────────────────────────────────
+
+export const userAnalytics = pgTable(
+    'user_analytics',
+    {
+        id: uuid('id').defaultRandom().primaryKey(),
+        userId: uuid('user_id')
+            .notNull()
+            .unique()
+            .references(() => users.id, { onDelete: 'cascade' }),
+        data: jsonb('data').notNull(), // Full computed analytics payload
+        computedAt: timestamp('computed_at', { withTimezone: true }).notNull().defaultNow(),
+        createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+        updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    },
+    (t) => [index('user_analytics_user_idx').on(t.userId)]
+);
+
+export const dailyMoodCheckins = pgTable(
+    'daily_mood_checkins',
+    {
+        id: uuid('id').defaultRandom().primaryKey(),
+        userId: uuid('user_id')
+            .notNull()
+            .references(() => users.id, { onDelete: 'cascade' }),
+        date: date('date').notNull(), // YYYY-MM-DD
+        rating: integer('rating').notNull(), // 1–5
+        createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    },
+    (t) => [uniqueIndex('daily_mood_checkins_user_date_idx').on(t.userId, t.date)]
+);

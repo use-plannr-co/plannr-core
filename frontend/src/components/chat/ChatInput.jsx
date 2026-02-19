@@ -9,6 +9,7 @@ import {
     Animated,
     Easing,
 } from 'react-native';
+import DailyLimitModal from '../../modals/DailyLimitModal.jsx';
 import Svg, { Line } from 'react-native-svg';
 import {
     ExpoSpeechRecognitionModule,
@@ -52,6 +53,7 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
     const [text, setText] = useState('');
     const [isVoiceActive, setIsVoiceActive] = useState(false);
     const [isListening, setIsListening] = useState(false);
+    const [showLimitModal, setShowLimitModal] = useState(false);
     const [rowWidth, setRowWidth] = useState(0);
     const [showLimitModal, setShowLimitModal] = useState(false);
 

@@ -72,6 +72,15 @@ const SchedulingCenterScreen = ({ navigation }) => {
                             navigation.navigate('Generate');
                         }}
                     />
+                    <MenuButton
+                        broad={true}
+                        title="Productivity Analytics"
+                        icon="Productivity"
+                        navTo={() => {
+                            logUserAction('productivity_analytics_clicked');
+                            navigation.navigate('Analytics');
+                        }}
+                    />
                     {/* <MenuButton
                         broad={true}
                         title="Reschedule Tasks"
