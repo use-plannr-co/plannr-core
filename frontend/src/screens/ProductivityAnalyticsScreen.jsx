@@ -353,7 +353,7 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
     const summary = analyticsData?.summary || {};
 
     return (
-        // <ProGate navigation={navigation} featureKey="productivity_analytics">
+        <ProGate navigation={navigation} featureKey="productivity_analytics">
             <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
                 {/* Header */}
                 <View style={styles.header}>
@@ -549,7 +549,7 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
                     </ScrollView>
                 )}
             </View>
-        // </ProGate>
+        </ProGate>
     );
 };
 

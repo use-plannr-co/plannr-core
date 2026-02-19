@@ -9,6 +9,7 @@ import {
     Animated,
     Easing,
 } from 'react-native';
+import DailyLimitModal from '../../modals/DailyLimitModal.jsx';
 import Svg, { Line } from 'react-native-svg';
 import { lightColor, darkColor } from '../../design/colors.js';
 import { useAppState } from '../../context/AppStateContext.js';
@@ -46,6 +47,7 @@ function CancelIcon({ color }) {
 export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage }) {
     const [text, setText] = useState('');
     const [isVoiceActive, setIsVoiceActive] = useState(false);
+    const [showLimitModal, setShowLimitModal] = useState(false);
     const [rowWidth, setRowWidth] = useState(0);
     const { appState } = useAppState();
     const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
@@ -145,6 +147,10 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
 
     const handleSend = () => {
         if (!canSend) return;
+        if (remaining !== null && remaining <= 0) {
+            setShowLimitModal(true);
+            return;
+        }
         const msg = text.trim();
         setText('');
         onSend(msg);
@@ -156,6 +162,10 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
 
     return (
         <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
+            <DailyLimitModal
+                isVisible={showLimitModal}
+                onClose={() => setShowLimitModal(false)}
+            />
             {remaining !== null && remaining <= FREE_LIMIT && (
                 <Text
                     style={[
