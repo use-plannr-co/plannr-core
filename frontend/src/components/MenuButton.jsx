@@ -91,6 +91,34 @@ const MenuButton = ({ broad, title, icon, navTo, enableHaptic = true }) => {
         navTo();
     };
 
+    if (icon === 'Productivity') {
+        return (
+            <TouchableOpacity
+                style={{ ...styles.card, backgroundColor: theme.COMP_COLOR }}
+                onPress={handlePress}
+            >
+                <LinearGradient
+                    colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{
+                        position: 'absolute',
+                        top: 16,
+                        left: 16,
+                        borderRadius: 24,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                    }}
+                >
+                    <Text style={{ color: '#FFFFFF', fontSize: 12, fontFamily: 'AlbertSans' }}>Pro</Text>
+                </LinearGradient>
+                <Text style={{ ...styles.text, color: theme.FOREGROUND }}>{title}</Text>
+                {ICONS[icon] || null}
+            </TouchableOpacity>
+        );
+    }
     if (broad) {
         return (
             <TouchableOpacity

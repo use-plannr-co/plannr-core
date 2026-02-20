@@ -378,7 +378,7 @@ const UserProfileScreen = ({ navigation }) => {
                     />
                     <MenuButton
                         broad={false}
-                        title="Your Productivity Analytics"
+                        title="Your Productivity"
                         icon="Productivity"
                         navTo={() => {
                             navigation.navigate('ProductivityAnalytics');
