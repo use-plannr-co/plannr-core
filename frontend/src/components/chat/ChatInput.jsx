@@ -17,10 +17,10 @@ import {
 } from 'expo-speech-recognition';
 import { lightColor, darkColor } from '../../design/colors.js';
 import { useAppState } from '../../context/AppStateContext.js';
+import { useSubscription } from '../../hooks/useSubscription.js';
 import SendIcon from '../../../assets/system-icons/SendIcon.svg';
 import VoiceIcon from '../../../assets/system-icons/VoiceIcon.svg';
 import { LinearGradient } from 'expo-linear-gradient';
-import DailyLimitModal from '../../modals/DailyLimitModal.jsx';
 
 const FREE_LIMIT = 5;
 
@@ -55,14 +55,15 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
     const [isListening, setIsListening] = useState(false);
     const [showLimitModal, setShowLimitModal] = useState(false);
     const [rowWidth, setRowWidth] = useState(0);
-    const [showLimitModal, setShowLimitModal] = useState(false);
 
     const { appState } = useAppState();
+    const { isPro } = useSubscription();
     const theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const isDark = appState.userPreferences.theme !== 'light';
 
     // Ref so event handlers always see the latest value without closure issues
     const isListeningRef = useRef(false);
+    const isSendingRef = useRef(false);
     const textRef = useRef('');
 
     const updateText = (val) => {
@@ -156,11 +157,13 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
     });
 
     useSpeechRecognitionEvent('result', (event) => {
+        if (isSendingRef.current) return;
         const transcript = event.results[0]?.transcript ?? '';
         updateText(transcript);
     });
 
     useSpeechRecognitionEvent('end', () => {
+        isSendingRef.current = false;
         isListeningRef.current = false;
         setIsListening(false);
         setIsVoiceActive(false);
@@ -211,13 +214,18 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
             return;
         }
         const msg = text.trim();
+        if (isListeningRef.current) {
+            isSendingRef.current = true; // block any trailing 'result' events
+            ExpoSpeechRecognitionModule.abort();
+        }
         updateText('');
+        iconProgress.setValue(0); // immediately reset icon to voice
         onSend(msg);
     };
 
     const handlePress = isStreaming ? onCancel : hasText ? handleSend : handleVoicePress;
 
-    const remaining = dailyUsage ? Math.max(0, FREE_LIMIT - (dailyUsage.messageCount || 0)) : null;
+    const remaining = !isPro && dailyUsage ? Math.max(0, FREE_LIMIT - (dailyUsage.messageCount || 0)) : null;
 
     // ── Placeholder text ──────────────────────────────────────────────────────
     const placeholder = isListening && !hasText
