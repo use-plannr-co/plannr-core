@@ -6,7 +6,7 @@ import { lightColor, darkColor } from '../design/colors.js';
 import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 import MenuButton from '../components/MenuButton.jsx';
-import Insights from '../components/Insights.jsx';
+import Insights from '../legacy/components/Insights.jsx';
 const { width, height } = Dimensions.get('window');
 
 const WIDTH = width - padding.SCREEN_PADDING * 2;

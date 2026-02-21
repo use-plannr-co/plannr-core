@@ -9,7 +9,6 @@ import FABChatButton from '../components/chat/FABChatButton.jsx';
 import HomeScreen from '../screens/HomeScreen';
 import TodaysTasksScreen from '../screens/TodaysTasksScreen';
 import UserProfileStack from './UserProfileStack.jsx';
-import SchedulingCenterScreen from '../screens/SchedulingCenterScreen.jsx';
 import GenerateScheduleScreen from '../screens/GenerateScheduleScreen.jsx';
 import ScheduleViewScreen from '../screens/ScheduleViewScreen.jsx';
 import ChatScreen from '../screens/ChatScreen.jsx';

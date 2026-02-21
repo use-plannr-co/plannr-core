@@ -38,6 +38,7 @@ import Link from '../../assets/system-icons/Link.svg';
 import EarliestFitIcon from '../../assets/strategy-icons/EarliestFitIcon.svg';
 import BalancedWorkIcon from '../../assets/strategy-icons/BalancedWorkIcon.svg';
 import DeadlineOrientedIcon from '../../assets/strategy-icons/DeadlineOrientedIcon.svg';
+import LightningIcon from '../../assets/system-icons/LightningIcon.svg';
 
 const { width, height } = Dimensions.get('window');
 const SPACE =
@@ -288,7 +289,9 @@ const UserProfileScreen = ({ navigation }) => {
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-            <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Hey, {appState.name}!</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: SPACE, justifyContent: 'center', marginTop: spacing.SPACING_16, gap: 8 }}>
+                <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Hey, {appState.name}!</Text>
+            </View>
             <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND }}>
                 {/* Avatar Container */}
                 <View
@@ -958,8 +961,6 @@ const styles = StyleSheet.create({
     title: {
         fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
-        marginTop: spacing.SPACING_16,
-        marginBottom: SPACE,
         alignSelf: 'center',
     },
     subHeading: {
