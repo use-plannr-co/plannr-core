@@ -31,6 +31,8 @@ const HomeScreen = ({ navigation }) => {
         AlbertSans: require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
     });
 
+    const noSchedules = appState.savedSchedules.length === 0;
+
     // Early returns after all hooks have been called
     if (!storageLoaded) {
         return <LoadingScreen />;
@@ -64,6 +66,7 @@ const HomeScreen = ({ navigation }) => {
                             logUserAction('generate_schedule_clicked');
                             navigation.navigate('Generate');
                         }}
+                        createFirstFlag={noSchedules}
                     />
                 </View>
             </ScrollView>

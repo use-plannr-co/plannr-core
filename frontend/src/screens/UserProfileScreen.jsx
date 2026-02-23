@@ -61,11 +61,6 @@ const UserProfileScreen = ({ navigation }) => {
     // Ref for coming soon bottom sheet
     const comingSoonSheetRef = useRef();
 
-    // Early return if storage not loaded
-    if (!storageLoaded) {
-        return <LoadingScreen />;
-    }
-
     let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const todaysDate = convertDateToScheduleDate(currentTime);
 
@@ -282,6 +277,11 @@ const UserProfileScreen = ({ navigation }) => {
             Alert.alert('Error', 'An unexpected error occurred while saving preferences.');
         }
     };
+
+    // Early return if storage not loaded
+    if (!storageLoaded) {
+        return <LoadingScreen />;
+    }
 
     if (loading) {
         return <LoadingScreen />;

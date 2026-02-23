@@ -41,8 +41,8 @@ import ChatDrawer from '../components/chat/ChatDrawer.jsx';
 const SUGGESTIONS = [
     "What's on my schedule today?",
     'Am I running late?',
-    'Reschedule my missed tasks',
     'Add a task for me',
+    'Reschedule my missed tasks',
 ];
 
 function ChevronDownIcon({ color }) {

@@ -69,7 +69,7 @@ const ScheduleViewScreen = ({ route }) => {
 
     // ✅ Screen view logging
     useEffect(() => {
-        if (!schedule) return; // ✅ Early return if no schedule
+        if (!schedule) return;
         logUserAction('view_schedule', {
             scheduleName: schedName,
             isActive: schedule.isActive || false,
@@ -77,37 +77,22 @@ const ScheduleViewScreen = ({ route }) => {
         });
     }, [schedule, schedName]);
 
-    // Early return for missing schedule to prevent hooks errors
-    if (!schedule.schedule) {
-        return (
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: theme.BACKGROUND,
-                }}
-            >
-                <Text style={{ fontFamily: 'AlbertSans', fontSize: 20, color: theme.FOREGROUND }}>
-                    Schedule not found.
-                </Text>
-            </View>
-        );
-    }
-
+    // ✅ Date indicator animation — must be before any early return
     useEffect(() => {
-        if (!schedule || !selectedDate) return; // ✅ Guard against null values
+        if (!schedule || !selectedDate) return;
 
-        console.log('Selected date:', selectedDate);
-        console.log('All dates in order:', schedule.schedule.getAllDatesInOrder());
         const index = schedule.schedule.getAllDatesInOrder().indexOf(selectedDate);
-        console.log('Index:', index);
         const xPosition = index * (2 * PADDING_HORIZONTAL + ICON_DIM) + OFFSET;
         Animated.spring(indicatorX, {
             toValue: xPosition,
             useNativeDriver: true,
         }).start();
-    }, [selectedDate, schedule]); // ✅ Add schedule as dependency
+    }, [selectedDate, schedule]);
+
+    // Early return for missing/deleted schedule — show nothing while navigation animates away
+    if (!schedule || !schedule.schedule) {
+        return null;
+    }
 
     const onSelectTB = (tb) => {
         setSelectedTB(tb);
@@ -522,6 +507,44 @@ const ScheduleViewScreen = ({ route }) => {
                         alignSelf: 'flex-start',
                     }}
                 >
+                    <TouchableOpacity 
+                        style={{ width: 32, height: 32, marginRight: 8, opacity: (schedule.isActive) ? 0.2 : 1 }} 
+                        disabled={schedule.isActive}
+                        onPress={() => {
+                            setShowDeleteModal(true);
+                        }}
+                    >
+                        <DeleteIcon width={32} height={32} color={theme.FOREGROUND} />
+                    </TouchableOpacity>
+                   
+                    <TouchableOpacity
+                        style={{ width: 32, height: 32, marginRight: 8 }}
+                        onPress={() => exportBottomSheetRef.current?.show()}
+                    >
+                        <ExportCalIcon width={32} height={32} color={theme.FOREGROUND} />
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingBottom: SPACE,
+                    alignItems: 'center',
+                }}
+            >
+                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, alignSelf: 'center', fontSize: 16, marginBottom: 0, }}>
+                    {schedule.isActive ? 'This schedule is currently active' : 'This schedule is currently inactive'}
+                </Text>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 12,
+                        alignSelf: 'flex-start',
+                    }}
+                >
                     <Switch
                         trackColor={{ false: '#000000', true: theme.GRADIENT_START }}
                         thumbColor={'#FFFFFF'}
@@ -648,29 +671,9 @@ const ScheduleViewScreen = ({ route }) => {
                         }}
                         value={schedule.isActive}
                     />
-                    {/* TEMPORARILY COMMENTED OUT - Delete functionality disabled
-                    <TouchableOpacity 
-                        style={{ width: 32, height: 32, marginRight: 8, opacity: (schedule.isActive) ? 0.2 : 1 }} 
-                        disabled={schedule.isActive}
-                        onPress={() => {
-                            setShowDeleteModal(true);
-                        }}
-                    >
-                        <DeleteIcon width={32} height={32} color={theme.FOREGROUND} />
-                    </TouchableOpacity>
-                    */}
-                    <TouchableOpacity
-                        style={{ width: 32, height: 32, marginRight: 8 }}
-                        onPress={() => exportBottomSheetRef.current?.show()}
-                    >
-                        <ExportCalIcon width={32} height={32} color={theme.FOREGROUND} />
-                    </TouchableOpacity>
                 </View>
             </View>
             <View style={styles.subContainer}>
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
-                    Here's what your calendar looks like
-                </Text>
                 {/* Date Selection Carousel */}
                 <View style={{ width: '100%' }}>
                     <ScrollView
@@ -740,13 +743,11 @@ const ScheduleViewScreen = ({ route }) => {
                 </View>
             </View>
             <EventInfoModal isVisible={showInfoModal} tb={selectedTB} onClose={onCloseModal} />
-            {/* TEMPORARILY COMMENTED OUT - Delete modal disabled
             <DeleteScheduleModal 
                 isVisible={showDeleteModal} 
                 onClose={() => setShowDeleteModal(false)} 
                 toDelete={schedule.name}
             />
-            */}
 
             <ExportCalendarBottomSheet
                 ref={exportBottomSheetRef}

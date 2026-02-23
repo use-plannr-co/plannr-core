@@ -19,107 +19,56 @@ const DeleteScheduleModal = ({ isVisible, toDelete, onClose }) => {
         try {
             logAction('delete_schedule_initiated', { scheduleName: toDelete });
 
-            console.log('🗑️ Deleting schedule:', toDelete);
-
-            // Find the schedule to get its backend ID
+            // Capture what we need from state before any async work
             const scheduleToDelete = appState.savedSchedules.find(
                 (sched) => sched.name === toDelete,
             );
-
-            // Get backend ID - either from local state or by fetching from backend
             let backendIdToDelete = scheduleToDelete?.backendId;
-
-            if (!backendIdToDelete) {
-                console.log('📡 No backend ID in local state, fetching from backend...');
-                // Get all schedules from backend to find the correct ID
-                const allSchedules = await getSchedules();
-                const backendSchedule = allSchedules.find((s) => s.title === toDelete);
-                backendIdToDelete = backendSchedule?.id;
-            }
-
-            // Delete from backend if we have a backend ID
-            if (backendIdToDelete) {
-                console.log('🗑️ Deleting from backend with ID:', backendIdToDelete);
-                await deleteSchedule(backendIdToDelete);
-                console.log('✅ Schedule deleted from backend');
-            } else {
-                console.log('⚠️ No backend ID found, only deleting from local state');
-            }
-
-            // Delete from local state
             const updatedSchedules = appState.savedSchedules.filter(
                 (sched) => sched.name !== toDelete,
             );
+            const newActiveSchedule =
+                appState.activeSchedule?.name === toDelete ? null : appState.activeSchedule;
 
-            // Clear active schedule if it's the one being deleted
-            let newActiveSchedule = appState.activeSchedule;
-            if (appState.activeSchedule && appState.activeSchedule.name === toDelete) {
-                newActiveSchedule = null;
-            }
+            // Navigate away FIRST — before state update — so ScheduleViewScreen
+            // unmounts before it can re-render with an undefined schedule.
+            onClose();
+            navigation.goBack();
 
+            // Update local state (ScheduleViewScreen is already animating off)
             setAppState({
                 ...appState,
                 savedSchedules: updatedSchedules,
                 activeSchedule: newActiveSchedule,
             });
 
-            console.log('✅ Schedule deleted successfully');
+            // Backend deletion — async, user already navigated away
+            if (!backendIdToDelete) {
+                const response = await getSchedules();
+                const backendSchedule = response.data?.find((s) => s.title === toDelete);
+                backendIdToDelete = backendSchedule?.id;
+            }
+            if (backendIdToDelete) {
+                await deleteSchedule(backendIdToDelete);
+            }
 
             logAction('delete_schedule_success', {
                 scheduleName: toDelete,
                 hadBackendId: !!backendIdToDelete,
             });
-
-            // Close modal and navigate to home
-            onClose();
-            navigation.navigate('MainTabs');
         } catch (error) {
             console.error('💥 Error during schedule deletion:', error);
-
             logError('delete_schedule_failed', error, {
                 scheduleName: toDelete,
                 errorType: error.name || 'unknown',
                 errorMessage: error.message || 'unknown error',
             });
-
-            // ✅ Always navigate to home on any error - this handles hooks errors gracefully
-            onClose();
-            navigation.navigate('MainTabs');
-
-            // Still try to delete from local state if possible
-            try {
-                const updatedSchedules = appState.savedSchedules.filter(
-                    (sched) => sched.name !== toDelete,
-                );
-                let newActiveSchedule = appState.activeSchedule;
-                if (appState.activeSchedule && appState.activeSchedule.name === toDelete) {
-                    newActiveSchedule = null;
-                }
-                setAppState({
-                    ...appState,
-                    savedSchedules: updatedSchedules,
-                    activeSchedule: newActiveSchedule,
-                });
-            } catch (stateError) {
-                console.error(
-                    '💥 Failed to update local state, navigating to home anyway:',
-                    stateError,
-                );
-                // Even if state update fails, we've already navigated to home
-            }
         }
     };
 
     const handleCancel = () => {
-        try {
-            logAction('delete_schedule_cancelled', { scheduleName: toDelete });
-            onClose();
-        } catch (error) {
-            console.error('💥 Error during cancel:', error);
-            // Still close modal and navigate to home even if logging fails
-            onClose();
-            navigation.navigate('MainTabs');
-        }
+        logAction('delete_schedule_cancelled', { scheduleName: toDelete });
+        onClose();
     };
 
     return (

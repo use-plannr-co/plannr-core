@@ -21,7 +21,7 @@ const WIDTH = width - padding.SCREEN_PADDING * 2;
 const SPACE =
     height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_2 : spacing.SPACING_1;
 
-const MenuButton = ({ broad, title, icon, navTo, enableHaptic = true }) => {
+const MenuButton = ({ broad, title, icon, navTo, createFirstFlag = false, enableHaptic = true }) => {
     const { appState } = useAppState();
     let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
 
@@ -115,6 +115,34 @@ const MenuButton = ({ broad, title, icon, navTo, enableHaptic = true }) => {
                     <Text style={{ color: '#FFFFFF', fontSize: 12, fontFamily: 'AlbertSans' }}>Pro</Text>
                 </LinearGradient>
                 <Text style={{ ...styles.text, color: theme.FOREGROUND }}>{title}</Text>
+                {ICONS[icon] || null}
+            </TouchableOpacity>
+        );
+    }
+    if (createFirstFlag) {
+        return (
+            <TouchableOpacity
+                style={{ ...styles.card, width: WIDTH, backgroundColor: theme.COMP_COLOR }}
+                onPress={handlePress}
+            >
+                <LinearGradient
+                    colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{
+                        position: 'absolute',
+                        top: 16,
+                        left: 16,
+                        borderRadius: 24,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                    }}
+                >
+                    <Text style={{ color: '#FFFFFF', fontSize: 12, fontFamily: 'AlbertSans' }}>Start here!</Text>
+                </LinearGradient>
+                <Text style={{ ...styles.text, color: theme.FOREGROUND, width: 240 }}>{title}</Text>
                 {ICONS[icon] || null}
             </TouchableOpacity>
         );

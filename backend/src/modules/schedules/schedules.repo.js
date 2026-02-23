@@ -197,10 +197,7 @@ export const updateSchedule = async (scheduleId, updateData) => {
 
 export const deleteSchedule = async (scheduleId) => {
     try {
-        // First manually delete all blocks (hard delete to remove them completely)
-        await db.delete(blocks).where(eq(blocks.scheduleId, scheduleId));
-
-        // Then hard delete the schedule
+        // Cascade deletes days → blocks automatically (onDelete: 'cascade' in schema)
         const [deletedSchedule] = await db
             .delete(schedules)
             .where(eq(schedules.id, scheduleId))
