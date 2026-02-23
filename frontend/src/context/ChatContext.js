@@ -4,6 +4,20 @@ import useScheduleActions from '../hooks/useScheduleActions';
 
 const ChatContext = createContext(null);
 
+// Tool name → human-readable status label shown in the typing indicator
+const TOOL_STATUS_MAP = {
+    get_active_schedule: 'Accessing your schedule...',
+    get_todays_tasks: "Reading today's tasks...",
+    get_completed_tasks: 'Checking completed tasks...',
+    get_incomplete_tasks: 'Looking at your remaining tasks...',
+    get_overdue_tasks: 'Checking for overdue tasks...',
+    get_upcoming_tasks: 'Looking ahead...',
+    get_schedule_for_date: 'Looking up that date...',
+    propose_missed_task_shift: 'Finding a slot to reschedule...',
+    propose_add_task: 'Finding room for your task...',
+    propose_strategy_switch: 'Reviewing your schedule strategy...',
+};
+
 export const ChatProvider = ({ children }) => {
     const api = useChatAPI();
     const { executeAction } = useScheduleActions();
@@ -13,6 +27,7 @@ export const ChatProvider = ({ children }) => {
     const [messages, setMessages] = useState([]);
     const [isStreaming, setIsStreaming] = useState(false);
     const [streamingText, setStreamingText] = useState('');
+    const [streamingStatus, setStreamingStatus] = useState(null);
     const [dailyUsage, setDailyUsage] = useState(null);
     const [error, setError] = useState(null);
 
@@ -23,7 +38,7 @@ export const ChatProvider = ({ children }) => {
     const pendingActionsRef = useRef(null);
 
     // Chars revealed per tick + tick interval.
-    // 3 chars @ 15 ms ≈ 200 chars/sec — matches Claude/GPT mobile pacing.
+    // 3 chars @ 10 ms ≈ 200 chars/sec — matches ChatGPT mobile pacing.
     const REVEAL_CHUNK = 3;
     const REVEAL_TICK_MS = 10;
 
@@ -57,6 +72,7 @@ export const ChatProvider = ({ children }) => {
                 setMessages(res.data.messages || []);
                 setDailyUsage(res.data.dailyUsage);
                 setStreamingText('');
+                setStreamingStatus(null);
                 setIsStreaming(false);
                 setError(null);
             } catch (err) {
@@ -75,6 +91,7 @@ export const ChatProvider = ({ children }) => {
             setActiveChat(newChat);
             setMessages([]);
             setStreamingText('');
+            setStreamingStatus(null);
             setIsStreaming(false);
             setError(null);
             setChats((prev) => [newChat, ...prev]);
@@ -102,33 +119,33 @@ export const ChatProvider = ({ children }) => {
             setMessages((prev) => [...prev, optimisticMsg]);
             setIsStreaming(true);
             setStreamingText('');
+            setStreamingStatus(null);
             streamingTextRef.current = '';
             pendingActionsRef.current = null;
             setError(null);
 
             const onEvent = (eventType, data) => {
                 if (eventType === 'text_delta') {
-                    // Accumulate only — display is driven by the reveal animation below,
-                    // not by individual deltas. This way the experience is consistent
-                    // whether the server truly streams or buffers the whole response.
+                    // Accumulate only — reveal is driven by the interval started on message_stop.
                     streamingTextRef.current += data.text;
+                } else if (eventType === 'tool_executing') {
+                    setStreamingStatus(TOOL_STATUS_MAP[data.toolName] || 'Thinking...');
                 } else if (eventType === 'action_proposal') {
-                    // Store the actions so they can be attached to the finalized message
                     pendingActionsRef.current = data.actions;
                 } else if (eventType === 'message_stop') {
                     const fullText = streamingTextRef.current;
                     const pendingActions = pendingActionsRef.current;
+                    // Don't clear streamingStatus here — keep it visible above the streaming
+                    // text during the reveal. It clears when the reveal completes below.
                     let pos = 0;
 
-                    // Start the controlled reveal: advance REVEAL_CHUNK chars every
-                    // REVEAL_TICK_MS ms so the text appears word-by-word at ~200 chars/sec.
                     revealIntervalRef.current = setInterval(() => {
                         pos = Math.min(pos + REVEAL_CHUNK, fullText.length);
                         setStreamingText(fullText.slice(0, pos));
 
                         if (pos >= fullText.length) {
-                            // Reveal complete — finalize as a real message
                             stopReveal();
+                            setStreamingStatus(null);
                             const assistantMsg = {
                                 id: `tmp-asst-${Date.now()}`,
                                 chatId: activeChat.id,
@@ -143,7 +160,6 @@ export const ChatProvider = ({ children }) => {
                             abortRef.current = null;
                             pendingActionsRef.current = null;
 
-                            // Bubble chat to top of sidebar
                             setChats((prev) => {
                                 const without = prev.filter((c) => c.id !== activeChat.id);
                                 const updated = {
@@ -162,6 +178,7 @@ export const ChatProvider = ({ children }) => {
                     }, REVEAL_TICK_MS);
                 } else if (eventType === 'error') {
                     stopReveal();
+                    setStreamingStatus(null);
                     setError(data.message || 'An error occurred');
                     setIsStreaming(false);
                     setStreamingText('');
@@ -170,14 +187,12 @@ export const ChatProvider = ({ children }) => {
             };
 
             const onDone = () => {
-                // message_stop handles cleanup; onDone fires after stream closes.
-                // If reveal is still running, let it finish naturally.
                 streamingTextRef.current = '';
             };
 
             const onError = (err) => {
-                stopReveal();
                 console.error('[Chat] Streaming error:', err);
+                setStreamingStatus(null);
                 setError(err.message || 'Connection error');
                 setIsStreaming(false);
                 setStreamingText('');
@@ -211,13 +226,10 @@ export const ChatProvider = ({ children }) => {
                     prev.map((m) => (m.processing ? { ...m, processing: false } : m)),
                 );
 
-                // 4. Stream Claude's confirmation
-                // Don't add a temp message to `messages` — ChatScreen's `displayMessages`
-                // appends the synthetic __streaming__ row whenever isStreaming is true,
-                // avoiding the double typing-indicator caused by having both a status:'streaming'
-                // message in the array AND the synthetic row.
+                // 4. Stream Grok's confirmation
                 setIsStreaming(true);
                 setStreamingText('');
+                setStreamingStatus(null);
                 streamingTextRef.current = '';
                 pendingActionsRef.current = null;
                 setError(null);
@@ -225,19 +237,22 @@ export const ChatProvider = ({ children }) => {
                 const onEvent = (eventType, data) => {
                     if (eventType === 'text_delta') {
                         streamingTextRef.current += data.text;
+                    } else if (eventType === 'tool_executing') {
+                        setStreamingStatus(TOOL_STATUS_MAP[data.toolName] || 'Thinking...');
                     } else if (eventType === 'action_proposal') {
-                        // Claude may propose another action (e.g. "now reschedule") during
-                        // the confirmation stream — capture it so the button attaches.
                         pendingActionsRef.current = data.actions;
                     } else if (eventType === 'message_stop') {
                         const fullText = streamingTextRef.current;
                         const pendingActions = pendingActionsRef.current;
                         let pos = 0;
+
                         revealIntervalRef.current = setInterval(() => {
                             pos = Math.min(pos + REVEAL_CHUNK, fullText.length);
                             setStreamingText(fullText.slice(0, pos));
+
                             if (pos >= fullText.length) {
                                 stopReveal();
+                                setStreamingStatus(null);
                                 const assistantMsg = {
                                     id: `tmp-confirm-${Date.now()}`,
                                     chatId: activeChat.id,
@@ -255,6 +270,7 @@ export const ChatProvider = ({ children }) => {
                         }, REVEAL_TICK_MS);
                     } else if (eventType === 'error') {
                         stopReveal();
+                        setStreamingStatus(null);
                         setError(data.message || 'An error occurred');
                         setIsStreaming(false);
                         setStreamingText('');
@@ -266,7 +282,7 @@ export const ChatProvider = ({ children }) => {
                     streamingTextRef.current = '';
                 };
                 const onError = (err) => {
-                    stopReveal();
+                    setStreamingStatus(null);
                     setError(err.message || 'Connection error');
                     setIsStreaming(false);
                     setStreamingText('');
@@ -285,6 +301,7 @@ export const ChatProvider = ({ children }) => {
                 abortRef.current = abort;
             } catch (err) {
                 setError(err.message);
+                setStreamingStatus(null);
                 setMessages((prev) =>
                     prev.map((m) => (m.processing ? { ...m, processing: false } : m)),
                 );
@@ -315,6 +332,7 @@ export const ChatProvider = ({ children }) => {
             abortRef.current();
             abortRef.current = null;
         }
+        setStreamingStatus(null);
         setIsStreaming(false);
         setStreamingText('');
         streamingTextRef.current = '';
@@ -328,6 +346,7 @@ export const ChatProvider = ({ children }) => {
                 messages,
                 isStreaming,
                 streamingText,
+                streamingStatus,
                 dailyUsage,
                 error,
                 loadChats,

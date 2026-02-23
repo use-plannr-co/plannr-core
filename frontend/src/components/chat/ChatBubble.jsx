@@ -157,7 +157,7 @@ function BlinkingCursor({ color }) {
 
 function ChatBubble({ message }) {
     const { appState } = useAppState();
-    const { confirmAction } = useChat();
+    const { confirmAction, streamingStatus } = useChat();
     const isDark = appState.userPreferences.theme !== 'light';
     const theme = isDark ? darkColor : lightColor;
 
@@ -202,18 +202,35 @@ function ChatBubble({ message }) {
             <Text style={[styles.roleLabel, { color: isDark ? '#888' : '#777' }]}>Planova</Text>
 
             {showTypingDots ? (
-                <ChatTypingIndicator color={isDark ? '#888' : '#777'} />
+                <ChatTypingIndicator
+                    color={isDark ? '#888' : '#777'}
+                    statusText={streamingStatus}
+                />
             ) : isStreaming ? (
                 /*
                  * While streaming: plain Text to avoid Markdown re-parsing on every token.
                  * Switching to Markdown on status change (once, when stream ends) avoids
                  * repeated layout recalculations.
                  * The blinking ▌ cursor signals that more text is coming.
+                 * streamingStatus (if set) shows above the text so it's visible even when
+                 * all SSE events arrive in one batch (before any render cycle).
                  */
-                <Text style={[styles.streamingText, { color: theme.FOREGROUND }]}>
-                    {content}
-                    <BlinkingCursor color={isDark ? '#888' : '#999'} />
-                </Text>
+                <>
+                    {streamingStatus ? (
+                        <Text
+                            style={[
+                                styles.streamingStatusLabel,
+                                { color: isDark ? '#777' : '#888' },
+                            ]}
+                        >
+                            {streamingStatus}
+                        </Text>
+                    ) : null}
+                    <Text style={[styles.streamingText, { color: theme.FOREGROUND }]}>
+                        {content}
+                        <BlinkingCursor color={isDark ? '#888' : '#999'} />
+                    </Text>
+                </>
             ) : (
                 <Markdown
                     style={markdownStyles}
@@ -263,6 +280,11 @@ const styles = StyleSheet.create({
     streamingText: {
         fontSize: 16,
         lineHeight: 26,
+    },
+    streamingStatusLabel: {
+        fontSize: 13,
+        fontStyle: 'italic',
+        marginBottom: 6,
     },
 
     // ── Shared label ──────────────────────────────────────────────────────────

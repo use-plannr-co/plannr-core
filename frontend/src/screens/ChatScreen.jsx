@@ -38,6 +38,13 @@ import ChatBubble from '../components/chat/ChatBubble.jsx';
 import ChatInput from '../components/chat/ChatInput.jsx';
 import ChatDrawer from '../components/chat/ChatDrawer.jsx';
 
+const SUGGESTIONS = [
+    "What's on my schedule today?",
+    'Am I running late?',
+    'Reschedule my missed tasks',
+    'Add a task for me',
+];
+
 function ChevronDownIcon({ color }) {
     return (
         <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
@@ -195,17 +202,33 @@ export default function ChatScreen() {
                 keyboardVerticalOffset={0}
             >
                 {displayMessages.length === 0 && !isStreaming && (
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                        <Image source={imageSource} style={{ width: 240, height: 240 }} />
-                        <Text
-                            style={{
-                                color: theme.FOREGROUND,
-                                fontSize: 16,
-                                fontFamily: 'Albert Sans',
-                            }}
-                        >
+                    <View style={styles.emptyState}>
+                        <Image source={imageSource} style={styles.emptyImage} />
+                        <Text style={[styles.emptyTitle, { color: theme.FOREGROUND }]}>
                             How can I help you plan today?
                         </Text>
+                        <View style={styles.suggestionsWrap}>
+                            {SUGGESTIONS.map((text) => (
+                                <TouchableOpacity
+                                    key={text}
+                                    style={[
+                                        styles.suggestionChip,
+                                        { backgroundColor: theme.COMP_COLOR, borderColor: theme.INPUT, borderWidth: 1.3 },
+                                    ]}
+                                    onPress={() => sendChatMessage(text)}
+                                    activeOpacity={0.7}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.suggestionText,
+                                            { color: theme.FOREGROUND },
+                                        ]}
+                                    >
+                                        {text}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
                     </View>
                 )}
                 <FlatList
@@ -298,5 +321,35 @@ const styles = StyleSheet.create({
         fontSize: 13,
         paddingHorizontal: 16,
         paddingVertical: 8,
+    },
+    emptyState: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingBottom: 24,
+        alignSelf: 'center',
+    },
+    emptyImage: {
+        width: 200,
+        height: 200,
+    },
+    emptyTitle: {
+        fontSize: 16,
+        fontFamily: 'Albert Sans',
+        marginBottom: 64,
+    },
+    suggestionsWrap: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        gap: 8,
+    },
+    suggestionChip: {
+        paddingHorizontal: 14,
+        paddingVertical: 9,
+        borderRadius: 20,
+    },
+    suggestionText: {
+        fontSize: 14,
     },
 });

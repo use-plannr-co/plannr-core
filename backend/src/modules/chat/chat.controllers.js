@@ -3,10 +3,10 @@ import { getSubscriptionByUserId } from '../subscriptions/subscriptions.repo.js'
 import { db } from '../../config/db.js';
 import { users } from '../../db/schema.js';
 import { eq } from 'drizzle-orm';
-import claudeClient from '../../services/claude/claudeClient.js';
-import { tools } from '../../services/claude/toolDefinitions.js';
-import { executeTool } from '../../services/claude/toolExecutors.js';
-import { buildSystemPrompt } from '../../services/claude/systemPrompt.js';
+import claudeClient from '../../services/grok/grokClient.js';
+import { tools } from '../../services/grok/toolDefinitions.js';
+import { executeTool } from '../../services/grok/toolExecutors.js';
+import { buildSystemPrompt } from '../../services/grok/systemPrompt.js';
 
 const FREE_DAILY_LIMIT = 5;
 
@@ -110,7 +110,7 @@ export async function sendMessage(req, res, next) {
         // 5. Increment daily usage
         await repo.incrementDailyUsage(userId);
 
-        // 6. Build Anthropic messages array from last 30 messages
+        // 6. Build messages array from last 30 messages
         const storedMessages = await repo.getMessages(chatId, 30);
         const claudeMessages = buildClaudeMessages(storedMessages);
 
@@ -158,7 +158,7 @@ export async function submitActionResult(req, res, next) {
             content: `[Action completed] ${actionType}: ${summary}`,
         });
 
-        // Build Claude context
+        // Build Grok context
         const storedMessages = await repo.getMessages(chatId, 30);
         const claudeMessages = buildClaudeMessages(storedMessages);
         const [userRow] = await db
@@ -174,7 +174,7 @@ export async function submitActionResult(req, res, next) {
             timezone: tz,
         });
 
-        // Stream Claude's confirmation
+        // Stream Grok's confirmation
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
@@ -190,97 +190,91 @@ export async function submitActionResult(req, res, next) {
 
 async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, timezone) {
     try {
-        const stream = claudeClient.createStreamingMessage(messages, tools, systemPrompt);
+        const stream = await claudeClient.createStreamingMessage(messages, tools, systemPrompt);
 
         let accumulatedText = '';
-        const toolCallsInProgress = {}; // keyed by content_block index
-        let finalInputTokens = 0;
-        let finalOutputTokens = 0;
-        let stopReason = null;
+        let finishReason = null;
+        let inputTokens = 0;
+        let outputTokens = 0;
+        const toolCallsMap = {}; // keyed by index, accumulates streaming deltas
 
-        for await (const event of stream) {
-            if (event.type === 'content_block_start') {
-                if (event.content_block?.type === 'tool_use') {
-                    toolCallsInProgress[event.index] = {
-                        id: event.content_block.id,
-                        name: event.content_block.name,
-                        inputJson: '',
-                    };
-                }
+        for await (const chunk of stream) {
+            const choice = chunk.choices[0];
+            const delta = choice?.delta;
+
+            if (delta?.content) {
+                accumulatedText += delta.content;
+                writeSSE(res, 'text_delta', { text: delta.content });
             }
 
-            if (event.type === 'content_block_delta') {
-                if (event.delta.type === 'text_delta') {
-                    accumulatedText += event.delta.text;
-                    writeSSE(res, 'text_delta', { text: event.delta.text });
-                } else if (event.delta.type === 'input_json_delta') {
-                    // event.index is the content_block index
-                    if (toolCallsInProgress[event.index]) {
-                        toolCallsInProgress[event.index].inputJson += event.delta.partial_json;
+            if (delta?.tool_calls) {
+                for (const tc of delta.tool_calls) {
+                    if (!toolCallsMap[tc.index]) {
+                        toolCallsMap[tc.index] = {
+                            id: '',
+                            type: 'function',
+                            function: { name: '', arguments: '' },
+                        };
                     }
+                    if (tc.id) toolCallsMap[tc.index].id = tc.id;
+                    if (tc.function?.name) toolCallsMap[tc.index].function.name += tc.function.name;
+                    if (tc.function?.arguments)
+                        toolCallsMap[tc.index].function.arguments += tc.function.arguments;
                 }
             }
 
-            if (event.type === 'message_delta') {
-                stopReason = event.delta?.stop_reason;
-                finalInputTokens = event.usage?.input_tokens || finalInputTokens;
-                finalOutputTokens = event.usage?.output_tokens || finalOutputTokens;
+            if (choice?.finish_reason) finishReason = choice.finish_reason;
+            if (chunk.usage) {
+                inputTokens = chunk.usage.prompt_tokens || 0;
+                outputTokens = chunk.usage.completion_tokens || 0;
             }
         }
 
-        // Get final message for stop_reason and usage
-        const finalMsg = await stream.finalMessage();
-        stopReason = finalMsg.stop_reason;
-        finalInputTokens = finalMsg.usage?.input_tokens || finalInputTokens;
-        finalOutputTokens = finalMsg.usage?.output_tokens || finalOutputTokens;
+        const toolCalls = Object.values(toolCallsMap);
 
-        if (stopReason === 'tool_use') {
-            // Extract tool use blocks from final message
-            const toolUseBlocks = finalMsg.content.filter((b) => b.type === 'tool_use');
-            const textBlocks = finalMsg.content.filter((b) => b.type === 'text');
-            const textContent = textBlocks.map((b) => b.text).join('');
+        if (finishReason === 'tool_calls') {
+            const textContent = accumulatedText;
 
-            // Save assistant message with tool calls
+            // Save assistant message with tool calls (OpenAI format)
             await repo.insertMessage({
                 chatId,
                 role: 'assistant',
                 content: textContent,
-                toolCalls: toolUseBlocks,
-                inputTokens: finalInputTokens,
-                outputTokens: finalOutputTokens,
+                toolCalls,
+                inputTokens,
+                outputTokens,
             });
 
             // Execute each tool and collect results
             const toolResultContents = [];
-            for (const toolBlock of toolUseBlocks) {
-                writeSSE(res, 'tool_executing', { toolName: toolBlock.name });
+            for (const toolCall of toolCalls) {
+                const toolName = toolCall.function.name;
+                const toolInput = JSON.parse(toolCall.function.arguments || '{}');
 
-                const result = await executeTool(toolBlock.name, toolBlock.input, userId, timezone);
+                writeSSE(res, 'tool_executing', { toolName });
+
+                const result = await executeTool(toolName, toolInput, userId, timezone);
                 const parsedResult = JSON.parse(result);
 
                 writeSSE(res, 'tool_result', {
-                    toolUseId: toolBlock.id,
-                    toolName: toolBlock.name,
+                    toolUseId: toolCall.id,
+                    toolName,
                     result: parsedResult,
                 });
 
                 // For proposal tools: emit structured action proposal for button rendering
                 if (
-                    toolBlock.name.startsWith('propose_') &&
+                    toolName.startsWith('propose_') &&
                     !parsedResult.error &&
                     parsedResult.count !== 0
                 ) {
                     writeSSE(res, 'action_proposal', {
-                        proposalId: toolBlock.id,
+                        proposalId: toolCall.id,
                         actions: [parsedResult],
                     });
                 }
 
-                toolResultContents.push({
-                    type: 'tool_result',
-                    tool_use_id: toolBlock.id,
-                    content: result,
-                });
+                toolResultContents.push({ tool_call_id: toolCall.id, content: result });
             }
 
             // Save tool results as user-role message
@@ -296,31 +290,33 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, tim
             // same createdAt timestamp (they're inserted milliseconds apart).
             const assistantTurn = {
                 role: 'assistant',
-                content: [
-                    ...(textContent ? [{ type: 'text', text: textContent }] : []),
-                    ...toolUseBlocks,
-                ],
+                content: textContent || null,
+                tool_calls: toolCalls,
             };
-            const toolResultTurn = {
-                role: 'user',
-                content: toolResultContents,
-            };
-            const nextClaudeMessages = [...messages, assistantTurn, toolResultTurn];
-            await runStreamingLoop(res, nextClaudeMessages, systemPrompt, userId, chatId, timezone);
+            const toolResultTurns = toolResultContents.map((tr) => ({
+                role: 'tool',
+                tool_call_id: tr.tool_call_id,
+                content: tr.content,
+            }));
+            await runStreamingLoop(
+                res,
+                [...messages, assistantTurn, ...toolResultTurns],
+                systemPrompt,
+                userId,
+                chatId,
+                timezone
+            );
         } else {
             // end_turn — save final message and close
             await repo.insertMessage({
                 chatId,
                 role: 'assistant',
                 content: accumulatedText,
-                inputTokens: finalInputTokens,
-                outputTokens: finalOutputTokens,
+                inputTokens,
+                outputTokens,
             });
             await repo.touchChat(chatId);
-            writeSSE(res, 'message_stop', {
-                inputTokens: finalInputTokens,
-                outputTokens: finalOutputTokens,
-            });
+            writeSSE(res, 'message_stop', { inputTokens, outputTokens });
             res.end();
         }
     } catch (err) {
@@ -333,9 +329,10 @@ async function runStreamingLoop(res, messages, systemPrompt, userId, chatId, tim
 // ─── Message Builder ──────────────────────────────────────────────────────────
 
 /**
- * Converts stored DB messages to Anthropic API message format.
+ * Converts stored DB messages to OpenAI API message format.
  * Handles: plain user/assistant messages, assistant messages with tool calls,
  * and user messages containing tool_result blocks.
+ * Also handles legacy Anthropic-format tool calls/results from before the migration.
  */
 function buildClaudeMessages(storedMessages) {
     const result = [];
@@ -345,38 +342,45 @@ function buildClaudeMessages(storedMessages) {
 
         if (msg.role === 'user') {
             if (msg.toolResults && msg.toolResults.length > 0) {
-                // Tool result turn — content is an array of tool_result blocks
-                const content = [];
-                if (msg.content) content.push({ type: 'text', text: msg.content });
-                content.push(...msg.toolResults);
-                result.push({ role: 'user', content });
+                // Each tool result becomes a separate 'tool' message in OpenAI format.
+                // Handle both legacy Anthropic format ({ type, tool_use_id, content })
+                // and current OpenAI format ({ tool_call_id, content }).
+                for (const tr of msg.toolResults) {
+                    const toolCallId = tr.tool_call_id ?? tr.tool_use_id;
+                    const content =
+                        typeof tr.content === 'string' ? tr.content : JSON.stringify(tr.content);
+                    result.push({ role: 'tool', tool_call_id: toolCallId, content });
+                }
             } else {
                 result.push({ role: 'user', content: msg.content });
             }
         } else if (msg.role === 'system') {
-            // Map system action-result notifications to user role so Claude understands context
+            // Map system action-result notifications to user role
             result.push({ role: 'user', content: msg.content });
         } else if (msg.role === 'assistant') {
             if (msg.toolCalls && msg.toolCalls.length > 0) {
-                // Only include tool_use blocks if the very next stored message is
-                // a user turn containing the matching tool_results. If the next
-                // message is missing or is a plain user message, the tool_use was
-                // never completed (e.g. a previous crash) — emit text-only to avoid
-                // the "tool_use without tool_result" Anthropic API error.
+                // Only include tool_calls if the very next stored message has matching
+                // tool_results. If not (e.g. a previous crash), emit text-only to keep
+                // history valid and avoid "tool_calls without tool messages" API errors.
                 const next = storedMessages[i + 1];
                 const nextHasResults = next?.role === 'user' && next?.toolResults?.length > 0;
 
                 if (nextHasResults) {
-                    const content = [];
-                    if (msg.content) content.push({ type: 'text', text: msg.content });
-                    content.push(...msg.toolCalls);
-                    result.push({ role: 'assistant', content });
+                    // Convert legacy Anthropic format if needed
+                    const tool_calls = msg.toolCalls.map((tc) => {
+                        if (tc.type === 'tool_use') {
+                            return {
+                                id: tc.id,
+                                type: 'function',
+                                function: { name: tc.name, arguments: JSON.stringify(tc.input) },
+                            };
+                        }
+                        return tc; // already OpenAI format
+                    });
+                    result.push({ role: 'assistant', content: msg.content || null, tool_calls });
                 } else {
-                    // Orphaned tool_use — degrade to text-only so history stays valid
-                    if (msg.content) {
-                        result.push({ role: 'assistant', content: msg.content });
-                    }
-                    // Skip the orphaned row entirely if it has no text either
+                    // Orphaned tool_use — degrade to text-only
+                    if (msg.content) result.push({ role: 'assistant', content: msg.content });
                 }
             } else {
                 result.push({ role: 'assistant', content: msg.content });
@@ -384,24 +388,5 @@ function buildClaudeMessages(storedMessages) {
         }
     }
 
-    // Anthropic requires strictly alternating user/assistant turns.
-    // Merge any consecutive same-role messages that may result from
-    // orphaned tool_use rows or other data anomalies.
-    const merged = [];
-    for (const turn of result) {
-        const prev = merged[merged.length - 1];
-        if (prev && prev.role === turn.role) {
-            // Merge into previous turn
-            const prevContent = Array.isArray(prev.content)
-                ? prev.content
-                : [{ type: 'text', text: prev.content }];
-            const thisContent = Array.isArray(turn.content)
-                ? turn.content
-                : [{ type: 'text', text: turn.content }];
-            prev.content = [...prevContent, ...thisContent];
-        } else {
-            merged.push({ ...turn });
-        }
-    }
-    return merged;
+    return result;
 }
