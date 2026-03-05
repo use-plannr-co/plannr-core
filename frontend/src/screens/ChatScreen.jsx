@@ -213,16 +213,17 @@ export default function ChatScreen() {
                                     key={text}
                                     style={[
                                         styles.suggestionChip,
-                                        { backgroundColor: theme.COMP_COLOR, borderColor: theme.INPUT, borderWidth: 1.3 },
+                                        {
+                                            backgroundColor: theme.COMP_COLOR,
+                                            borderColor: theme.INPUT,
+                                            borderWidth: 1.3,
+                                        },
                                     ]}
                                     onPress={() => sendChatMessage(text)}
                                     activeOpacity={0.7}
                                 >
                                     <Text
-                                        style={[
-                                            styles.suggestionText,
-                                            { color: theme.FOREGROUND },
-                                        ]}
+                                        style={[styles.suggestionText, { color: theme.FOREGROUND }]}
                                     >
                                         {text}
                                     </Text>

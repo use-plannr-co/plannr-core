@@ -324,8 +324,8 @@ const ScheduleViewScreen = ({ route }) => {
                 verification: googleAccount.verification?.status,
             });
 
-            // Step 2: Get user's timezone - you might want to get this from user preferences
-            const userTimezone = 'America/Vancouver'; // TODO: Get from user preferences
+            // Step 2: Get user's timezone from device locale
+            const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
             // Step 3: Prepare user and schedule names for calendar naming
             const userName = user?.firstName || user?.fullName || 'User';
@@ -507,8 +507,13 @@ const ScheduleViewScreen = ({ route }) => {
                         alignSelf: 'flex-start',
                     }}
                 >
-                    <TouchableOpacity 
-                        style={{ width: 32, height: 32, marginRight: 8, opacity: (schedule.isActive) ? 0.2 : 1 }} 
+                    <TouchableOpacity
+                        style={{
+                            width: 32,
+                            height: 32,
+                            marginRight: 8,
+                            opacity: schedule.isActive ? 0.2 : 1,
+                        }}
                         disabled={schedule.isActive}
                         onPress={() => {
                             setShowDeleteModal(true);
@@ -516,7 +521,7 @@ const ScheduleViewScreen = ({ route }) => {
                     >
                         <DeleteIcon width={32} height={32} color={theme.FOREGROUND} />
                     </TouchableOpacity>
-                   
+
                     <TouchableOpacity
                         style={{ width: 32, height: 32, marginRight: 8 }}
                         onPress={() => exportBottomSheetRef.current?.show()}
@@ -534,8 +539,18 @@ const ScheduleViewScreen = ({ route }) => {
                     alignItems: 'center',
                 }}
             >
-                <Text style={{ ...styles.subHeading, color: theme.FOREGROUND, alignSelf: 'center', fontSize: 16, marginBottom: 0, }}>
-                    {schedule.isActive ? 'This schedule is currently active' : 'This schedule is currently inactive'}
+                <Text
+                    style={{
+                        ...styles.subHeading,
+                        color: theme.FOREGROUND,
+                        alignSelf: 'center',
+                        fontSize: 16,
+                        marginBottom: 0,
+                    }}
+                >
+                    {schedule.isActive
+                        ? 'This schedule is currently active'
+                        : 'This schedule is currently inactive'}
                 </Text>
                 <View
                     style={{
@@ -679,13 +694,8 @@ const ScheduleViewScreen = ({ route }) => {
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        style={{
-                            width: '100%',
-                            contentContainerStyle: {
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                            },
-                        }}
+                        style={{ width: '100%' }}
+                        contentContainerStyle={{ justifyContent: 'center', alignItems: 'center' }}
                     >
                         <Animated.View
                             style={[styles.indicator, { transform: [{ translateX: indicatorX }] }]}
@@ -743,9 +753,9 @@ const ScheduleViewScreen = ({ route }) => {
                 </View>
             </View>
             <EventInfoModal isVisible={showInfoModal} tb={selectedTB} onClose={onCloseModal} />
-            <DeleteScheduleModal 
-                isVisible={showDeleteModal} 
-                onClose={() => setShowDeleteModal(false)} 
+            <DeleteScheduleModal
+                isVisible={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
                 toDelete={schedule.name}
             />
 

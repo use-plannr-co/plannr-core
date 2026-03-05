@@ -289,8 +289,19 @@ const UserProfileScreen = ({ navigation }) => {
 
     return (
         <View style={{ ...styles.container, backgroundColor: theme.BACKGROUND }}>
-            <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: SPACE, justifyContent: 'center', marginTop: spacing.SPACING_16, gap: 8 }}>
-                <Text style={{ ...styles.title, color: theme.FOREGROUND }}>Hey, {appState.name}!</Text>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    marginBottom: SPACE,
+                    justifyContent: 'center',
+                    marginTop: spacing.SPACING_16,
+                    gap: 8,
+                }}
+            >
+                <Text style={{ ...styles.title, color: theme.FOREGROUND }}>
+                    Hey, {appState.name}!
+                </Text>
             </View>
             <ScrollView style={{ ...styles.subContainer, backgroundColor: theme.BACKGROUND }}>
                 {/* Avatar Container */}

@@ -1,67 +1,65 @@
 {
-  "expo": {
-    "name": "Plannr",
-    "slug": "Plannr",
-    "version": "2.0.0",
-    "orientation": "portrait",
-    "install": {
-      "exclude": [
-        "react-native-reanimated"
-      ]
-    },
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "scheme": "plannr",
-    "splash": {
-      "image": "./assets/icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.sthareja19.Plannr",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "NSCalendarsUsageDescription": "Plannr needs access to your calendar to add scheduled events."
-      },
-      "usesAppleSignIn": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "package": "com.sthareja19.Plannr"
-    },
-    "web": {
-      "favicon": "./assets/icon.png"
-    },
-    "plugins": [
-      "expo-font",
-      [
-        "expo-build-properties",
-        {
-          "ios": {
-            "useFrameworks": "static"
-          }
-        }
-      ],
-      "expo-secure-store",
-      [
-        "expo-speech-recognition",
-        {
-          "microphonePermission": "Allow Plannr to use the microphone for voice input.",
-          "speechRecognitionPermission": "Allow Plannr to recognise your speech for voice input."
-        }
-      ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "bdcd6096-e4fd-427d-a455-9026fac3dfb2"
-      }
-    },
-    "owner": "sthareja19"
-  }
+    "expo": {
+        "name": "Plannr",
+        "slug": "Plannr",
+        "version": "2.0.0",
+        "orientation": "portrait",
+        "install": {
+            "exclude": ["react-native-reanimated"]
+        },
+        "icon": "./assets/icon.png",
+        "userInterfaceStyle": "light",
+        "newArchEnabled": true,
+        "scheme": "plannr",
+        "splash": {
+            "image": "./assets/icon.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+        },
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.sthareja19.Plannr",
+            "infoPlist": {
+                "ITSAppUsesNonExemptEncryption": false,
+                "NSCalendarsUsageDescription": "Plannr needs access to your calendar to add scheduled events."
+            },
+            "usesAppleSignIn": true
+        },
+        "android": {
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/icon.png",
+                "backgroundColor": "#ffffff"
+            },
+            "edgeToEdgeEnabled": true,
+            "package": "com.sthareja19.Plannr"
+        },
+        "web": {
+            "favicon": "./assets/icon.png"
+        },
+        "plugins": [
+            "expo-font",
+            [
+                "expo-build-properties",
+                {
+                    "ios": {
+                        "useFrameworks": "static"
+                    }
+                }
+            ],
+            "expo-secure-store",
+            [
+                "expo-speech-recognition",
+                {
+                    "microphonePermission": "Allow Plannr to use the microphone for voice input.",
+                    "speechRecognitionPermission": "Allow Plannr to recognise your speech for voice input."
+                }
+            ]
+        ],
+        "extra": {
+            "eas": {
+                "projectId": "bdcd6096-e4fd-427d-a455-9026fac3dfb2"
+            }
+        },
+        "owner": "sthareja19"
+    }
 }

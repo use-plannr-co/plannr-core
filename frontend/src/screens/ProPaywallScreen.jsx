@@ -11,9 +11,12 @@ import {
     Linking,
     Platform,
     Animated,
+    ScrollView,
+    LayoutAnimation,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
+import Svg, { Path } from 'react-native-svg';
 
 import { useAppState } from '../context/AppStateContext.js';
 import { useSubscription } from '../hooks/useSubscription.js';
@@ -24,9 +27,42 @@ import { spacing, padding } from '../design/spacing.js';
 import { typography } from '../design/typography.js';
 
 import LightningIcon from '../../assets/system-icons/LightningIcon.svg';
+import ScheduleIcon from '../../assets/paywall-icons/ScheduleIcon.svg';
+import ChatIcon from '../../assets/paywall-icons/ChatIcon.svg';
+import CoPlanIcon from '../../assets/paywall-icons/CoPlanIcon.svg';
+import AnalyticsIcon from '../../assets/paywall-icons/AnalyticsIcon.svg';
+import StarIcon from '../../assets/system-icons/StarIcon.svg';
 
 const { width, height } = Dimensions.get('window');
 const SCREEN_PADDING = padding.SCREEN_PADDING;
+
+function ChevronRightIcon({ color, size = 18 }) {
+    return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+            <Path
+                d="M9 18L15 12L9 6"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </Svg>
+    );
+}
+
+function ChevronDownIcon({ color, size = 18 }) {
+    return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+            <Path
+                d="M6 9L12 15L18 9"
+                stroke={color}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </Svg>
+    );
+}
 
 /**
  * ProPaywallScreen
@@ -61,6 +97,8 @@ const ProPaywallScreen = ({ navigation, route }) => {
     const [loadingOfferings, setLoadingOfferings] = useState(true);
     const [purchasing, setPurchasing] = useState(false);
     const [restoring, setRestoring] = useState(false);
+    const [showTestimonials, setShowTestimonials] = useState(true);
+    const [headerHeight, setHeaderHeight] = useState(0);
 
     // Animation for sliding selector
     const selectorPosition = useRef(new Animated.Value(0)).current; // 0 = annual (left), 1 = monthly (right)
@@ -86,9 +124,12 @@ const ProPaywallScreen = ({ navigation, route }) => {
     // Redirect if already Pro
     useEffect(() => {
         if (isPro && !isLoading) {
-            Alert.alert('Already Pro! 🎉', 'You already have access to Plannr Pro features.', [
-                { text: 'OK', onPress: () => navigation.goBack() },
-            ]);
+            // Alert.alert('Already Pro! 🎉', 'You already have access to Plannr Pro features.', [
+            //     {
+            //         text: 'OK',
+            //         // onPress: () => navigation.goBack()
+            //     },
+            // ]);
         }
     }, [isPro, isLoading]);
 
@@ -120,11 +161,11 @@ const ProPaywallScreen = ({ navigation, route }) => {
             });
         } catch (error) {
             console.error('Failed to load offerings:', error);
-            Alert.alert(
-                'Unable to Load Plans',
-                "We couldn't load subscription plans. Please try again later.",
-                [{ text: 'Go Back', onPress: () => navigation.goBack() }],
-            );
+            // Alert.alert(
+            //     'Unable to Load Plans',
+            //     "We couldn't load subscription plans. Please try again later.",
+            //     [{ text: 'Go Back', onPress: () => navigation.goBack() }],
+            // );
             logAction('offerings_error', { error: error.message });
         } finally {
             setLoadingOfferings(false);
@@ -267,6 +308,24 @@ const ProPaywallScreen = ({ navigation, route }) => {
     const monthlyPrice = monthlyPackage?.product?.priceString || '$4.99';
     const annualPrice = annualPackage?.product?.priceString || '$3.33';
 
+    const testimonials = [
+        {
+            name: 'Prabhnoor Dua',
+            rating: 5,
+            quote: "Plannr is the only app on my phone that makes me feel assured that things won't slip through the cracks.",
+        },
+        {
+            name: 'Vardaan Grover',
+            rating: 5,
+            quote: '...',
+        },
+        {
+            name: 'Gurleen Rao',
+            rating: 5,
+            quote: 'It helps me stay on top of everything without the stress, I finally feel in control of my time!',
+        },
+    ];
+
     // Loading state
     if (loadingOfferings || isLoading) {
         return (
@@ -281,7 +340,291 @@ const ProPaywallScreen = ({ navigation, route }) => {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
-            <View style={styles.subContainer}>
+            <ScrollView
+                style={{ flex: 1, width: '100%' }}
+                contentContainerStyle={[styles.subContainer, { paddingTop: headerHeight }]}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
+                {/* Features List */}
+                <View style={styles.featuresList}>
+                    <FeatureItem
+                        text="Automatically adapt your schedules when life changes"
+                        i={0}
+                    />
+                    <FeatureItem text="Talk to your AI-powered personal assistant" i={1} />
+                    <FeatureItem text="Plan with others without the back-and-forth" i={2} />
+                    <FeatureItem
+                        text="Understand when you actually work best with smart analytics"
+                        i={3}
+                    />
+                </View>
+
+                <View
+                    style={{
+                        borderBottomWidth: 1,
+                        borderBottomColor: theme.INPUT,
+                        marginHorizontal: padding.SCREEN_PADDING,
+                        marginBottom: spacing.SPACING_3,
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => {
+                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                            setShowTestimonials((prev) => !prev);
+                        }}
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: spacing.SPACING_3,
+                        }}
+                        activeOpacity={0.7}
+                    >
+                        <Text
+                            style={{
+                                fontFamily: 'Albert Sans',
+                                fontSize: typography.subHeadingSize,
+                                color: theme.FOREGROUND,
+                                opacity: 0.4,
+                                flex: 1,
+                            }}
+                        >
+                            What people are saying about Plannr Pro
+                        </Text>
+                        <View style={{ opacity: 0.4, marginLeft: spacing.SPACING_2 }}>
+                            {showTestimonials ? (
+                                <ChevronDownIcon color={theme.FOREGROUND} />
+                            ) : (
+                                <ChevronRightIcon color={theme.FOREGROUND} />
+                            )}
+                        </View>
+                    </TouchableOpacity>
+                    {showTestimonials && (
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            style={{ marginBottom: spacing.SPACING_3 }}
+                        >
+                            {testimonials.map((item, index) => (
+                                <TestimonialItem
+                                    key={`testimonial-${index}`}
+                                    name={item.name}
+                                    rating={item.rating}
+                                    quote={item.quote}
+                                    theme={theme}
+                                />
+                            ))}
+                        </ScrollView>
+                    )}
+                </View>
+
+                <View>
+                    {/* Plan Selection */}
+                    <View style={{ ...styles.planSelector, backgroundColor: theme.COMP_COLOR }}>
+                        {/* Animated Background Selector */}
+                        <Animated.View
+                            style={[
+                                styles.animatedSelector,
+                                {
+                                    transform: [
+                                        {
+                                            translateX: selectorPosition.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [
+                                                    0,
+                                                    (width -
+                                                        SCREEN_PADDING * 2 -
+                                                        padding.PADDING_1 * 2 -
+                                                        spacing.SPACING_2) /
+                                                        2 +
+                                                        spacing.SPACING_2 * 0.5,
+                                                ],
+                                            }),
+                                        },
+                                    ],
+                                },
+                            ]}
+                        >
+                            <LinearGradient
+                                colors={
+                                    selectedPlan === 'annual'
+                                        ? [theme.GRADIENT_START, theme.GRADIENT_END]
+                                        : [theme.GRADIENT_START, theme.GRADIENT_START]
+                                }
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={styles.animatedSelectorGradient}
+                            />
+                        </Animated.View>
+
+                        {/* Annual Plan */}
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                if (selectedPlan !== 'annual') {
+                                    setSelectedPlan('annual');
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                }
+                            }}
+                            style={styles.planButton}
+                        >
+                            <View style={styles.planButtonContent}>
+                                <Text
+                                    style={[
+                                        styles.planTitle,
+                                        {
+                                            color:
+                                                selectedPlan === 'annual'
+                                                    ? '#FFFFFF'
+                                                    : theme.FOREGROUND,
+                                        },
+                                    ]}
+                                >
+                                    Annual (33% OFF)
+                                </Text>
+                                <Text />
+                                <Text
+                                    style={[
+                                        styles.planPrice,
+                                        {
+                                            color:
+                                                selectedPlan === 'annual'
+                                                    ? '#FFFFFF'
+                                                    : theme.FOREGROUND,
+                                        },
+                                    ]}
+                                >
+                                    {annualPrice}/mo (billed annually)
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+
+                        {/* Monthly Plan */}
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                if (selectedPlan !== 'monthly') {
+                                    setSelectedPlan('monthly');
+                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                }
+                            }}
+                            style={styles.planButton}
+                        >
+                            <View style={styles.planButtonContent}>
+                                <Text
+                                    style={[
+                                        styles.planTitle,
+                                        {
+                                            color:
+                                                selectedPlan === 'monthly'
+                                                    ? '#FFFFFF'
+                                                    : theme.FOREGROUND,
+                                        },
+                                    ]}
+                                >
+                                    Monthly
+                                </Text>
+                                <Text />
+                                <Text
+                                    style={[
+                                        styles.planPrice,
+                                        {
+                                            color:
+                                                selectedPlan === 'monthly'
+                                                    ? '#FFFFFF'
+                                                    : theme.FOREGROUND,
+                                        },
+                                    ]}
+                                >
+                                    {monthlyPrice}/mo
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Upgrade Button */}
+                    <TouchableOpacity
+                        activeOpacity={isPro ? 1 : 0.9}
+                        onPress={isPro ? undefined : handlePurchase}
+                        disabled={purchasing || loadingOfferings || isPro}
+                        style={styles.upgradeButtonContainer}
+                    >
+                        <LinearGradient
+                            colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={[styles.upgradeButton, isPro && { opacity: 0.7 }]}
+                        >
+                            {purchasing ? (
+                                <ActivityIndicator color="#FFFFFF" />
+                            ) : (
+                                <Text style={styles.upgradeButtonText}>
+                                    {isPro ? "You're a Pro Member" : 'Upgrade Now'}
+                                </Text>
+                            )}
+                        </LinearGradient>
+                    </TouchableOpacity>
+
+                    {/* Pricing Details */}
+                    <Text style={[styles.pricingDetails, { color: theme.SELECTION }]}>
+                        Get a free 1-month trial,{'\n'} then{' '}
+                        <Text style={{ fontWeight: 'bold' }}>subscribe</Text> to continue enjoying
+                        premium features.
+                    </Text>
+                </View>
+
+                {/* Restore Button */}
+                <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={handleRestore}
+                    disabled={restoring}
+                    style={styles.restoreButton}
+                >
+                    {restoring ? (
+                        <ActivityIndicator size="small" color={theme.GRADIENT_START} />
+                    ) : (
+                        <Text style={[styles.restoreText, { color: theme.GRADIENT_START }]}>
+                            Restore Purchases
+                        </Text>
+                    )}
+                </TouchableOpacity>
+
+                {/* Legal Links */}
+                <View style={styles.legalLinks}>
+                    <TouchableOpacity
+                        onPress={() => openURL('https://www.useplannr.co/terms', 'terms')}
+                    >
+                        <Text style={[styles.legalLink, { color: theme.SELECTION }]}>
+                            Terms of Service
+                        </Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.legalSeparator, { color: theme.SELECTION }]}> • </Text>
+                    <TouchableOpacity
+                        onPress={() => openURL('https://www.useplannr.co/privacy', 'privacy')}
+                    >
+                        <Text style={[styles.legalLink, { color: theme.SELECTION }]}>
+                            Privacy Policy
+                        </Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.legalSeparator, { color: theme.SELECTION }]}> • </Text>
+                    <TouchableOpacity onPress={handleManageSubscription}>
+                        <Text style={[styles.legalLink, { color: theme.SELECTION }]}>
+                            Manage Subscription
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+
+            {/* Gradient header overlay — sits on top of the ScrollView so content fades under it */}
+            <LinearGradient
+                pointerEvents="none"
+                onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+                colors={[theme.BACKGROUND, theme.BACKGROUND + '00']}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+                style={styles.headerGradient}
+            >
                 {/* Header Badge */}
                 <View style={styles.headerBadge}>
                     <LinearGradient
@@ -311,238 +654,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
                 <Text style={[styles.title, { color: theme.FOREGROUND }]}>
                     Turn your schedule into a{'\n'}system built for you.
                 </Text>
-
-                {/* Plan Selection */}
-                <View style={{ ...styles.planSelector, backgroundColor: theme.COMP_COLOR }}>
-                    {/* Animated Background Selector */}
-                    <Animated.View
-                        style={[
-                            styles.animatedSelector,
-                            {
-                                transform: [
-                                    {
-                                        translateX: selectorPosition.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [
-                                                0,
-                                                (width -
-                                                    SCREEN_PADDING * 2 -
-                                                    padding.PADDING_1 * 2 -
-                                                    spacing.SPACING_2) /
-                                                    2 +
-                                                    spacing.SPACING_2 * 0.5,
-                                            ],
-                                        }),
-                                    },
-                                ],
-                            },
-                        ]}
-                    >
-                        <LinearGradient
-                            colors={
-                                selectedPlan === 'annual'
-                                    ? [theme.GRADIENT_START, theme.GRADIENT_END]
-                                    : [theme.GRADIENT_START, theme.GRADIENT_START]
-                            }
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.animatedSelectorGradient}
-                        />
-                    </Animated.View>
-
-                    {/* Annual Plan */}
-                    <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => {
-                            if (selectedPlan !== 'annual') {
-                                setSelectedPlan('annual');
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            }
-                        }}
-                        style={styles.planButton}
-                    >
-                        <View style={styles.planButtonContent}>
-                            <Text
-                                style={[
-                                    styles.planTitle,
-                                    {
-                                        color:
-                                            selectedPlan === 'annual'
-                                                ? '#FFFFFF'
-                                                : theme.FOREGROUND,
-                                    },
-                                ]}
-                            >
-                                Annual (33% OFF)
-                            </Text>
-                            <Text />
-                            <Text
-                                style={[
-                                    styles.planPrice,
-                                    {
-                                        color:
-                                            selectedPlan === 'annual'
-                                                ? '#FFFFFF'
-                                                : theme.FOREGROUND,
-                                    },
-                                ]}
-                            >
-                                {annualPrice}/mo
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-
-                    {/* Monthly Plan */}
-                    <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => {
-                            if (selectedPlan !== 'monthly') {
-                                setSelectedPlan('monthly');
-                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                            }
-                        }}
-                        style={styles.planButton}
-                    >
-                        <View style={styles.planButtonContent}>
-                            <Text
-                                style={[
-                                    styles.planTitle,
-                                    {
-                                        color:
-                                            selectedPlan === 'monthly'
-                                                ? '#FFFFFF'
-                                                : theme.FOREGROUND,
-                                    },
-                                ]}
-                            >
-                                Monthly
-                            </Text>
-                            <Text />
-                            <Text
-                                style={[
-                                    styles.planPrice,
-                                    {
-                                        color:
-                                            selectedPlan === 'monthly'
-                                                ? '#FFFFFF'
-                                                : theme.FOREGROUND,
-                                    },
-                                ]}
-                            >
-                                {monthlyPrice}/mo
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Features List */}
-                <View style={styles.featuresList}>
-                    <FeatureItem text="Unlimited smart scheduling & rescheduling" colors={theme} />
-                    <FeatureItem
-                        text="AI that understands natural languagerequests"
-                        colors={theme}
-                    />
-                    <FeatureItem
-                        text="Co-planning with friends & shared availability"
-                        colors={theme}
-                    />
-                    <FeatureItem
-                        text="Productivity analytics & trends to help you know yourself better"
-                        colors={theme}
-                    />
-                </View>
-
-                {/* Bottom Description */}
-                <View>
-                    <LinearGradient
-                        colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.bottomDescription}
-                    >
-                        <Text style={[styles.bottomText, { color: '#FFFFFF' }]}>
-                            A scheduling system tailored to how{'\n'}you work
-                        </Text>
-                    </LinearGradient>
-                </View>
-
-                <View>
-                    {/* Trial Info */}
-                    <View style={styles.trialInfo}>
-                        <Text style={[styles.trialTitle, { color: theme.FOREGROUND }]}>
-                            Get a free 1 month trial for
-                        </Text>
-                        <Text style={[styles.trialBrand, { color: theme.FOREGROUND }]}>
-                            Plannr Pro
-                        </Text>
-                    </View>
-
-                    {/* Upgrade Button */}
-                    <TouchableOpacity
-                        activeOpacity={isPro ? 1 : 0.9}
-                        onPress={isPro ? undefined : handlePurchase}
-                        disabled={purchasing || loadingOfferings || isPro}
-                        style={styles.upgradeButtonContainer}
-                    >
-                        <LinearGradient
-                            colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={[styles.upgradeButton, isPro && { opacity: 0.7 }]}
-                        >
-                            {purchasing ? (
-                                <ActivityIndicator color="#FFFFFF" />
-                            ) : (
-                                <Text style={styles.upgradeButtonText}>
-                                    {isPro ? "You're a Pro Member" : 'Upgrade Now'}
-                                </Text>
-                            )}
-                        </LinearGradient>
-                    </TouchableOpacity>
-
-                    {/* Pricing Details */}
-                    <Text style={[styles.pricingDetails, { color: theme.SELECTION }]}>
-                        Free for 30 days,{'\n'}
-                        {selectedPlan === 'annual'
-                            ? `$39.99/year afterwards`
-                            : `${monthlyPrice}/month afterwards`}
-                    </Text>
-                </View>
-
-                {/* Restore Button */}
-                {/* <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={handleRestore}
-                    disabled={restoring}
-                    style={styles.restoreButton}
-                >
-                    {restoring ? (
-                        <ActivityIndicator size="small" color={theme.GRADIENT_START} />
-                    ) : (
-                        <Text style={[styles.restoreText, { color: theme.GRADIENT_START }]}>
-                            Restore Purchases
-                        </Text>
-                    )}
-                </TouchableOpacity> */}
-
-                {/* Legal Links */}
-                {/* <View style={styles.legalLinks}>
-                    <TouchableOpacity onPress={() => openURL('https://plannr.app/terms', 'terms')}>
-                        <Text style={[styles.legalLink, { color: theme.SELECTION }]}>Terms of Service</Text>
-                    </TouchableOpacity>
-                    <Text style={[styles.legalSeparator, { color: theme.SELECTION }]}>  •  </Text>
-                    <TouchableOpacity onPress={() => openURL('https://plannr.app/privacy', 'privacy')}>
-                        <Text style={[styles.legalLink, { color: theme.SELECTION }]}>Privacy Policy</Text>
-                    </TouchableOpacity>
-                    <Text style={[styles.legalSeparator, { color: theme.SELECTION }]}>  •  </Text>
-                    <TouchableOpacity onPress={handleManageSubscription}>
-                        <Text style={[styles.legalLink, { color: theme.SELECTION }]}>Manage Subscription</Text>
-                    </TouchableOpacity>
-                </View> */}
-
-                {/* Bottom Spacing */}
-                <View style={{ height: spacing.SPACING_10 }} />
-            </View>
+            </LinearGradient>
         </View>
     );
 };
@@ -550,25 +662,42 @@ const ProPaywallScreen = ({ navigation, route }) => {
 /**
  * Feature Item Component
  */
-const FeatureItem = ({ text, colors }) => {
+const FeatureItem = ({ text, i }) => {
     const { appState } = useAppState();
     const theme = appState.userPreferences.theme === 'dark' ? 'dark' : 'light';
-    const imageMap = {
-        light: require('../../assets/images/light/PaywallTick.png'),
-        dark: require('../../assets/images/dark/PaywallTick.png'),
-    };
+    const iconArray = [ScheduleIcon, ChatIcon, CoPlanIcon, AnalyticsIcon];
+    const IconComponent = iconArray[i] || ScheduleIcon;
 
     return (
         <View style={styles.featureItem}>
-            <Image
-                source={imageMap[theme]}
-                style={{ width: 22, height: 16, alignSelf: 'center' }}
-            />
-            <Text style={[styles.featureText, { color: colors.FOREGROUND }]}>{text}</Text>
+            <IconComponent width={24} height={24} color={theme.FOREGROUND} />
+            <Text style={[styles.featureText, { color: theme.FOREGROUND }]}>{text}</Text>
         </View>
     );
 };
 
+/**
+ * Testimonial Item Component
+ */
+const TestimonialItem = ({ name, rating, quote, theme }) => {
+    return (
+        <View style={[styles.testimonialItem, { borderColor: theme.INPUT }]}>
+            <Text style={[styles.testimonialName, { color: theme.FOREGROUND }]}>{name}</Text>
+            <View style={{ flexDirection: 'row', marginVertical: 8 }}>
+                {[...Array(rating)].map((_, idx) => (
+                    <StarIcon
+                        key={idx}
+                        width={16}
+                        height={16}
+                        color={theme.GRADIENT_START}
+                        style={{ marginRight: 2 }}
+                    />
+                ))}
+            </View>
+            <Text style={[styles.testimonialQuote, { color: theme.FOREGROUND }]}>"{quote}"</Text>
+        </View>
+    );
+};
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -576,9 +705,15 @@ const styles = StyleSheet.create({
     },
     subContainer: {
         width: '100%',
-        marginTop: spacing.SPACING_16,
-        marginBottom: spacing.SPACING_1,
-        flex: 1,
+        paddingBottom: spacing.SPACING_10,
+    },
+    headerGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        paddingTop: spacing.SPACING_16,
+        paddingBottom: spacing.SPACING_10,
     },
     loadingText: {
         marginTop: spacing.SPACING_4,
@@ -683,7 +818,7 @@ const styles = StyleSheet.create({
     },
     featureItem: {
         flexDirection: 'row',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         marginBottom: spacing.SPACING_4,
         gap: spacing.SPACING_4,
     },
@@ -771,6 +906,29 @@ const styles = StyleSheet.create({
     legalSeparator: {
         fontSize: typography.bodySize - 2,
         fontFamily: 'Albert Sans',
+    },
+    testimonialItem: {
+        marginBottom: spacing.SPACING_1,
+        paddingHorizontal: padding.PADDING_4,
+        paddingVertical: padding.PADDING_3,
+        borderRadius: 16,
+        borderWidth: 3,
+        marginRight: spacing.SPACING_3,
+    },
+    testimonialName: {
+        fontSize: typography.subHeadingSize,
+        fontFamily: 'Albert Sans',
+        marginBottom: spacing.SPACING_1,
+    },
+    testimonialRating: {
+        fontSize: typography.bodySize - 2,
+        fontFamily: 'Albert Sans',
+        marginBottom: spacing.SPACING_1,
+    },
+    testimonialQuote: {
+        fontSize: typography.bodySize,
+        fontFamily: 'Albert Sans',
+        maxWidth: width * 0.6,
     },
 });
 

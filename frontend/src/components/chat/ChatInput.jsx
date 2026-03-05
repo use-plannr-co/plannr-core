@@ -11,10 +11,7 @@ import {
 } from 'react-native';
 import DailyLimitModal from '../../modals/DailyLimitModal.jsx';
 import Svg, { Line } from 'react-native-svg';
-import {
-    ExpoSpeechRecognitionModule,
-    useSpeechRecognitionEvent,
-} from 'expo-speech-recognition';
+import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from 'expo-speech-recognition';
 import { lightColor, darkColor } from '../../design/colors.js';
 import { useAppState } from '../../context/AppStateContext.js';
 import { useSubscription } from '../../hooks/useSubscription.js';
@@ -225,21 +222,20 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
 
     const handlePress = isStreaming ? onCancel : hasText ? handleSend : handleVoicePress;
 
-    const remaining = !isPro && dailyUsage ? Math.max(0, FREE_LIMIT - (dailyUsage.messageCount || 0)) : null;
+    const remaining =
+        !isPro && dailyUsage ? Math.max(0, FREE_LIMIT - (dailyUsage.messageCount || 0)) : null;
 
     // ── Placeholder text ──────────────────────────────────────────────────────
-    const placeholder = isListening && !hasText
-        ? 'Listening...'
-        : !isVoiceActive
-          ? 'Ask about your schedule...'
-          : '';
+    const placeholder =
+        isListening && !hasText
+            ? 'Listening...'
+            : !isVoiceActive
+              ? 'Ask about your schedule...'
+              : '';
 
     return (
         <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
-            <DailyLimitModal
-                isVisible={showLimitModal}
-                onClose={() => setShowLimitModal(false)}
-            />
+            <DailyLimitModal isVisible={showLimitModal} onClose={() => setShowLimitModal(false)} />
 
             {remaining !== null && remaining <= FREE_LIMIT && (
                 <Text
@@ -273,9 +269,14 @@ export default function ChatInput({ onSend, onCancel, isStreaming, dailyUsage })
                 />
 
                 <TextInput
-                    style={[styles.input, { color: isVoiceActive ? theme.SELECTED_TEXT : theme.FOREGROUND }]}
+                    style={[
+                        styles.input,
+                        { color: isVoiceActive ? theme.SELECTED_TEXT : theme.FOREGROUND },
+                    ]}
                     placeholder={placeholder}
-                    placeholderTextColor={isListening ? theme.SELECTED_TEXT + '99' : isDark ? '#666' : '#999'}
+                    placeholderTextColor={
+                        isListening ? theme.SELECTED_TEXT + '99' : isDark ? '#666' : '#999'
+                    }
                     value={text}
                     onChangeText={updateText}
                     multiline

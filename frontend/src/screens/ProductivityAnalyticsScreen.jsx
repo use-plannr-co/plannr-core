@@ -1,12 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { LineChart, BarChart } from 'react-native-gifted-charts';
 import { Circle } from 'react-native-animated-spinkit';
 
@@ -31,11 +24,20 @@ const CONTENT_WIDTH = width - padding.SCREEN_PADDING * 2;
 const BAR_CHART_W = CONTENT_WIDTH - spacing.SPACING_8; // chart width prop (card inner minus Y-axis reservation)
 const BAR_GAP = 8;
 const BAR_W = Math.floor((BAR_CHART_W - 6 * BAR_GAP) / 7); // fills all 7 bars edge-to-edge
-const SPACE = height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
+const SPACE =
+    height > 900 ? spacing.SPACING_4 : height > 800 ? spacing.SPACING_3 : spacing.SPACING_2;
 
 const PERIODS = ['7 Days', '30 Days', 'All Time'];
 const DOW_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const DOW_SHORT = { Monday: 'Mon', Tuesday: 'Tue', Wednesday: 'Wed', Thursday: 'Thu', Friday: 'Fri', Saturday: 'Sat', Sunday: 'Sun' };
+const DOW_SHORT = {
+    Monday: 'Mon',
+    Tuesday: 'Tue',
+    Wednesday: 'Wed',
+    Thursday: 'Thu',
+    Friday: 'Fri',
+    Saturday: 'Sat',
+    Sunday: 'Sun',
+};
 const HOUR_BUCKETS = [
     { label: 'Before 9', hours: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
     { label: '9-12', hours: [9, 10, 11] },
@@ -92,13 +94,13 @@ function buildXLabels(filteredDaily, period) {
     const n = filteredDaily.length;
     const step = period === '7 Days' ? 2 : period === '30 Days' ? 6 : 15;
     return filteredDaily.map((d, i) =>
-        i === 0 || i === n - 1 || i % step === 0 ? formatDateShort(d.date) : ''
+        i === 0 || i === n - 1 || i % step === 0 ? formatDateShort(d.date) : '',
     );
 }
 
 function buildBarChartData(dowStats, theme) {
     return DOW_ORDER.map((day) => ({
-        value: Math.round(((dowStats[day]?.rate) || 0) * 100),
+        value: Math.round((dowStats[day]?.rate || 0) * 100),
         label: DOW_SHORT[day],
         frontColor: theme.GRADIENT_START,
     }));
@@ -154,8 +156,7 @@ const PeriodTabs = ({ selected, onSelect, theme }) => (
                 style={[
                     styles.periodTab,
                     {
-                        backgroundColor:
-                            selected === p ? theme.GRADIENT_START : theme.COMP_COLOR,
+                        backgroundColor: selected === p ? theme.GRADIENT_START : theme.COMP_COLOR,
                     },
                 ]}
             >
@@ -264,7 +265,8 @@ const EmptyState = ({ theme }) => (
             Insights are building...
         </Text>
         <Text style={[styles.emptyBody, { color: theme.FOREGROUND, opacity: 0.6 }]}>
-            Keep scheduling and completing tasks. Your productivity patterns will appear here after a few days of data.
+            Keep scheduling and completing tasks. Your productivity patterns will appear here after
+            a few days of data.
         </Text>
     </View>
 );
@@ -328,7 +330,7 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
                 return [{ date: today, rating }, ...filtered];
             });
         },
-        [submitMoodCheckin]
+        [submitMoodCheckin],
     );
 
     if (!storageLoaded) return <LoadingScreen />;
@@ -358,7 +360,10 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
                 {/* Header */}
                 <View style={styles.header}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                        <TouchableOpacity
+                            onPress={() => navigation.goBack()}
+                            style={styles.backButton}
+                        >
                             <GoBackIcon width={24} height={24} color={theme.FOREGROUND} />
                         </TouchableOpacity>
                         <Text style={[styles.title, { color: theme.FOREGROUND }]}>
@@ -377,7 +382,9 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
                 {loading ? (
                     <View style={styles.loadingContainer}>
                         <Circle size={60} color={theme.FOREGROUND} />
-                        <Text style={[styles.loadingText, { color: theme.FOREGROUND, opacity: 0.6 }]}>
+                        <Text
+                            style={[styles.loadingText, { color: theme.FOREGROUND, opacity: 0.6 }]}
+                        >
                             Computing your insights...
                         </Text>
                     </View>
@@ -422,8 +429,14 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
 
                                 {/* Completion trend */}
                                 {lineData.length > 1 && (
-                                    <View style={[styles.card, { backgroundColor: theme.COMP_COLOR }]}>
-                                        <SectionTitle label="Completion Trend" description="% of tasks completed each day over the selected period" theme={theme} />
+                                    <View
+                                        style={[styles.card, { backgroundColor: theme.COMP_COLOR }]}
+                                    >
+                                        <SectionTitle
+                                            label="Completion Trend"
+                                            description="% of tasks completed each day over the selected period"
+                                            theme={theme}
+                                        />
                                         <LineChart
                                             data={lineData}
                                             width={CONTENT_WIDTH - spacing.SPACING_16 - 4}
@@ -444,21 +457,44 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
                                             noOfSections={2}
                                             yAxisLabelWidth={36}
                                             formatYLabel={(v) => `${v}%`}
-                                            yAxisTextStyle={{ color: theme.FOREGROUND, fontSize: 10, opacity: 0.5 }}
+                                            yAxisTextStyle={{
+                                                color: theme.FOREGROUND,
+                                                fontSize: 10,
+                                                opacity: 0.5,
+                                            }}
                                             xAxisLabelTexts={xLabels}
-                                            xAxisLabelTextStyle={{ color: theme.FOREGROUND, fontSize: 8, opacity: 0.5 }}
+                                            xAxisLabelTextStyle={{
+                                                color: theme.FOREGROUND,
+                                                fontSize: 8,
+                                                opacity: 0.5,
+                                            }}
                                             showFractionalValues={false}
                                             spacing={lineSpacing}
                                             initialSpacing={0}
                                             endSpacing={0}
                                         />
-                                        <Text style={[styles.sectionDescription, { color: theme.FOREGROUND, opacity: 0.6, textAlign: 'center' }]}>Scroll sideways to see full chart.</Text>
+                                        <Text
+                                            style={[
+                                                styles.sectionDescription,
+                                                {
+                                                    color: theme.FOREGROUND,
+                                                    opacity: 0.6,
+                                                    textAlign: 'center',
+                                                },
+                                            ]}
+                                        >
+                                            Scroll sideways to see full chart.
+                                        </Text>
                                     </View>
                                 )}
 
                                 {/* Best days */}
                                 <View style={[styles.card, { backgroundColor: theme.COMP_COLOR }]}>
-                                    <SectionTitle label="Best Days of the Week" description="Which days you're most likely to finish what you planned" theme={theme} />
+                                    <SectionTitle
+                                        label="Best Days of the Week"
+                                        description="Which days you're most likely to finish what you planned"
+                                        theme={theme}
+                                    />
                                     <BarChart
                                         data={barData}
                                         width={BAR_CHART_W}
@@ -486,7 +522,11 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
 
                                 {/* Peak hours heatmap */}
                                 <View style={[styles.card, { backgroundColor: theme.COMP_COLOR }]}>
-                                    <SectionTitle label="Peak Hours" description="When your completed tasks tend to be scheduled" theme={theme} />
+                                    <SectionTitle
+                                        label="Peak Hours"
+                                        description="When your completed tasks tend to be scheduled"
+                                        theme={theme}
+                                    />
                                     <View style={styles.heatmapRow}>
                                         {heatmapBuckets.map((bucket) => (
                                             <HeatmapBucket
@@ -500,8 +540,14 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
 
                                 {/* Task breakdown */}
                                 {categoryEntries.length > 0 && (
-                                    <View style={[styles.card, { backgroundColor: theme.COMP_COLOR }]}>
-                                        <SectionTitle label="Task Breakdown" description="Completion rate by task category" theme={theme} />
+                                    <View
+                                        style={[styles.card, { backgroundColor: theme.COMP_COLOR }]}
+                                    >
+                                        <SectionTitle
+                                            label="Task Breakdown"
+                                            description="Completion rate by task category"
+                                            theme={theme}
+                                        />
                                         {categoryEntries.map(([name, stats]) => (
                                             <CategoryBar
                                                 key={name}
@@ -515,29 +561,63 @@ const ProductivityAnalyticsScreen = ({ navigation }) => {
 
                                 {/* Additional stats footer */}
                                 <View style={[styles.card, { backgroundColor: theme.COMP_COLOR }]}>
-                                    <SectionTitle label="All-Time Stats" description="Your overall productivity numbers since day one" theme={theme} />
+                                    <SectionTitle
+                                        label="All-Time Stats"
+                                        description="Your overall productivity numbers since day one"
+                                        theme={theme}
+                                    />
                                     <View style={styles.footerRow}>
                                         <View style={styles.footerItem}>
-                                            <Text style={[styles.footerValue, { color: theme.FOREGROUND }]}>
+                                            <Text
+                                                style={[
+                                                    styles.footerValue,
+                                                    { color: theme.FOREGROUND },
+                                                ]}
+                                            >
                                                 {summary.completedBlocks}
                                             </Text>
-                                            <Text style={[styles.footerLabel, { color: theme.FOREGROUND, opacity: 0.6 }]}>
+                                            <Text
+                                                style={[
+                                                    styles.footerLabel,
+                                                    { color: theme.FOREGROUND, opacity: 0.6 },
+                                                ]}
+                                            >
                                                 Tasks done
                                             </Text>
                                         </View>
                                         <View style={styles.footerItem}>
-                                            <Text style={[styles.footerValue, { color: theme.FOREGROUND }]}>
+                                            <Text
+                                                style={[
+                                                    styles.footerValue,
+                                                    { color: theme.FOREGROUND },
+                                                ]}
+                                            >
                                                 {summary.longestStreak}d
                                             </Text>
-                                            <Text style={[styles.footerLabel, { color: theme.FOREGROUND, opacity: 0.6 }]}>
+                                            <Text
+                                                style={[
+                                                    styles.footerLabel,
+                                                    { color: theme.FOREGROUND, opacity: 0.6 },
+                                                ]}
+                                            >
                                                 Best streak
                                             </Text>
                                         </View>
                                         <View style={styles.footerItem}>
-                                            <Text style={[styles.footerValue, { color: theme.FOREGROUND }]}>
+                                            <Text
+                                                style={[
+                                                    styles.footerValue,
+                                                    { color: theme.FOREGROUND },
+                                                ]}
+                                            >
                                                 {summary.totalScheduledHours}h
                                             </Text>
-                                            <Text style={[styles.footerLabel, { color: theme.FOREGROUND, opacity: 0.6 }]}>
+                                            <Text
+                                                style={[
+                                                    styles.footerLabel,
+                                                    { color: theme.FOREGROUND, opacity: 0.6 },
+                                                ]}
+                                            >
                                                 Scheduled
                                             </Text>
                                         </View>

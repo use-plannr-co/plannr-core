@@ -51,9 +51,7 @@ const DailyLimitModal = ({ isVisible, onClose }) => {
                 </View>
 
                 {/* Title */}
-                <Text style={[styles.title, { color: theme.FOREGROUND }]}>
-                    Daily limit reached
-                </Text>
+                <Text style={[styles.title, { color: theme.FOREGROUND }]}>Daily limit reached</Text>
 
                 {/* Description */}
                 <Text style={[styles.description, { color: theme.FOREGROUND }]}>
