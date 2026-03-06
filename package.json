@@ -44,7 +44,9 @@
     
     "test": "npm run test:frontend && npm run test:backend",
     "test:frontend": "cd frontend && npm test",
-    "test:backend": "cd backend && npm test"
+    "test:backend": "cd backend && npm test",
+
+    "build:app": "cd frontend && npx expo prebuild --platform ios"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
