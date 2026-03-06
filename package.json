@@ -46,7 +46,12 @@
     "test:frontend": "cd frontend && npm test",
     "test:backend": "cd backend && npm test",
 
-    "build:app": "cd frontend && npx expo prebuild --platform ios"
+    "build:dev": "cd frontend && npx expo prebuild --platform ios",
+    "build:prod": "cd frontend && eas build --platform ios --profile production",
+
+    "submit": "cd frontend && eas submit --platform ios",
+
+    "bump-version": "node scripts/bump-version.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
