@@ -1,4 +1,5 @@
 import React from 'react';
+import * as Font from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppStateProvider } from './src/context/AppStateContext.js';
 import { AppUpdateProvider, useAppUpdate } from './src/context/AppUpdateContext.js';
@@ -86,6 +87,14 @@ const AppContent = () => {
 
 export default function App() {
     NotificationService.requestPermissions();
+
+    const [fontsLoaded] = Font.useFonts({
+        PinkSunset: require('./assets/fonts/PinkSunset-Regular.ttf'),
+        AlbertSans: require('./assets/fonts/AlbertSans-VariableFont_wght.ttf'),
+        TheSeasons: require('./assets/fonts/TheSeasons-Bold.otf'),
+    });
+
+    if (!fontsLoaded) return null;
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>

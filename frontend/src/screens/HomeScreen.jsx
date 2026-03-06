@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import { Text, View, StyleSheet, ScrollView } from 'react-native';
-import * as Font from 'expo-font';
-
 import LoadingScreen from './LoadingScreen.jsx';
 import TimeOfDay from '../components/TimeOfDay.jsx';
 import UpcomingTasks from '../components/UpcomingTasks.jsx';
@@ -26,18 +24,11 @@ const HomeScreen = ({ navigation }) => {
     const currentTime = useCurrentTime();
     const { logUserAction } = useActionLogger('Home');
 
-    const [fontsLoaded] = Font.useFonts({
-        PinkSunset: require('../../assets/fonts/PinkSunset-Regular.ttf'),
-        AlbertSans: require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
-    });
-
     const noSchedules = appState.savedSchedules.length === 0;
 
-    // Early returns after all hooks have been called
     if (!storageLoaded) {
         return <LoadingScreen />;
     }
-    if (!fontsLoaded) return null;
 
     let theme = appState.userPreferences.theme === 'light' ? lightColor : darkColor;
     const todaysDate = convertDateToScheduleDate(currentTime);

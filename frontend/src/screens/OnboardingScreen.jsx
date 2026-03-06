@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Font from 'expo-font';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import LottieView from 'lottie-react-native';
 
@@ -19,7 +18,6 @@ import { useAppState } from '../context/AppStateContext.js';
 import { useAuthenticatedAPI } from '../api/index.js';
 import { useActionLogger } from '../hooks/useActionLogger.js';
 import { padding } from '../design/spacing.js';
-import LoadingScreen from './LoadingScreen.jsx';
 import { typography } from '../design/typography.js';
 import { CheckCheck } from 'lucide-react-native';
 import { getAvatarList, getRandomAvatar } from '../utils/avatarUtils.js';
@@ -30,11 +28,6 @@ const OnboardingScreen = () => {
     const { appState, setAppState } = useAppState();
     const { updateUserProfile, updatePreferences, markOnboardingComplete } = useAuthenticatedAPI();
     const { logAction, logScreenView, logError } = useActionLogger('Onboarding');
-
-    const [fontsLoaded] = Font.useFonts({
-        PinkSunset: require('../../assets/fonts/PinkSunset-Regular.ttf'),
-        AlbertSans: require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
-    });
 
     const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -83,21 +76,18 @@ const OnboardingScreen = () => {
         }).start();
     }, [currentStep, progressPercentage]);
 
-    // Fade in Step 1 when screen becomes visible (after fonts are loaded)
+    // Fade in Step 1 when screen becomes visible
     useEffect(() => {
-        if (fontsLoaded) {
-            // Add a small delay to ensure the screen is fully rendered
-            const timer = setTimeout(() => {
-                Animated.timing(step1FadeAnim, {
-                    toValue: 1,
-                    duration: 1000, // 1 second smooth fade-in
-                    useNativeDriver: true,
-                }).start();
-            }, 100); // 100ms delay to ensure screen is visible
+        const timer = setTimeout(() => {
+            Animated.timing(step1FadeAnim, {
+                toValue: 1,
+                duration: 1000,
+                useNativeDriver: true,
+            }).start();
+        }, 100);
 
-            return () => clearTimeout(timer);
-        }
-    }, [fontsLoaded]);
+        return () => clearTimeout(timer);
+    }, []);
 
     // Function to check if button should be disabled for current step
     const checkButtonDisability = (step) => {
@@ -268,7 +258,7 @@ const OnboardingScreen = () => {
         }
     };
 
-    if (!fontsLoaded) return <LoadingScreen />;
+
 
     return (
         <LinearGradient

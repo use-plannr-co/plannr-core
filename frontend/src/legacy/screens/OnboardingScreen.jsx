@@ -10,7 +10,6 @@ import {
     TouchableOpacity,
     ScrollView,
 } from 'react-native';
-import * as Font from 'expo-font';
 
 import { useAppState } from '../../context/AppStateContext';
 import { useActionLogger } from '../../hooks/useActionLogger.js';
@@ -28,11 +27,6 @@ const OnboardingScreen = ({ navigation }) => {
     const { appState, setAppState } = useAppState();
     const { updateUserProfile, updatePreferences, markOnboardingComplete } = useAuthenticatedAPI();
     const { logAction, logScreenView, logError } = useActionLogger('Onboarding');
-
-    const [fontsLoaded] = Font.useFonts({
-        PinkSunset: require('../../assets/fonts/PinkSunset-Regular.ttf'),
-        AlbertSans: require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
-    });
 
     const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
     const [currentStep, setCurrentStep] = useState(0);
@@ -135,8 +129,6 @@ const OnboardingScreen = ({ navigation }) => {
     useEffect(() => {
         logScreenView({ currentStep: currentStep });
 
-        if (!fontsLoaded) return;
-
         const timeout = setTimeout(() => {
             Animated.timing(indicatorYLogo, {
                 toValue: -250,
@@ -152,9 +144,7 @@ const OnboardingScreen = ({ navigation }) => {
         }, 1000);
 
         return () => clearTimeout(timeout);
-    }, [fontsLoaded, indicatorYLogo, fadeAnim]);
-
-    if (!fontsLoaded) return null;
+    }, [indicatorYLogo, fadeAnim]);
 
     return (
         <View style={styles.container}>

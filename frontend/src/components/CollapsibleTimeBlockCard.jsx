@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
     },
     taskTitle: {
         fontSize: 20,
-        fontFamily: 'PinkSunset-Regular',
+        fontFamily: 'PinkSunset',
         marginBottom: 4,
     },
     timeInfo: {

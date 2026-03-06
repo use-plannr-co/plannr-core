@@ -22,7 +22,6 @@ import { EyeIcon, EyeClosedIcon } from 'lucide-react-native';
 const { width, height } = Dimensions.get('window');
 import Google from '../../assets/auth/Google.svg';
 import Apple from '../../assets/auth/Apple.svg';
-import * as Font from 'expo-font';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 
@@ -45,11 +44,6 @@ const SPACE =
 
 const SignInScreen = ({ navigation }) => {
     useWarmUpBrowser();
-
-    const [fontsLoaded] = Font.useFonts({
-        PinkSunset: require('../../assets/fonts/PinkSunset-Regular.ttf'),
-        AlbertSans: require('../../assets/fonts/AlbertSans-VariableFont_wght.ttf'),
-    });
 
     const { signIn, setActive, isLoaded } = useSignIn();
     const clerk = useClerk();
@@ -306,7 +300,7 @@ const SignInScreen = ({ navigation }) => {
         }
     }, [loading, startSSOFlow]);
 
-    if (!fontsLoaded) return null;
+
 
     return (
         <View style={styles.container}>

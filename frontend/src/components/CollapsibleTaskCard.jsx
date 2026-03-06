@@ -448,7 +448,7 @@ const styles = StyleSheet.create({
     },
     taskTitle: {
         fontSize: 20,
-        fontFamily: 'PinkSunset-Regular',
+        fontFamily: 'PinkSunset',
         flex: 1,
         marginRight: 12,
     },
