@@ -44,6 +44,10 @@ const SavedSchedulesScreen = ({ navigation }) => {
                 </View>
                 {appState.savedSchedules.length === 0 ? (
                     <View style={{ alignItems: 'center' }}>
+                        <Image
+                            source={require('../../assets/planova/planova-sad.png')}
+                            style={{ width: 300, height: 247.5, marginVertical: 32 }}
+                        />
                         <Text
                             style={{
                                 fontSize: typography.headingSize,

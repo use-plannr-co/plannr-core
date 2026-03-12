@@ -317,7 +317,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
         {
             name: 'Vardaan Grover',
             rating: 5,
-            quote: '...',
+            quote: 'I have tried so many planners and scheduling apps, but Plannr is the only one that truly understands my needs and adapts to my life.',
         },
         {
             name: 'Gurleen Rao',
@@ -593,10 +593,10 @@ const ProPaywallScreen = ({ navigation, route }) => {
                 {/* Legal Links */}
                 <View style={styles.legalLinks}>
                     <TouchableOpacity
-                        onPress={() => openURL('https://www.useplannr.co/terms', 'terms')}
+                        onPress={() => openURL('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/', 'terms')}
                     >
                         <Text style={[styles.legalLink, { color: theme.SELECTION }]}>
-                            Terms of Service
+                            Terms of Use
                         </Text>
                     </TouchableOpacity>
                     <Text style={[styles.legalSeparator, { color: theme.SELECTION }]}> • </Text>
@@ -621,7 +621,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
                 pointerEvents="none"
                 onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
                 colors={[theme.BACKGROUND, theme.BACKGROUND + '00']}
-                start={{ x: 0.5, y: 0 }}
+                start={{ x: 0.5, y: 0.6 }}
                 end={{ x: 0.5, y: 1 }}
                 style={styles.headerGradient}
             >

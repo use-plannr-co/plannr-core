@@ -105,8 +105,8 @@ const UpcomingTasks = ({ onClick }) => {
                 }}
             >
                 <Image
-                    source={imageMap[appState.userPreferences.theme]}
-                    style={{ width: 192, height: 192, alignSelf: 'center' }}
+                    source={require('../../assets/planova/planova-sleeping.png')}
+                    style={{ width: 200, height: 165, alignSelf: 'center', marginBottom: 16 }}
                 />
                 <Text
                     style={{
@@ -180,11 +180,6 @@ const UpcomingTasks = ({ onClick }) => {
     };
 
     const CompletedTasksView = () => {
-        const imageMap = {
-            light: require('../../assets/images/light/Celebration.png'),
-            dark: require('../../assets/images/dark/Celebration.png'),
-        };
-
         return (
             <View
                 style={{
@@ -194,8 +189,8 @@ const UpcomingTasks = ({ onClick }) => {
                 }}
             >
                 <Image
-                    source={imageMap[appState.userPreferences.theme]}
-                    style={{ width: 192, height: 192, alignSelf: 'center' }}
+                    source={require('../../assets/planova/planova-chilling.png')}
+                    style={{ width: 200, height: 165, alignSelf: 'center', marginBottom: 16 }}
                 />
                 <Text
                     style={{

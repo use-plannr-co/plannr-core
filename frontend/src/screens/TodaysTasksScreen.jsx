@@ -77,8 +77,8 @@ const TodaysTasksScreen = () => {
         return (
             <View style={{ ...styles.completion, backgroundColor: theme.BACKGROUND }}>
                 <Image
-                    style={{ height: 448, width: 448, marginTop: 48 }}
-                    source={imageMap[appState.userPreferences.theme]}
+                    style={{ height: 247.5, width: 300, marginVertical: 48 }}
+                    source={require('../../assets/planova/planova-sleeping.png')}
                 />
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
                     You have no tasks due for today.
@@ -96,8 +96,8 @@ const TodaysTasksScreen = () => {
         return (
             <View style={{ ...styles.completion, backgroundColor: theme.BACKGROUND }}>
                 <Image
-                    style={{ height: 448, width: 448, marginTop: 48 }}
-                    source={imageMap[appState.userPreferences.theme]}
+                    style={{ height: 247.5, width: 300, marginVertical: 48 }}
+                    source={require('../../assets/planova/planova-chilling.png')}
                 />
                 <Text style={{ ...styles.subHeading, color: theme.FOREGROUND }}>
                     You crushed it today!
