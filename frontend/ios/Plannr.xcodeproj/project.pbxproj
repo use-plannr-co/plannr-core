@@ -7,26 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		031BE582033B92AAD6248AAC /* Pods_Plannr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A96EE8F1C65212AC0B31852 /* Pods_Plannr.framework */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		2C46A6AC65E1720A01E92FA5 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5F64BBD795A3DA44690021C8 /* PrivacyInfo.xcprivacy */; };
+		2EBBE8B8762A3F33ABD96D96 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4B1D29D70226CB7B04AB1F /* ExpoModulesProvider.swift */; };
+		2F65EC58BFCC76DABDEFADA5 /* Pods_Plannr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6511EC7AFB94330A526C66FD /* Pods_Plannr.framework */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
+		92A1C00385D66389F657F14C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 96D7314BB8E12D6AEB0AC0B1 /* PrivacyInfo.xcprivacy */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
-		F11C982453E3713EB1C387DB /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F11DAD229459D3262D9AD4 /* ExpoModulesProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		13B07F961A680F5B00A75B9A /* Plannr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Plannr.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Plannr/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Plannr/Info.plist; sourceTree = "<group>"; };
-		26698DD2BED0478D1F5A37F7 /* Pods-Plannr.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Plannr.release.xcconfig"; path = "Target Support Files/Pods-Plannr/Pods-Plannr.release.xcconfig"; sourceTree = "<group>"; };
-		38E87530BE4E66838A80DD7A /* Pods-Plannr.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Plannr.debug.xcconfig"; path = "Target Support Files/Pods-Plannr/Pods-Plannr.debug.xcconfig"; sourceTree = "<group>"; };
-		5F64BBD795A3DA44690021C8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Plannr/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		8A96EE8F1C65212AC0B31852 /* Pods_Plannr.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Plannr.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		96F11DAD229459D3262D9AD4 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Plannr/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		3281BDF64BCDE1D359DDE6AC /* Pods-Plannr.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Plannr.release.xcconfig"; path = "Target Support Files/Pods-Plannr/Pods-Plannr.release.xcconfig"; sourceTree = "<group>"; };
+		6511EC7AFB94330A526C66FD /* Pods_Plannr.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Plannr.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		96D7314BB8E12D6AEB0AC0B1 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Plannr/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Plannr/SplashScreen.storyboard; sourceTree = "<group>"; };
+		B9A556E2E7C6F2B2FC922D61 /* Pods-Plannr.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Plannr.debug.xcconfig"; path = "Target Support Files/Pods-Plannr/Pods-Plannr.debug.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		CB4B1D29D70226CB7B04AB1F /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Plannr/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Plannr/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* Plannr-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Plannr-Bridging-Header.h"; path = "Plannr/Plannr-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -37,22 +37,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				031BE582033B92AAD6248AAC /* Pods_Plannr.framework in Frameworks */,
+				2F65EC58BFCC76DABDEFADA5 /* Pods_Plannr.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		125066C45F343F23F9CB0D26 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				38E87530BE4E66838A80DD7A /* Pods-Plannr.debug.xcconfig */,
-				26698DD2BED0478D1F5A37F7 /* Pods-Plannr.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		13B07FAE1A68108700A75B9A /* Plannr */ = {
 			isa = PBXGroup;
 			children = (
@@ -62,15 +53,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				5F64BBD795A3DA44690021C8 /* PrivacyInfo.xcprivacy */,
-			);
-			name = Plannr;
-			sourceTree = "<group>";
-		};
-		1F2B205762F37347BB5AFF6E /* Plannr */ = {
-			isa = PBXGroup;
-			children = (
-				96F11DAD229459D3262D9AD4 /* ExpoModulesProvider.swift */,
+				96D7314BB8E12D6AEB0AC0B1 /* PrivacyInfo.xcprivacy */,
 			);
 			name = Plannr;
 			sourceTree = "<group>";
@@ -79,15 +62,15 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				8A96EE8F1C65212AC0B31852 /* Pods_Plannr.framework */,
+				6511EC7AFB94330A526C66FD /* Pods_Plannr.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		350C7BCDFF5F67528AB8BA06 /* ExpoModulesProviders */ = {
+		810D0ADFAD77E42B15B20FA2 /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				1F2B205762F37347BB5AFF6E /* Plannr */,
+				C7AF5E4181123B5ED3370264 /* Plannr */,
 			);
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
@@ -106,8 +89,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				125066C45F343F23F9CB0D26 /* Pods */,
-				350C7BCDFF5F67528AB8BA06 /* ExpoModulesProviders */,
+				BE8F541EF19ACD8CFBC2164C /* Pods */,
+				810D0ADFAD77E42B15B20FA2 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -131,6 +114,24 @@
 			path = Plannr/Supporting;
 			sourceTree = "<group>";
 		};
+		BE8F541EF19ACD8CFBC2164C /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				B9A556E2E7C6F2B2FC922D61 /* Pods-Plannr.debug.xcconfig */,
+				3281BDF64BCDE1D359DDE6AC /* Pods-Plannr.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		C7AF5E4181123B5ED3370264 /* Plannr */ = {
+			isa = PBXGroup;
+			children = (
+				CB4B1D29D70226CB7B04AB1F /* ExpoModulesProvider.swift */,
+			);
+			name = Plannr;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -139,13 +140,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Plannr" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				BB9FD1EEE3826A02E229716D /* [Expo] Configure project */,
+				EF729218B47F1D44F01EAD5E /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				F14C00ABBFFD185313D296BD /* [CP] Embed Pods Frameworks */,
+				52CD6BEF25E0F16C97C5A83B /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -195,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				2C46A6AC65E1720A01E92FA5 /* PrivacyInfo.xcprivacy in Resources */,
+				92A1C00385D66389F657F14C /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,6 +240,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		52CD6BEF25E0F16C97C5A83B /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Plannr/Pods-Plannr-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/React.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactNativeDependencies.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Plannr/Pods-Plannr-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
@@ -327,7 +350,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Plannr/Pods-Plannr-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		BB9FD1EEE3826A02E229716D /* [Expo] Configure project */ = {
+		EF729218B47F1D44F01EAD5E /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -351,28 +374,6 @@
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Plannr/expo-configure-project.sh\"\n";
 		};
-		F14C00ABBFFD185313D296BD /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Plannr/Pods-Plannr-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/React.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactNativeDependencies.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Plannr/Pods-Plannr-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -381,7 +382,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				F11C982453E3713EB1C387DB /* ExpoModulesProvider.swift in Sources */,
+				2EBBE8B8762A3F33ABD96D96 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,27 +391,24 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 38E87530BE4E66838A80DD7A /* Pods-Plannr.debug.xcconfig */;
+			baseConfigurationReference = B9A556E2E7C6F2B2FC922D61 /* Pods-Plannr.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Plannr/Plannr.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2DJ4Y53ALY;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
 				);
 				INFOPLIST_FILE = Plannr/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Plannr;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -418,11 +416,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sthareja19.Plannr;
-				PRODUCT_NAME = "Plannr";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				PRODUCT_NAME = Plannr;
 				SWIFT_OBJC_BRIDGING_HEADER = "Plannr/Plannr-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -433,22 +427,19 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 26698DD2BED0478D1F5A37F7 /* Pods-Plannr.release.xcconfig */;
+			baseConfigurationReference = 3281BDF64BCDE1D359DDE6AC /* Pods-Plannr.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Plannr/Plannr.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 2DJ4Y53ALY;
 				INFOPLIST_FILE = Plannr/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Plannr;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -456,11 +447,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sthareja19.Plannr;
-				PRODUCT_NAME = "Plannr";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				PRODUCT_NAME = Plannr;
 				SWIFT_OBJC_BRIDGING_HEADER = "Plannr/Plannr-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
