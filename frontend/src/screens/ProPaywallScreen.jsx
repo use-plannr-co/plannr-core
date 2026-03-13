@@ -593,7 +593,12 @@ const ProPaywallScreen = ({ navigation, route }) => {
                 {/* Legal Links */}
                 <View style={styles.legalLinks}>
                     <TouchableOpacity
-                        onPress={() => openURL('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/', 'terms')}
+                        onPress={() =>
+                            openURL(
+                                'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/',
+                                'terms',
+                            )
+                        }
                     >
                         <Text style={[styles.legalLink, { color: theme.SELECTION }]}>
                             Terms of Use

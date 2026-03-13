@@ -72,7 +72,7 @@ class SubscriptionService {
             return customerInfo;
         } catch (error) {
             console.error('❌ SubscriptionService: Initialization failed:', error);
-            throw new Error(`Failed to initialize RevenueCat: ${error.message}`);
+            return null;
         }
     }
 

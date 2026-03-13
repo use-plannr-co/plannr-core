@@ -258,8 +258,6 @@ const OnboardingScreen = () => {
         }
     };
 
-
-
     return (
         <LinearGradient
             colors={['#b79fffff', '#856bd3ff']}

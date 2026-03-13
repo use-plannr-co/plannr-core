@@ -300,8 +300,6 @@ const SignInScreen = ({ navigation }) => {
         }
     }, [loading, startSSOFlow]);
 
-
-
     return (
         <View style={styles.container}>
             <KeyboardAvoidingView

@@ -183,11 +183,6 @@ export default function ChatScreen() {
           ]
         : messages;
 
-    const imageSource =
-        theme === darkColor
-            ? require('../../assets/planova/planova-chat-dark.png')
-            : require('../../assets/planova/planova-chat-light.png');
-
     return (
         <View style={[styles.screen, { backgroundColor: theme.BACKGROUND }]}>
             <ChatHeader
@@ -203,7 +198,7 @@ export default function ChatScreen() {
             >
                 {displayMessages.length === 0 && !isStreaming && (
                     <View style={styles.emptyState}>
-                        <Image source={imageSource} style={styles.emptyImage} />
+                        <Image source={require('../../assets/planova/planova-default.png')} style={styles.emptyImage} />
                         <Text style={[styles.emptyTitle, { color: theme.FOREGROUND }]}>
                             How can I help you plan today?
                         </Text>
@@ -331,7 +326,8 @@ const styles = StyleSheet.create({
     },
     emptyImage: {
         width: 200,
-        height: 200,
+        height: 165,
+        marginBottom: 24,
     },
     emptyTitle: {
         fontSize: 16,

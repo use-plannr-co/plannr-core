@@ -132,7 +132,13 @@ export async function computeAnalytics(userId) {
     const dailyMap = {};
     for (const b of rawBlocks) {
         if (!dailyMap[b.date]) {
-            dailyMap[b.date] = { date: b.date, total: 0, completed: 0, scheduledMinutes: 0, focusMinutes: 0 };
+            dailyMap[b.date] = {
+                date: b.date,
+                total: 0,
+                completed: 0,
+                scheduledMinutes: 0,
+                focusMinutes: 0,
+            };
         }
         const mins = getBlockDurationMinutes(b);
         dailyMap[b.date].total++;
@@ -145,7 +151,15 @@ export async function computeAnalytics(userId) {
     const dailyData = Object.values(dailyMap).sort((a, b) => a.date.localeCompare(b.date));
 
     // ── Day-of-week stats ─────────────────────────────────────────────────────
-    const DOW_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const DOW_ORDER = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+    ];
     const dowMap = {};
     for (const d of DOW_ORDER) dowMap[d] = { total: 0, completed: 0, rate: 0 };
 
@@ -173,7 +187,8 @@ export async function computeAnalytics(userId) {
     const categoryMap = {};
     for (const b of rawBlocks) {
         const cat = b.category || 'UNCATEGORIZED';
-        if (!categoryMap[cat]) categoryMap[cat] = { total: 0, completed: 0, rate: 0, totalMinutes: 0 };
+        if (!categoryMap[cat])
+            categoryMap[cat] = { total: 0, completed: 0, rate: 0, totalMinutes: 0 };
         const mins = getBlockDurationMinutes(b);
         categoryMap[cat].total++;
         categoryMap[cat].totalMinutes += mins;
@@ -208,8 +223,7 @@ export async function computeAnalytics(userId) {
     const datesWithCompletions = [
         ...new Set(rawBlocks.filter((b) => b.completed).map((b) => b.date)),
     ];
-    const { current: currentStreak, longest: longestStreak } =
-        computeStreaks(datesWithCompletions);
+    const { current: currentStreak, longest: longestStreak } = computeStreaks(datesWithCompletions);
 
     const allDates = [...new Set(rawBlocks.map((b) => b.date))].sort();
 
@@ -277,8 +291,6 @@ export async function getMoodCheckins(userId) {
     return db
         .select({ date: dailyMoodCheckins.date, rating: dailyMoodCheckins.rating })
         .from(dailyMoodCheckins)
-        .where(
-            and(eq(dailyMoodCheckins.userId, userId), gte(dailyMoodCheckins.date, cutoffDate))
-        )
+        .where(and(eq(dailyMoodCheckins.userId, userId), gte(dailyMoodCheckins.date, cutoffDate)))
         .orderBy(desc(dailyMoodCheckins.date));
 }

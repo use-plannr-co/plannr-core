@@ -10,6 +10,29 @@ import NotificationService from './src/notifications/NotificationService.js';
 import 'react-native-gesture-handler';
 import { Keyboard, TouchableWithoutFeedback, View, Alert, Linking, Platform } from 'react-native';
 
+class SubscriptionErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error) {
+        console.error('❌ SubscriptionErrorBoundary caught error:', error);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            // Render children without subscription — app continues in free mode
+            return this.props.fallback ?? null;
+        }
+        return this.props.children;
+    }
+}
+
 import RootNavigator from './src/navigation/RootNavigator.jsx';
 import { ClerkProvider } from '@clerk/clerk-expo';
 import { tokenCache } from './cache.js';
@@ -71,16 +94,18 @@ const AppContent = () => {
 
     return (
         <View style={{ flex: 1 }}>
-            <SubscriptionProvider>
-                <AppStateProvider>
-                    <ChatProvider>
-                        <TaskCompletionChecker />
-                        <SafeAreaProvider>
-                            <RootNavigator />
-                        </SafeAreaProvider>
-                    </ChatProvider>
-                </AppStateProvider>
-            </SubscriptionProvider>
+            <SubscriptionErrorBoundary>
+                <SubscriptionProvider>
+                    <AppStateProvider>
+                        <ChatProvider>
+                            <TaskCompletionChecker />
+                            <SafeAreaProvider>
+                                <RootNavigator />
+                            </SafeAreaProvider>
+                        </ChatProvider>
+                    </AppStateProvider>
+                </SubscriptionProvider>
+            </SubscriptionErrorBoundary>
         </View>
     );
 };
