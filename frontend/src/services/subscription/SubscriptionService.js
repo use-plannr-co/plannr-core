@@ -50,17 +50,17 @@ class SubscriptionService {
                 appUserID: appUserId,
             });
 
-            // Set log level based on environment
+            // Set log level based on environment (synchronous in RC v8)
             if (__DEV__) {
-                await Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+                Purchases.setLogLevel(LOG_LEVEL.DEBUG);
                 console.log('📱 SubscriptionService: Debug logging enabled');
             } else {
-                await Purchases.setLogLevel(LOG_LEVEL.INFO);
+                Purchases.setLogLevel(LOG_LEVEL.INFO);
             }
 
-            // Login with Clerk user ID to ensure purchases map to correct customer
-            console.log('📱 SubscriptionService: Logging in to RevenueCat...');
-            const { customerInfo } = await Purchases.logIn(appUserId);
+            // appUserID was already passed to configure() above — fetch customerInfo directly
+            console.log('📱 SubscriptionService: Fetching initial customer info...');
+            const customerInfo = await Purchases.getCustomerInfo();
 
             this._isInitialized = true;
             console.log('✅ SubscriptionService: Initialization complete');

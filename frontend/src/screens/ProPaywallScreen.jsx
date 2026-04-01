@@ -1,16 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
     StyleSheet,
-    Image,
     TouchableOpacity,
     Dimensions,
     ActivityIndicator,
     Alert,
     Linking,
     Platform,
-    Animated,
     ScrollView,
     LayoutAnimation,
 } from 'react-native';
@@ -95,31 +93,26 @@ const ProPaywallScreen = ({ navigation, route }) => {
     const [selectedPlan, setSelectedPlan] = useState('annual'); // 'monthly' or 'annual'
     const [offerings, setOfferings] = useState(null);
     const [loadingOfferings, setLoadingOfferings] = useState(true);
+    const [offeringsError, setOfferingsError] = useState(false);
     const [purchasing, setPurchasing] = useState(false);
     const [restoring, setRestoring] = useState(false);
     const [showTestimonials, setShowTestimonials] = useState(true);
-    const [headerHeight, setHeaderHeight] = useState(0);
-
-    // Animation for sliding selector
-    const selectorPosition = useRef(new Animated.Value(0)).current; // 0 = annual (left), 1 = monthly (right)
+    const [bottomSectionHeight, setBottomSectionHeight] = useState(360);
 
     // Get feature key from route params (for tracking where user came from)
     const featureKey = route?.params?.featureKey;
 
     useEffect(() => {
         logScreenView({ featureKey });
-        loadOfferings();
     }, []);
 
-    // Animate selector when plan changes
+    // Only fetch offerings once the RC SDK has finished initializing.
+    // Firing before init completes causes _ensureInitialized() to throw.
     useEffect(() => {
-        Animated.spring(selectorPosition, {
-            toValue: selectedPlan === 'annual' ? 0 : 1,
-            useNativeDriver: false,
-            tension: 80,
-            friction: 20,
-        }).start();
-    }, [selectedPlan]);
+        if (!isLoading) {
+            loadOfferings();
+        }
+    }, [isLoading]);
 
     // Redirect if already Pro
     useEffect(() => {
@@ -144,6 +137,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
 
         try {
             setLoadingOfferings(true);
+            setOfferingsError(false);
             const fetchedOfferings = await fetchOfferings();
 
             // Look for "Plannr Pro Default" offering
@@ -161,11 +155,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
             });
         } catch (error) {
             console.error('Failed to load offerings:', error);
-            // Alert.alert(
-            //     'Unable to Load Plans',
-            //     "We couldn't load subscription plans. Please try again later.",
-            //     [{ text: 'Go Back', onPress: () => navigation.goBack() }],
-            // );
+            setOfferingsError(true);
             logAction('offerings_error', { error: error.message });
         } finally {
             setLoadingOfferings(false);
@@ -306,7 +296,12 @@ const ProPaywallScreen = ({ navigation, route }) => {
     const annualPackage = getPackage('$rc_annual');
 
     const monthlyPrice = monthlyPackage?.product?.priceString || '$4.99';
-    const annualPrice = annualPackage?.product?.priceString || '$3.33';
+    // annualTotalPrice is the actual amount billed (e.g. "$39.99") — must be shown prominently per Apple guidelines
+    const annualTotalPrice = annualPackage?.product?.priceString || '$39.99';
+    // Monthly equivalent shown as subordinate/smaller text only
+    const annualMonthlyPrice = annualPackage?.product?.price
+        ? `$${(annualPackage.product.price / 12).toFixed(2)}/mo`
+        : '$3.33/mo';
 
     const testimonials = [
         {
@@ -340,12 +335,43 @@ const ProPaywallScreen = ({ navigation, route }) => {
 
     return (
         <View style={[styles.container, { backgroundColor: theme.BACKGROUND }]}>
+            {/* Scrollable content: badge, title, features, testimonials */}
             <ScrollView
                 style={{ flex: 1, width: '100%' }}
-                contentContainerStyle={[styles.subContainer, { paddingTop: headerHeight }]}
+                contentContainerStyle={[styles.subContainer, { paddingBottom: bottomSectionHeight }]}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
+                {/* Header: Badge + Title — scrolls with content */}
+                <View style={styles.headerContent}>
+                    <View style={styles.headerBadge}>
+                        <LinearGradient
+                            colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.badgeGradient}
+                        >
+                            <View
+                                style={{
+                                    backgroundColor: theme.BACKGROUND,
+                                    borderRadius: 20,
+                                    flexDirection: 'row',
+                                    paddingHorizontal: spacing.SPACING_4,
+                                    paddingVertical: spacing.SPACING_2,
+                                }}
+                            >
+                                <LightningIcon width={16} height={16} color={theme.FOREGROUND} />
+                                <Text style={{ ...styles.badgeText, color: theme.FOREGROUND }}>
+                                    Try Plannr Pro
+                                </Text>
+                            </View>
+                        </LinearGradient>
+                    </View>
+                    <Text style={[styles.title, { color: theme.FOREGROUND }]}>
+                        Turn your schedule into a{'\n'}system built for you.
+                    </Text>
+                </View>
+
                 {/* Features List */}
                 <View style={styles.featuresList}>
                     <FeatureItem
@@ -360,6 +386,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
                     />
                 </View>
 
+                {/* Testimonials */}
                 <View
                     style={{
                         borderBottomWidth: 1,
@@ -418,162 +445,6 @@ const ProPaywallScreen = ({ navigation, route }) => {
                         </ScrollView>
                     )}
                 </View>
-
-                <View>
-                    {/* Plan Selection */}
-                    <View style={{ ...styles.planSelector, backgroundColor: theme.COMP_COLOR }}>
-                        {/* Animated Background Selector */}
-                        <Animated.View
-                            style={[
-                                styles.animatedSelector,
-                                {
-                                    transform: [
-                                        {
-                                            translateX: selectorPosition.interpolate({
-                                                inputRange: [0, 1],
-                                                outputRange: [
-                                                    0,
-                                                    (width -
-                                                        SCREEN_PADDING * 2 -
-                                                        padding.PADDING_1 * 2 -
-                                                        spacing.SPACING_2) /
-                                                        2 +
-                                                        spacing.SPACING_2 * 0.5,
-                                                ],
-                                            }),
-                                        },
-                                    ],
-                                },
-                            ]}
-                        >
-                            <LinearGradient
-                                colors={
-                                    selectedPlan === 'annual'
-                                        ? [theme.GRADIENT_START, theme.GRADIENT_END]
-                                        : [theme.GRADIENT_START, theme.GRADIENT_START]
-                                }
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                                style={styles.animatedSelectorGradient}
-                            />
-                        </Animated.View>
-
-                        {/* Annual Plan */}
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                if (selectedPlan !== 'annual') {
-                                    setSelectedPlan('annual');
-                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                }
-                            }}
-                            style={styles.planButton}
-                        >
-                            <View style={styles.planButtonContent}>
-                                <Text
-                                    style={[
-                                        styles.planTitle,
-                                        {
-                                            color:
-                                                selectedPlan === 'annual'
-                                                    ? '#FFFFFF'
-                                                    : theme.FOREGROUND,
-                                        },
-                                    ]}
-                                >
-                                    Annual (33% OFF)
-                                </Text>
-                                <Text />
-                                <Text
-                                    style={[
-                                        styles.planPrice,
-                                        {
-                                            color:
-                                                selectedPlan === 'annual'
-                                                    ? '#FFFFFF'
-                                                    : theme.FOREGROUND,
-                                        },
-                                    ]}
-                                >
-                                    {annualPrice}/mo (billed annually)
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-
-                        {/* Monthly Plan */}
-                        <TouchableOpacity
-                            activeOpacity={0.8}
-                            onPress={() => {
-                                if (selectedPlan !== 'monthly') {
-                                    setSelectedPlan('monthly');
-                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                                }
-                            }}
-                            style={styles.planButton}
-                        >
-                            <View style={styles.planButtonContent}>
-                                <Text
-                                    style={[
-                                        styles.planTitle,
-                                        {
-                                            color:
-                                                selectedPlan === 'monthly'
-                                                    ? '#FFFFFF'
-                                                    : theme.FOREGROUND,
-                                        },
-                                    ]}
-                                >
-                                    Monthly
-                                </Text>
-                                <Text />
-                                <Text
-                                    style={[
-                                        styles.planPrice,
-                                        {
-                                            color:
-                                                selectedPlan === 'monthly'
-                                                    ? '#FFFFFF'
-                                                    : theme.FOREGROUND,
-                                        },
-                                    ]}
-                                >
-                                    {monthlyPrice}/mo
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Upgrade Button */}
-                    <TouchableOpacity
-                        activeOpacity={isPro ? 1 : 0.9}
-                        onPress={isPro ? undefined : handlePurchase}
-                        disabled={purchasing || loadingOfferings || isPro}
-                        style={styles.upgradeButtonContainer}
-                    >
-                        <LinearGradient
-                            colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={[styles.upgradeButton, isPro && { opacity: 0.7 }]}
-                        >
-                            {purchasing ? (
-                                <ActivityIndicator color="#FFFFFF" />
-                            ) : (
-                                <Text style={styles.upgradeButtonText}>
-                                    {isPro ? "You're a Pro Member" : 'Upgrade Now'}
-                                </Text>
-                            )}
-                        </LinearGradient>
-                    </TouchableOpacity>
-
-                    {/* Pricing Details */}
-                    <Text style={[styles.pricingDetails, { color: theme.SELECTION }]}>
-                        Get a free 1-month trial,{'\n'} then{' '}
-                        <Text style={{ fontWeight: 'bold' }}>subscribe</Text> to continue enjoying
-                        premium features.
-                    </Text>
-                </View>
-
                 {/* Restore Button */}
                 <TouchableOpacity
                     activeOpacity={0.7}
@@ -589,6 +460,156 @@ const ProPaywallScreen = ({ navigation, route }) => {
                         </Text>
                     )}
                 </TouchableOpacity>
+            </ScrollView>
+
+            {/* Sticky bottom section — plan cards, upgrade button, links */}
+            <View
+                style={styles.bottomSection}
+                onLayout={(e) => setBottomSectionHeight(e.nativeEvent.layout.height)}
+                pointerEvents="box-none"
+            >
+                {/* Upward fade gradient so scroll content disappears gracefully behind it */}
+                <LinearGradient
+                    pointerEvents="none"
+                    colors={[theme.BACKGROUND + '00', theme.BACKGROUND]}
+                    start={{ x: 0.5, y: 0 }}
+                    end={{ x: 0.5, y: 1 }}
+                    style={StyleSheet.absoluteFillObject}
+                />
+
+                {/* Plan Selection */}
+                <View style={styles.planCardsContainer}>
+                    {/* Annual Plan Card */}
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => {
+                            setSelectedPlan('annual');
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }}
+                        style={styles.planCardWrapper}
+                    >
+                        <View
+                            style={[
+                                styles.planCard,
+                                {
+                                    borderColor:
+                                        selectedPlan === 'annual'
+                                            ? theme.GRADIENT_END
+                                            : theme.INPUT,
+                                    backgroundColor: theme.BACKGROUND,
+                                },
+                            ]}
+                        >
+                            <View style={styles.planCardContent}>
+                                <Text style={[styles.planCardPrice, { color: theme.FOREGROUND }]}>
+                                    {annualTotalPrice}
+                                </Text>
+                                <Text
+                                    style={[styles.planCardSubPrice, { color: theme.FOREGROUND }]}
+                                >
+                                    {annualMonthlyPrice}, Billed Annually
+                                </Text>
+                            </View>
+                            <Text style={[styles.pricingDetails, { color: theme.FOREGROUND, opacity: 0.4 }]}>
+                                Get a free 1-week trial!
+                            </Text>
+                        </View>
+                        <View
+                            style={[
+                                styles.planCardLabelContainer,
+                                { backgroundColor: theme.GRADIENT_END, borderWidth: 2.5, borderColor: theme.GRADIENT_END },
+                            ]}
+                        >
+                            <Text style={[styles.planCardLabelText, { color: '#FFFFFF' }]}>
+                                Annual (33% OFF)
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    {/* Monthly Plan Card */}
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => {
+                            setSelectedPlan('monthly');
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        }}
+                        style={styles.planCardWrapper}
+                    >
+                        <View
+                            style={[
+                                styles.planCard,
+                                {
+                                    borderColor:
+                                        selectedPlan === 'monthly'
+                                            ? theme.GRADIENT_END
+                                            : theme.INPUT,
+                                    backgroundColor: theme.BACKGROUND,
+                                },
+                            ]}
+                        >
+                            <View style={styles.planCardContent}>
+                                <Text style={[styles.planCardPrice, { color: theme.FOREGROUND }]}>
+                                    {monthlyPrice}
+                                </Text>
+                                <Text
+                                    style={[styles.planCardSubPrice, { color: theme.FOREGROUND }]}
+                                >
+                                    Billed Monthly
+                                </Text>
+                            </View>
+                        </View>
+                        <View
+                            style={[
+                                styles.planCardLabelContainer,
+                                { backgroundColor: theme.GRADIENT_END, borderWidth: 2.5, borderColor: theme.GRADIENT_END },
+                            ]}
+                        >
+                            <Text style={[styles.planCardLabelText, { color: '#FFFFFF' }]}>
+                                Monthly
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Upgrade Button */}
+                {offeringsError ? (
+                    <TouchableOpacity
+                        activeOpacity={0.9}
+                        onPress={loadOfferings}
+                        style={styles.upgradeButtonContainer}
+                    >
+                        <LinearGradient
+                            colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.upgradeButton}
+                        >
+                            <Text style={styles.upgradeButtonText}>Retry Loading Plans</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        activeOpacity={isPro ? 1 : 0.9}
+                        onPress={isPro ? undefined : handlePurchase}
+                        disabled={purchasing || loadingOfferings || isPro || !offerings}
+                        style={styles.upgradeButtonContainer}
+                    >
+                        <LinearGradient
+                            colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={[styles.upgradeButton, (isPro || !offerings) && { opacity: 0.7 }]}
+                        >
+                            {purchasing ? (
+                                <ActivityIndicator color="#FFFFFF" />
+                            ) : (
+                                <Text style={styles.upgradeButtonText}>
+                                    {isPro ? "You're a Pro Member" : 'Upgrade Now'}
+                                </Text>
+                            )}
+                        </LinearGradient>
+                    </TouchableOpacity>
+                )}
 
                 {/* Legal Links */}
                 <View style={styles.legalLinks}>
@@ -619,47 +640,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
                         </Text>
                     </TouchableOpacity>
                 </View>
-            </ScrollView>
-
-            {/* Gradient header overlay — sits on top of the ScrollView so content fades under it */}
-            <LinearGradient
-                pointerEvents="none"
-                onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
-                colors={[theme.BACKGROUND, theme.BACKGROUND + '00']}
-                start={{ x: 0.5, y: 0.6 }}
-                end={{ x: 0.5, y: 1 }}
-                style={styles.headerGradient}
-            >
-                {/* Header Badge */}
-                <View style={styles.headerBadge}>
-                    <LinearGradient
-                        colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.badgeGradient}
-                    >
-                        <View
-                            style={{
-                                backgroundColor: theme.BACKGROUND,
-                                borderRadius: 20,
-                                flexDirection: 'row',
-                                paddingHorizontal: spacing.SPACING_4,
-                                paddingVertical: spacing.SPACING_2,
-                            }}
-                        >
-                            <LightningIcon width={16} height={16} color={theme.FOREGROUND} />
-                            <Text style={{ ...styles.badgeText, color: theme.FOREGROUND }}>
-                                Try Plannr Pro
-                            </Text>
-                        </View>
-                    </LinearGradient>
-                </View>
-
-                {/* Title */}
-                <Text style={[styles.title, { color: theme.FOREGROUND }]}>
-                    Turn your schedule into a{'\n'}system built for you.
-                </Text>
-            </LinearGradient>
+            </View>
         </View>
     );
 };
@@ -669,7 +650,7 @@ const ProPaywallScreen = ({ navigation, route }) => {
  */
 const FeatureItem = ({ text, i }) => {
     const { appState } = useAppState();
-    const theme = appState.userPreferences.theme === 'dark' ? 'dark' : 'light';
+    const theme = appState.userPreferences.theme === 'dark' ? darkColor : lightColor;
     const iconArray = [ScheduleIcon, ChatIcon, CoPlanIcon, AnalyticsIcon];
     const IconComponent = iconArray[i] || ScheduleIcon;
 
@@ -694,7 +675,6 @@ const TestimonialItem = ({ name, rating, quote, theme }) => {
                         key={idx}
                         width={16}
                         height={16}
-                        color={theme.GRADIENT_START}
                         style={{ marginRight: 2 }}
                     />
                 ))}
@@ -710,15 +690,23 @@ const styles = StyleSheet.create({
     },
     subContainer: {
         width: '100%',
-        paddingBottom: spacing.SPACING_10,
     },
-    headerGradient: {
+    headerContent: {
+        alignItems: 'center',
+        paddingTop: spacing.SPACING_16,
+        paddingHorizontal: SCREEN_PADDING,
+        paddingBottom: spacing.SPACING_2,
+    },
+    bottomSection: {
         position: 'absolute',
-        top: 0,
+        bottom: 0,
         left: 0,
         right: 0,
-        paddingTop: spacing.SPACING_16,
-        paddingBottom: spacing.SPACING_10,
+        paddingBottom: spacing.SPACING_8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -8 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
     },
     loadingText: {
         marginTop: spacing.SPACING_4,
@@ -752,74 +740,57 @@ const styles = StyleSheet.create({
         fontSize: typography.titleSize,
         fontFamily: 'PinkSunset',
         textAlign: 'center',
-        marginBottom: spacing.SPACING_5,
+        marginBottom: spacing.SPACING_2,
         lineHeight: typography.titleSize * 1.3,
     },
-    planSelector: {
-        height: 90,
-        borderRadius: 16,
+    planCardsContainer: {
+        marginTop: spacing.SPACING_4,
         marginHorizontal: SCREEN_PADDING,
-        padding: padding.PADDING_1,
-        flexDirection: 'row',
-        gap: spacing.SPACING_2,
         marginBottom: spacing.SPACING_5,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 0,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
-        position: 'relative',
+        gap: spacing.SPACING_2,
     },
-    animatedSelector: {
-        position: 'absolute',
-        left: padding.PADDING_1,
-        top: padding.PADDING_1,
-        bottom: padding.PADDING_1,
-        width: '50%',
-        borderRadius: 12,
-        zIndex: 0,
+    // paddingTop makes room for the floating label that sits on the top border
+    planCardWrapper: {
+        paddingTop: 10,
     },
-    animatedSelectorGradient: {
-        flex: 1,
-        borderRadius: 12,
-    },
-    planButton: {
-        width: '50%',
-        borderRadius: 12,
-        zIndex: 1,
-    },
-    planButtonContent: {
-        flex: 1,
+    planCard: {
+        borderWidth: 2.5,
+        borderRadius: 16,
+        justifyContent: 'flex-end',
         paddingVertical: spacing.SPACING_4,
-        paddingHorizontal: spacing.SPACING_4,
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 80,
-        borderRadius: 12,
+        paddingHorizontal: spacing.SPACING_5,
     },
-    planButtonSelected: {},
-    planButtonGradient: {
-        flex: 1,
-        paddingVertical: spacing.SPACING_4,
-        paddingHorizontal: spacing.SPACING_4,
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 80,
-        borderRadius: 12,
+    planCardContent: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        gap: spacing.SPACING_2,
     },
-    planTitle: {
+    planCardPrice: {
+        fontSize: 32,
+        fontFamily: 'Albert Sans',
+    },
+    planCardSubPrice: {
         fontSize: typography.subHeadingSize,
         fontFamily: 'Albert Sans',
-        marginBottom: spacing.SPACING_1,
+        opacity: 0.4,
+        marginBottom: 4,
     },
-    planPrice: {
-        fontSize: typography.bodySize,
+    // Floats on the top border line of the card
+    planCardLabelContainer: {
+        position: 'absolute',
+        top: -2,
+        right: 16,
+        paddingHorizontal: spacing.SPACING_3,
+        paddingVertical: spacing.SPACING_1,
+        borderRadius: 24,
+    },
+    planCardLabelText: {
+        fontSize: typography.bodySize - 2,
         fontFamily: 'Albert Sans',
     },
     featuresList: {
-        marginHorizontal: SCREEN_PADDING * 2,
+        marginHorizontal: SCREEN_PADDING,
+        marginBottom: spacing.SPACING_2,
     },
     featureItem: {
         flexDirection: 'row',
@@ -882,11 +853,10 @@ const styles = StyleSheet.create({
         fontFamily: 'Albert Sans',
     },
     pricingDetails: {
-        fontSize: typography.bodySize - 1,
-        textAlign: 'center',
+        fontSize: typography.subHeadingSize,
+        textAlign: 'flex-start',
         fontFamily: 'Albert Sans',
-        marginBottom: spacing.SPACING_6,
-        lineHeight: typography.bodySize * 1.4,
+        marginTop: spacing.SPACING_2,
     },
     restoreButton: {
         paddingVertical: spacing.SPACING_3,
@@ -903,6 +873,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: spacing.SPACING_4,
+        marginTop: spacing.SPACING_2,
     },
     legalLink: {
         fontSize: typography.bodySize - 2,
