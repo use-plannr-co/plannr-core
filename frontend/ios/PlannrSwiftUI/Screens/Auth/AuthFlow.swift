@@ -1,14 +1,10 @@
 import SwiftUI
 
 // MARK: - AuthFlow
-// Mirrors AuthStack (SignIn + SignUp screens).
-// Uses NavigationStack so SignUp can push onto SignIn.
 
 struct AuthFlow: View {
     var body: some View {
-        NavigationStack {
-            SignInView()
-        }
+        NavigationStack { SignInView() }
     }
 }
 
@@ -19,77 +15,69 @@ struct SignInView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var isLoading = false
-    @State private var errorMessage: String? = nil
+    @State private var errorMessage: String?
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: PlSpacing.s8) {
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 0) {
 
-                // Logo / wordmark
+                // Wordmark
                 VStack(spacing: PlSpacing.s2) {
-                    LinearGradient.plPurple
-                        .mask(
-                            Text("Plannr")
-                                .font(PlFont.title(.black))
-                        )
-                        .frame(height: 44)
-
+                    Text("Plannr")
+                        .font(PlFont.title())
+                        .foregroundStyle(LinearGradient(
+                            colors: [Color.plGradientStart, Color.plGradientEnd],
+                            startPoint: .leading, endPoint: .trailing))
                     Text("Your AI scheduling assistant")
-                        .font(PlFont.body())
-                        .foregroundStyle(.secondary)
+                        .font(PlFont.subHeading())
+                        .foregroundStyle(Color.plForeground.opacity(0.5))
                 }
-                .padding(.top, 60)
+                .padding(.top, PlSpacing.s16)
+                .padding(.bottom, PlSpacing.s8)
 
-                // Fields
                 VStack(spacing: PlSpacing.s3) {
-                    PlTextField(placeholder: "Email", text: $email, keyboardType: .emailAddress)
-                    PlTextField(placeholder: "Password", text: $password, isSecure: true)
+                    PlannrTextField(placeholder: "Email", text: $email,
+                                    keyboardType: .emailAddress, autocap: false)
+                    PlannrTextField(placeholder: "Password", text: $password,
+                                    isSecure: true, autocap: false)
                 }
+                .padding(.bottom, PlSpacing.s3)
 
-                // Error
                 if let err = errorMessage {
                     Text(err)
                         .font(PlFont.caption())
-                        .foregroundStyle(.red)
+                        .foregroundStyle(Color.plRed)
+                        .padding(.bottom, PlSpacing.s3)
                 }
 
-                // Sign in button
-                PlButton(title: isLoading ? "Signing in…" : "Sign In") {
-                    signIn()
-                }
-                .disabled(isLoading || email.isEmpty || password.isEmpty)
+                GradientButton(title: isLoading ? "Signing in…" : "Sign In") { signIn() }
+                    .disabled(isLoading || email.isEmpty || password.isEmpty)
+                    .padding(.bottom, PlSpacing.s5)
 
-                // Sign up link
-                NavigationLink {
-                    SignUpView()
-                } label: {
+                NavigationLink { SignUpView() } label: {
                     HStack(spacing: 4) {
                         Text("Don't have an account?")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.plForeground.opacity(0.5))
                         Text("Sign up")
-                            .foregroundStyle(.plGradientStart)
+                            .foregroundStyle(Color.plGradientStart)
                     }
                     .font(PlFont.body())
                 }
             }
             .padding(.horizontal, PlSpacing.s4)
         }
+        .background(Color.plBackground.ignoresSafeArea())
         .navigationBarHidden(true)
     }
 
     private func signIn() {
-        isLoading = true
-        errorMessage = nil
-        // Simulate Clerk auth
+        isLoading = true; errorMessage = nil
         Task {
             try? await Task.sleep(nanoseconds: 1_000_000_000)
             await MainActor.run {
                 isLoading = false
-                if email.lowercased().contains("@") {
-                    appState.isAuthenticated = true
-                } else {
-                    errorMessage = "Invalid email or password."
-                }
+                if email.contains("@") { appState.isAuthenticated = true }
+                else { errorMessage = "Invalid email or password." }
             }
         }
     }
@@ -99,39 +87,39 @@ struct SignInView: View {
 
 struct SignUpView: View {
     @EnvironmentObject var appState: AppState
-    @Environment(\.dismiss) private var dismiss
-
     @State private var name = ""
     @State private var email = ""
     @State private var password = ""
     @State private var isLoading = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: PlSpacing.s8) {
-                VStack(alignment: .leading, spacing: PlSpacing.s2) {
-                    Text("Create account")
-                        .font(PlFont.title())
-                    Text("Start scheduling smarter.")
-                        .font(PlFont.body())
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, PlSpacing.s8)
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Create account")
+                    .font(PlFont.title())
+                    .foregroundStyle(Color.plForeground)
+                    .padding(.top, PlSpacing.s16)
+                    .padding(.bottom, PlSpacing.s2)
+                Text("Start scheduling smarter.")
+                    .font(PlFont.subHeading())
+                    .foregroundStyle(Color.plForeground.opacity(0.5))
+                    .padding(.bottom, PlSpacing.s8)
 
                 VStack(spacing: PlSpacing.s3) {
-                    PlTextField(placeholder: "Display name", text: $name)
-                    PlTextField(placeholder: "Email", text: $email, keyboardType: .emailAddress)
-                    PlTextField(placeholder: "Password", text: $password, isSecure: true)
+                    PlannrTextField(placeholder: "Display name", text: $name)
+                    PlannrTextField(placeholder: "Email", text: $email,
+                                    keyboardType: .emailAddress, autocap: false)
+                    PlannrTextField(placeholder: "Password", text: $password,
+                                    isSecure: true, autocap: false)
                 }
+                .padding(.bottom, PlSpacing.s5)
 
-                PlButton(title: isLoading ? "Creating account…" : "Create Account") {
-                    signUp()
-                }
-                .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty)
+                GradientButton(title: isLoading ? "Creating…" : "Create Account") { signUp() }
+                    .disabled(isLoading || name.isEmpty || email.isEmpty || password.isEmpty)
             }
             .padding(.horizontal, PlSpacing.s4)
         }
+        .background(Color.plBackground.ignoresSafeArea())
         .navigationTitle("Sign Up")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -151,11 +139,12 @@ struct SignUpView: View {
 
 // MARK: - Shared form components
 
-struct PlTextField: View {
+struct PlannrTextField: View {
     let placeholder: String
     @Binding var text: String
     var keyboardType: UIKeyboardType = .default
     var isSecure: Bool = false
+    var autocap: Bool = true
 
     var body: some View {
         Group {
@@ -164,40 +153,87 @@ struct PlTextField: View {
             } else {
                 TextField(placeholder, text: $text)
                     .keyboardType(keyboardType)
-                    .autocapitalization(.none)
+                    .autocapitalization(autocap ? .sentences : .none)
             }
         }
-        .padding()
-        .background(Color(.secondarySystemBackground))
+        .font(PlFont.subHeading())
+        .foregroundStyle(Color.plForeground)
+        .padding(.horizontal, PlSpacing.s4)
+        .padding(.vertical, PlSpacing.s3)
+        .background(Color.plInput)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .font(PlFont.body())
     }
 }
 
-struct PlButton: View {
+/// Primary CTA — gradient fill, radius 12, minHeight 56, shadow 0.2
+struct GradientButton: View {
     let title: String
-    var style: Style = .primary
     let action: () -> Void
 
-    enum Style { case primary, destructive, secondary }
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(PlFont.heading(.semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 56)
+                .background(LinearGradient.plPurple)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 0)
+    }
+}
+
+/// Secondary / destructive button — plInput bg, radius 12
+struct PlainButton: View {
+    let title: String
+    var isDestructive: Bool = false
+    let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Text(title)
                 .font(PlFont.subHeading(.semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(isDestructive ? Color.plRed : Color.plForeground)
                 .frame(maxWidth: .infinity)
-                .padding()
-                .background(background)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .padding(PlSpacing.s4)
+                .background(Color.plInput)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }
+}
 
-    @ViewBuilder var background: some View {
-        switch style {
-        case .primary:     LinearGradient.plPurple
-        case .destructive: Color.plRed
-        case .secondary:   Color(.tertiarySystemBackground)
+// MARK: - Shared aliases & components used across multiple screens
+
+/// Gradient CTA button — same as GradientButton, aliased for convenience.
+typealias PlButton = GradientButton
+
+/// Input field — same as PlannrTextField, aliased for convenience.
+typealias PlTextField = PlannrTextField
+
+/// Gradient circle avatar (6 preset icons keyed by avatar name).
+struct AvatarView: View {
+    let name: String
+    let size: CGFloat
+
+    private var symbol: String {
+        let table = ["avatar1": "person.fill",
+                     "avatar2": "person.crop.circle.fill",
+                     "avatar3": "figure.wave",
+                     "avatar4": "figure.run",
+                     "avatar5": "person.badge.clock.fill",
+                     "avatar6": "brain.head.profile"]
+        return table[name] ?? "person.fill"
+    }
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(LinearGradient.plPurple)
+                .frame(width: size, height: size)
+            Image(systemName: symbol)
+                .font(.system(size: size * 0.38, weight: .semibold))
+                .foregroundStyle(.white)
         }
     }
 }

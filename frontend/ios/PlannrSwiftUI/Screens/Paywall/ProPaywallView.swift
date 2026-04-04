@@ -1,7 +1,11 @@
 import SwiftUI
 
 // MARK: - ProPaywallView
-// Mirrors ProPaywallScreen.jsx — subscription purchase UI backed by RevenueCat.
+// Precisely matches ProPaywallScreen.jsx visual layout:
+// - Gradient badge at top, PinkSunset title, features list
+// - Plan cards: border 2.5pt (selected=gradientEnd), floating label top-right
+// - Upgrade button: gradient, radius 12, minHeight 56
+// - Sticky bottom section with fade gradient overlay
 
 struct ProPaywallView: View {
     @EnvironmentObject var appState: AppState
@@ -14,123 +18,100 @@ struct ProPaywallView: View {
         case monthly = "Monthly"
         case annual  = "Annual"
 
-        var price: String {
-            switch self {
-            case .monthly: return "$6.99 / month"
-            case .annual:  return "$55.99 / year"
-            }
-        }
-
-        var savings: String? {
-            self == .annual ? "Best value — 33% off" : nil
-        }
-
-        var monthlyEquivalent: String {
-            switch self {
-            case .monthly: return "$6.99"
-            case .annual:  return "$4.67"
-            }
-        }
+        var price: String { self == .monthly ? "$6.99" : "$55.99" }
+        var subLabel: String { self == .monthly ? "/month" : "/year" }
+        var monthlyEquiv: String { self == .monthly ? "$6.99" : "$4.67" }
+        var floatingLabel: String? { self == .annual ? "Best Value" : nil }
     }
 
-    private let features: [(icon: String, color: Color, title: String, detail: String)] = [
-        ("infinity",             .plGradientStart, "Unlimited Schedules",  "Create as many schedules as you need"),
-        ("sparkles",             .plGradientEnd,   "Unlimited AI Chat",     "Chat without daily message limits"),
-        ("person.2.fill",        .plOrange,        "Co-planning",           "Collaborate on schedules with others"),
-        ("chart.bar.fill",       .plGreen,         "Productivity Analytics","Detailed insights into your work habits"),
+    private let features: [(icon: String, text: String)] = [
+        ("infinity",          "Unlimited Schedules"),
+        ("sparkles",          "Unlimited AI Chat"),
+        ("person.2.fill",     "Co-planning"),
+        ("chart.bar.fill",    "Productivity Analytics"),
     ]
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
+            ZStack(alignment: .bottom) {
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .center, spacing: 0) {
 
-                    // Hero
-                    ZStack {
-                        LinearGradient.plPurple.ignoresSafeArea()
-                        VStack(spacing: PlSpacing.s3) {
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 48))
-                                .foregroundStyle(.white)
-                                .shadow(radius: 8)
-                            Text("Plannr Pro")
-                                .font(PlFont.title(.black))
-                                .foregroundStyle(.white)
-                            Text("The smartest way to own your time.")
-                                .font(PlFont.body())
-                                .foregroundStyle(.white.opacity(0.85))
-                                .multilineTextAlignment(.center)
-                        }
-                        .padding(.vertical, PlSpacing.s10)
-                    }
-                    .frame(height: 220)
+                        // Gradient badge
+                        GradientBadge(label: "Plannr Pro")
+                            .padding(.top, PlSpacing.s16)
+                            .padding(.bottom, PlSpacing.s3)
 
-                    VStack(spacing: PlSpacing.s6) {
+                        // PinkSunset title
+                        Text("Unlock everything.")
+                            .font(PlFont.title())
+                            .foregroundStyle(Color.plForeground)
+                            .multilineTextAlignment(.center)
+                            .padding(.bottom, PlSpacing.s2)
+
+                        Text("The smartest way to own your time.")
+                            .font(PlFont.subHeading())
+                            .foregroundStyle(Color.plForeground.opacity(0.5))
+                            .multilineTextAlignment(.center)
+                            .padding(.bottom, PlSpacing.s6)
 
                         // Features list
-                        VStack(spacing: PlSpacing.s3) {
-                            ForEach(features, id: \.title) { f in
-                                ProFeatureRow(icon: f.icon, color: f.color,
-                                              title: f.title, detail: f.detail)
-                            }
-                        }
-                        .padding(.top, PlSpacing.s6)
-
-                        // Plan selector
-                        VStack(spacing: PlSpacing.s3) {
-                            Text("Choose a plan")
-                                .font(PlFont.subHeading(.semibold))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-
-                            HStack(spacing: PlSpacing.s3) {
-                                ForEach(Plan.allCases, id: \.rawValue) { plan in
-                                    PlanCard(plan: plan, isSelected: selectedPlan == plan) {
-                                        selectedPlan = plan
-                                    }
+                        VStack(alignment: .leading, spacing: PlSpacing.s4) {
+                            ForEach(features, id: \.text) { f in
+                                HStack(spacing: PlSpacing.s4) {
+                                    Image(systemName: f.icon)
+                                        .font(.system(size: 24))
+                                        .foregroundStyle(Color.plForeground)
+                                        .frame(width: 24)
+                                    Text(f.text)
+                                        .font(PlFont.subHeading())
+                                        .foregroundStyle(Color.plForeground)
+                                    Spacer()
                                 }
                             }
                         }
+                        .padding(.horizontal, PlSpacing.s4)
+                        .padding(.bottom, PlSpacing.s6)
 
-                        // Price & CTA
-                        VStack(spacing: PlSpacing.s3) {
-                            Text("Just \(selectedPlan.monthlyEquivalent) / month")
-                                .font(PlFont.heading(.bold))
-
-                            PlButton(title: isPurchasing ? "Processing…" : "Subscribe — \(selectedPlan.price)") {
-                                purchase()
+                        // Plan cards
+                        VStack(spacing: PlSpacing.s2) {
+                            ForEach(Plan.allCases, id: \.rawValue) { plan in
+                                PaywallPlanCard(
+                                    plan: plan,
+                                    isSelected: selectedPlan == plan
+                                ) { selectedPlan = plan }
                             }
-                            .disabled(isPurchasing)
-
-                            Button("Restore Purchases") {
-                                // RevenueCat: Purchases.shared.restorePurchases()
-                            }
-                            .font(PlFont.body())
-                            .foregroundStyle(.secondary)
                         }
+                        .padding(.horizontal, PlSpacing.s4)
+                        .padding(.top, PlSpacing.s4)
 
-                        // Legal
-                        HStack(spacing: PlSpacing.s4) {
-                            Link("Terms", destination: URL(string: "https://plannr.app/terms")!)
-                            Text("·").foregroundStyle(.secondary)
-                            Link("Privacy", destination: URL(string: "https://plannr.app/privacy")!)
-                            Text("·").foregroundStyle(.secondary)
-                            Link("Manage Subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
-                        }
-                        .font(PlFont.caption())
-                        .foregroundStyle(.secondary)
+                        // Pricing detail
+                        Text("Just \(selectedPlan.monthlyEquiv) / month")
+                            .font(PlFont.subHeading())
+                            .foregroundStyle(Color.plForeground.opacity(0.4))
+                            .padding(.top, PlSpacing.s2)
+                            .padding(.bottom, PlSpacing.s3)
 
-                        Spacer(minLength: 40)
+                        // Spacer for sticky bottom
+                        Spacer(minLength: 160)
                     }
-                    .padding(.horizontal, PlSpacing.s4)
                 }
+
+                // Sticky bottom: fade gradient + button + legal
+                StickyPaywallBottom(
+                    plan: selectedPlan,
+                    isPurchasing: isPurchasing,
+                    onPurchase: purchase
+                )
             }
-            .ignoresSafeArea(edges: .top)
+            .background(Color.plBackground.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { dismiss() }) {
+                    Button { dismiss() } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color.plForeground.opacity(0.3))
                     }
                 }
             }
@@ -139,7 +120,6 @@ struct ProPaywallView: View {
 
     private func purchase() {
         isPurchasing = true
-        // In production: RevenueCat Purchases.shared.purchase(package: selectedPackage)
         Task {
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             await MainActor.run {
@@ -152,69 +132,143 @@ struct ProPaywallView: View {
     }
 }
 
-// MARK: - Pro feature row
+// MARK: - Gradient badge (top pill)
+// LinearGradient border, dark inner bg, gradient text
 
-struct ProFeatureRow: View {
-    let icon: String
-    let color: Color
-    let title: String
-    let detail: String
+struct GradientBadge: View {
+    let label: String
 
     var body: some View {
-        HStack(spacing: PlSpacing.s4) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(color.opacity(0.15))
-                    .frame(width: 44, height: 44)
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundStyle(color)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(PlFont.body(.semibold))
-                Text(detail).font(PlFont.caption()).foregroundStyle(.secondary)
-            }
-            Spacer()
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.plGreen)
+        ZStack {
+            // Gradient outer
+            LinearGradient.plPurple
+                .clipShape(Capsule())
+                .frame(height: 36)
+            // Inner bg
+            Color.plBackground
+                .clipShape(Capsule())
+                .padding(2)
+            // Label
+            Text(label)
+                .font(PlFont.body(.semibold))
+                .foregroundStyle(Color.plGradientStart)
+                .padding(.horizontal, PlSpacing.s3)
         }
+        .fixedSize(horizontal: true, vertical: false)
+        .frame(height: 36)
+        .plShadow(radius: 6)
     }
 }
 
 // MARK: - Plan card
+// border 2.5pt (selected = gradientEnd, unselected = input),
+// floating label on top-right edge
 
-struct PlanCard: View {
+struct PaywallPlanCard: View {
     let plan: ProPaywallView.Plan
     let isSelected: Bool
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: PlSpacing.s2) {
-                if let savings = plan.savings {
-                    Text(savings)
-                        .font(PlFont.caption(.bold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(.plGreen)
-                        .clipShape(Capsule())
+            ZStack(alignment: .topTrailing) {
+                // Card
+                HStack(alignment: .bottom, spacing: PlSpacing.s2) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(plan.rawValue)
+                            .font(PlFont.subHeading(.semibold))
+                            .foregroundStyle(Color.plForeground)
+                    }
+                    Spacer()
+                    // Price — 32pt + subLabel at subHeading opacity 0.4
+                    HStack(alignment: .lastTextBaseline, spacing: 4) {
+                        Text(plan.price)
+                            .font(.system(size: 32, weight: .bold))
+                            .foregroundStyle(Color.plForeground)
+                        Text(plan.subLabel)
+                            .font(PlFont.subHeading())
+                            .foregroundStyle(Color.plForeground.opacity(0.4))
+                            .padding(.bottom, 4)
+                    }
                 }
-                Text(plan.rawValue)
-                    .font(PlFont.subHeading(.semibold))
-                    .foregroundStyle(isSelected ? .plGradientStart : .primary)
-                Text(plan.price)
-                    .font(PlFont.caption())
-                    .foregroundStyle(.secondary)
+                .padding(.vertical, PlSpacing.s4)
+                .padding(.horizontal, PlSpacing.s5)
+                .background(Color.plBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(isSelected ? Color.plGradientEnd : Color.plInput, lineWidth: 2.5)
+                )
+
+                // Floating label — position absolute top -2 right 16
+                if let label = plan.floatingLabel {
+                    Text(label)
+                        .font(.system(size: PlFontSize.body - 2, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, PlSpacing.s3)
+                        .padding(.vertical, PlSpacing.s1)
+                        .background(Color.plGradientEnd)
+                        .clipShape(Capsule())
+                        .offset(x: -PlSpacing.s4, y: -8)
+                }
             }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color(.secondarySystemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isSelected ? .plGradientStart : Color.clear, lineWidth: 2)
+        }
+        .padding(.top, 8) // room for floating label
+    }
+}
+
+// MARK: - Sticky bottom section
+
+struct StickyPaywallBottom: View {
+    let plan: ProPaywallView.Plan
+    let isPurchasing: Bool
+    let onPurchase: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Fade gradient overlay (transparent → background)
+            LinearGradient(
+                colors: [Color.plBackground.opacity(0), Color.plBackground],
+                startPoint: .top, endPoint: .bottom
             )
+            .frame(height: 40)
+            .allowsHitTesting(false)
+
+            VStack(spacing: PlSpacing.s3) {
+                // Upgrade button
+                Button(action: onPurchase) {
+                    HStack {
+                        if isPurchasing {
+                            ProgressView().tint(.white)
+                        }
+                        Text(isPurchasing ? "Processing…" : "Subscribe — \(plan.price)\(plan.subLabel)")
+                            .font(PlFont.heading(.semibold))
+                            .foregroundStyle(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 56)
+                    .background(LinearGradient.plPurple)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .disabled(isPurchasing)
+                .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 0)
+
+                // Legal links
+                HStack(spacing: PlSpacing.s1) {
+                    Group {
+                        Text("Terms").underline()
+                        Text("·")
+                        Text("Privacy").underline()
+                        Text("·")
+                        Text("Restore Purchases").underline()
+                    }
+                    .font(.system(size: PlFontSize.body - 2))
+                    .foregroundStyle(Color.plGradientStart)
+                }
+            }
+            .padding(.horizontal, PlSpacing.s4)
+            .padding(.bottom, PlSpacing.s8)
+            .background(Color.plBackground)
         }
     }
 }

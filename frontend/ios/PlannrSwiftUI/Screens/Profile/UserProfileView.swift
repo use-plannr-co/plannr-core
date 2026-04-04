@@ -1,7 +1,6 @@
 import SwiftUI
 
 // MARK: - UserProfileView
-// Mirrors UserProfileScreen.jsx — settings, preferences, navigation to sub-screens.
 
 struct UserProfileView: View {
     @EnvironmentObject var appState: AppState
@@ -9,112 +8,134 @@ struct UserProfileView: View {
     @State private var showDeleteAlert = false
 
     var body: some View {
-        List {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 0) {
 
-            // Avatar + name header
-            Section {
+                // Title
+                Text("Profile")
+                    .font(PlFont.title())
+                    .foregroundStyle(Color.plForeground)
+                    .padding(.top, PlSpacing.s16)
+                    .padding(.horizontal, PlSpacing.s4)
+                    .padding(.bottom, PlSpacing.s5)
+
+                // Avatar + name card
                 HStack(spacing: PlSpacing.s4) {
-                    AvatarView(name: appState.userProfile.avatarName, size: 64)
-                    VStack(alignment: .leading, spacing: 4) {
+                    PlannrAvatarView(name: appState.userProfile.avatarName, size: 64)
+                    VStack(alignment: .leading, spacing: PlSpacing.s1) {
                         Text(appState.userProfile.displayName)
                             .font(PlFont.heading(.semibold))
+                            .foregroundStyle(Color.plForeground)
                         Text(appState.userProfile.email)
                             .font(PlFont.body())
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.plForeground.opacity(0.5))
                     }
                     Spacer()
                 }
-                .padding(.vertical, PlSpacing.s2)
-            }
+                .padding(PlSpacing.s4)
+                .background(Color.plComp)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .plShadow(radius: 12)
+                .padding(.horizontal, PlSpacing.s4)
+                .padding(.bottom, PlSpacing.s4)
 
-            // Appearance
-            Section("Appearance") {
-                Toggle(isOn: $appState.isDarkMode) {
-                    Label("Dark Mode", systemImage: "moon.fill")
-                }
-                .tint(.plGradientStart)
-            }
-
-            // Scheduling defaults
-            Section("Scheduling") {
-                Picker(selection: $appState.userProfile.preferredStrategy) {
-                    ForEach(SchedulingStrategy.allCases, id: \.rawValue) { s in
-                        Text(s.displayName).tag(s)
-                    }
-                } label: {
-                    Label("Default Strategy", systemImage: "slider.horizontal.3")
+                // Settings sections
+                ProfileSection(title: "Appearance") {
+                    ProfileToggleRow(icon: "moon.fill", label: "Dark Mode", isOn: $appState.isDarkMode)
                 }
 
-                HStack {
-                    Label("Working Hours Limit", systemImage: "clock")
-                    Spacer()
-                    Stepper("\(Int(appState.userProfile.dailyWorkingHoursLimit))h",
+                ProfileSection(title: "Scheduling") {
+                    VStack(spacing: 0) {
+                        ProfilePickerRow(
+                            icon: "slider.horizontal.3",
+                            label: "Strategy",
+                            selection: $appState.userProfile.preferredStrategy,
+                            options: SchedulingStrategy.allCases,
+                            display: { $0.displayName }
+                        )
+                        ProfileDivider()
+                        ProfileStepperRow(
+                            icon: "clock",
+                            label: "Working Hours",
                             value: $appState.userProfile.dailyWorkingHoursLimit,
-                            in: 1...16, step: 0.5)
-                        .fixedSize()
-                }
-
-                HStack {
-                    Label("Min Gap", systemImage: "timer")
-                    Spacer()
-                    Stepper("\(appState.userProfile.minGapBetweenEvents) min",
+                            range: 1...16, step: 0.5,
+                            format: { "\(Int($0))h" }
+                        )
+                        ProfileDivider()
+                        ProfileIntStepperRow(
+                            icon: "timer",
+                            label: "Min Gap",
                             value: $appState.userProfile.minGapBetweenEvents,
-                            in: 0...60, step: 5)
-                        .fixedSize()
-                }
-            }
-
-            // Notifications
-            Section("Notifications") {
-                Toggle(isOn: $appState.userProfile.taskRemindersEnabled) {
-                    Label("Task Reminders", systemImage: "bell.fill")
-                }
-                .tint(.plGradientStart)
-            }
-
-            // Pro
-            Section("Subscription") {
-                if appState.isPro {
-                    HStack {
-                        Label("Plannr Pro", systemImage: "crown.fill")
-                            .foregroundStyle(.plGradientStart)
-                        Spacer()
-                        Text("Active")
-                            .font(PlFont.caption(.semibold))
-                            .foregroundStyle(.plGreen)
-                    }
-                } else {
-                    NavigationLink(destination: ProPaywallView()) {
-                        Label("Upgrade to Pro", systemImage: "crown.fill")
-                            .foregroundStyle(.plGradientStart)
+                            range: 0...60, step: 5,
+                            format: { "\($0) min" }
+                        )
                     }
                 }
-            }
 
-            // Account navigation
-            Section("Account") {
-                NavigationLink(destination: ManageAccountView()) {
-                    Label("Manage Account", systemImage: "person.crop.circle")
+                ProfileSection(title: "Notifications") {
+                    ProfileToggleRow(icon: "bell.fill", label: "Task Reminders",
+                                     isOn: $appState.userProfile.taskRemindersEnabled)
                 }
-                NavigationLink(destination: SavedSchedulesView()) {
-                    Label("Saved Schedules", systemImage: "calendar")
-                }
-                NavigationLink(destination: ProductivityAnalyticsView()) {
-                    Label("Productivity Analytics", systemImage: "chart.bar.fill")
-                }
-            }
 
-            // Danger zone
-            Section {
-                Button(role: .destructive, action: { showSignOutAlert = true }) {
-                    Label("Sign Out", systemImage: "arrow.right.square")
+                ProfileSection(title: "Subscription") {
+                    if appState.isPro {
+                        ProfileRow(icon: "crown.fill", label: "Plannr Pro", value: "Active",
+                                   valueColor: Color.plGreen)
+                    } else {
+                        NavigationLink(destination: ProPaywallView()) {
+                            ProfileRowContent(icon: "crown.fill", label: "Upgrade to Pro",
+                                              iconColor: Color.plGradientStart)
+                        }
+                    }
                 }
-                Button(role: .destructive, action: { showDeleteAlert = true }) {
-                    Label("Delete Account", systemImage: "trash")
+
+                ProfileSection(title: "Account") {
+                    VStack(spacing: 0) {
+                        NavigationLink(destination: ManageAccountView()) {
+                            ProfileRowContent(icon: "person.crop.circle", label: "Manage Account")
+                        }
+                        ProfileDivider()
+                        NavigationLink(destination: SavedSchedulesView()) {
+                            ProfileRowContent(icon: "calendar", label: "Saved Schedules")
+                        }
+                        ProfileDivider()
+                        NavigationLink(destination: ProductivityAnalyticsView()) {
+                            ProfileRowContent(icon: "chart.bar.fill", label: "Productivity Analytics")
+                        }
+                    }
                 }
+
+                // Danger actions
+                VStack(spacing: PlSpacing.s3) {
+                    Button(action: { showSignOutAlert = true }) {
+                        Text("Sign Out")
+                            .font(PlFont.subHeading(.semibold))
+                            .foregroundStyle(Color.plForeground)
+                            .frame(maxWidth: .infinity)
+                            .padding(PlSpacing.s4)
+                            .background(Color.plComp)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .plShadow(radius: 6)
+                    }
+                    Button(action: { showDeleteAlert = true }) {
+                        Text("Delete Account")
+                            .font(PlFont.subHeading(.semibold))
+                            .foregroundStyle(Color.plRed)
+                            .frame(maxWidth: .infinity)
+                            .padding(PlSpacing.s4)
+                            .background(Color.plComp)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .plShadow(radius: 6)
+                    }
+                }
+                .padding(.horizontal, PlSpacing.s4)
+                .padding(.top, PlSpacing.s2)
+
+                Spacer(minLength: 100)
             }
         }
-        .navigationTitle("Profile")
+        .background(Color.plBackground.ignoresSafeArea())
+        .navigationBarHidden(true)
         .alert("Sign Out?", isPresented: $showSignOutAlert) {
             Button("Sign Out", role: .destructive) { appState.signOut() }
             Button("Cancel", role: .cancel) {}
@@ -128,22 +149,209 @@ struct UserProfileView: View {
     }
 }
 
+// MARK: - Profile section container
+
+struct ProfileSection<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PlSpacing.s2) {
+            Text(title)
+                .font(PlFont.caption(.semibold))
+                .foregroundStyle(Color.plForeground.opacity(0.4))
+                .textCase(.uppercase)
+                .padding(.horizontal, PlSpacing.s4)
+            content()
+                .background(Color.plComp)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .plShadow(radius: 6)
+                .padding(.horizontal, PlSpacing.s4)
+        }
+        .padding(.bottom, PlSpacing.s4)
+    }
+}
+
+struct ProfileDivider: View {
+    var body: some View {
+        Rectangle()
+            .fill(Color.plForeground.opacity(0.08))
+            .frame(height: 1)
+            .padding(.leading, PlSpacing.s4 + 24 + PlSpacing.s3)
+    }
+}
+
+struct ProfileRowContent: View {
+    let icon: String
+    let label: String
+    var iconColor: Color = Color.plForeground
+
+    var body: some View {
+        HStack(spacing: PlSpacing.s3) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(iconColor)
+                .frame(width: 24)
+            Text(label)
+                .font(PlFont.subHeading())
+                .foregroundStyle(Color.plForeground)
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Color.plForeground.opacity(0.3))
+        }
+        .padding(.horizontal, PlSpacing.s4)
+        .padding(.vertical, PlSpacing.s3)
+    }
+}
+
+struct ProfileRow: View {
+    let icon: String
+    let label: String
+    let value: String
+    var valueColor: Color = Color.plForeground
+
+    var body: some View {
+        HStack(spacing: PlSpacing.s3) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(Color.plForeground)
+                .frame(width: 24)
+            Text(label)
+                .font(PlFont.subHeading())
+                .foregroundStyle(Color.plForeground)
+            Spacer()
+            Text(value)
+                .font(PlFont.caption(.semibold))
+                .foregroundStyle(valueColor)
+        }
+        .padding(.horizontal, PlSpacing.s4)
+        .padding(.vertical, PlSpacing.s3)
+    }
+}
+
+struct ProfileToggleRow: View {
+    let icon: String
+    let label: String
+    @Binding var isOn: Bool
+
+    var body: some View {
+        HStack(spacing: PlSpacing.s3) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(Color.plForeground)
+                .frame(width: 24)
+            Text(label)
+                .font(PlFont.subHeading())
+                .foregroundStyle(Color.plForeground)
+            Spacer()
+            Toggle("", isOn: $isOn)
+                .tint(Color.plGradientStart)
+                .labelsHidden()
+        }
+        .padding(.horizontal, PlSpacing.s4)
+        .padding(.vertical, PlSpacing.s3)
+    }
+}
+
+struct ProfilePickerRow<T: Hashable>: View {
+    let icon: String
+    let label: String
+    @Binding var selection: T
+    let options: [T]
+    let display: (T) -> String
+
+    var body: some View {
+        HStack(spacing: PlSpacing.s3) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(Color.plForeground)
+                .frame(width: 24)
+            Text(label)
+                .font(PlFont.subHeading())
+                .foregroundStyle(Color.plForeground)
+            Spacer()
+            Picker("", selection: $selection) {
+                ForEach(options, id: \.self) { opt in
+                    Text(display(opt)).tag(opt)
+                }
+            }
+            .tint(Color.plGradientStart)
+        }
+        .padding(.horizontal, PlSpacing.s4)
+        .padding(.vertical, PlSpacing.s3)
+    }
+}
+
+struct ProfileStepperRow: View {
+    let icon: String
+    let label: String
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let step: Double
+    let format: (Double) -> String
+
+    var body: some View {
+        HStack(spacing: PlSpacing.s3) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(Color.plForeground)
+                .frame(width: 24)
+            Text(label)
+                .font(PlFont.subHeading())
+                .foregroundStyle(Color.plForeground)
+            Spacer()
+            Stepper(format(value), value: $value, in: range, step: step)
+                .labelsHidden()
+            Text(format(value))
+                .font(PlFont.caption(.semibold))
+                .foregroundStyle(Color.plForeground)
+                .frame(minWidth: 36, alignment: .trailing)
+        }
+        .padding(.horizontal, PlSpacing.s4)
+        .padding(.vertical, PlSpacing.s3)
+    }
+}
+
+struct ProfileIntStepperRow: View {
+    let icon: String
+    let label: String
+    @Binding var value: Int
+    let range: ClosedRange<Int>
+    let step: Int
+    let format: (Int) -> String
+
+    var body: some View {
+        HStack(spacing: PlSpacing.s3) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(Color.plForeground)
+                .frame(width: 24)
+            Text(label)
+                .font(PlFont.subHeading())
+                .foregroundStyle(Color.plForeground)
+            Spacer()
+            Stepper("", value: $value, in: range, step: step).labelsHidden()
+            Text(format(value))
+                .font(PlFont.caption(.semibold))
+                .foregroundStyle(Color.plForeground)
+                .frame(minWidth: 48, alignment: .trailing)
+        }
+        .padding(.horizontal, PlSpacing.s4)
+        .padding(.vertical, PlSpacing.s3)
+    }
+}
+
 // MARK: - Avatar view
 
-struct AvatarView: View {
+struct PlannrAvatarView: View {
     let name: String
     let size: CGFloat
 
-    // Maps the avatarName string to a system SF Symbol (real app would use image assets)
-    private var symbolName: String {
-        let table: [String: String] = [
-            "avatar1": "person.fill",
-            "avatar2": "person.crop.circle.fill",
-            "avatar3": "person.circle.fill",
-            "avatar4": "person.badge.clock.fill",
-            "avatar5": "figure.wave",
-            "avatar6": "figure.run",
-        ]
+    private var symbol: String {
+        let table = ["avatar1": "person.fill", "avatar2": "person.crop.circle.fill",
+                     "avatar3": "figure.wave", "avatar4": "figure.run",
+                     "avatar5": "person.badge.clock.fill", "avatar6": "brain.head.profile"]
         return table[name] ?? "person.fill"
     }
 
@@ -152,8 +360,8 @@ struct AvatarView: View {
             Circle()
                 .fill(LinearGradient.plPurple)
                 .frame(width: size, height: size)
-            Image(systemName: symbolName)
-                .font(.system(size: size * 0.4))
+            Image(systemName: symbol)
+                .font(.system(size: size * 0.38, weight: .semibold))
                 .foregroundStyle(.white)
         }
     }

@@ -22,7 +22,7 @@ struct ManageAccountView: View {
                             AvatarView(name: appState.userProfile.avatarName, size: 90)
                             ZStack {
                                 Circle()
-                                    .fill(Color(.systemBackground))
+                                    .fill(Color.plBackground)
                                     .frame(width: 28, height: 28)
                                 Image(systemName: "pencil.circle.fill")
                                     .font(.system(size: 26))
@@ -45,7 +45,7 @@ struct ManageAccountView: View {
             // Email (read-only)
             Section("Email") {
                 Text(appState.userProfile.email)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.plForeground.opacity(0.5))
             }
         }
         .navigationTitle("Manage Account")

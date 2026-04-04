@@ -81,7 +81,7 @@ struct ChatView: View {
                                     .font(PlFont.caption(.semibold))
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 8)
-                                    .background(.ultraThinMaterial)
+                                    .background(Color.plComp)
                                     .clipShape(Capsule())
                             }
                             Spacer()
@@ -198,13 +198,13 @@ struct ChatBubble: View {
                     .background(
                         isUser
                         ? AnyShapeStyle(LinearGradient.plPurple)
-                        : AnyShapeStyle(Color(.secondarySystemBackground))
+                        : AnyShapeStyle(Color.plComp)
                     )
                     .clipShape(BubbleShape(isUser: isUser))
 
                 Text(timeString(message.timestamp))
                     .font(PlFont.caption())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.plForeground.opacity(0.5))
                     .padding(.horizontal, 4)
             }
 
@@ -253,7 +253,7 @@ struct SuggestionPills: View {
 
             Text("I can help you understand, manage, and optimise your schedule.")
                 .font(PlFont.body())
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.plForeground.opacity(0.5))
                 .multilineTextAlignment(.center)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: PlSpacing.s3) {
@@ -264,10 +264,10 @@ struct SuggestionPills: View {
                             .multilineTextAlignment(.center)
                             .padding()
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(Color(.secondarySystemBackground))
+                            .background(Color.plComp)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color.plForeground)
                 }
             }
         }
@@ -294,7 +294,7 @@ struct TypingIndicator: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(Color(.secondarySystemBackground))
+            .background(Color.plComp)
             .clipShape(RoundedRectangle(cornerRadius: 18))
             Spacer()
         }
@@ -320,13 +320,13 @@ struct ChatInputBar: View {
                 .lineLimit(4)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
-                .background(Color(.secondarySystemBackground))
+                .background(Color.plComp)
                 .clipShape(RoundedRectangle(cornerRadius: 22))
 
             Button(action: onSend) {
                 ZStack {
                     Circle()
-                        .fill(text.isEmpty ? AnyShapeStyle(Color(.tertiarySystemBackground)) : AnyShapeStyle(LinearGradient.plPurple))
+                        .fill(text.isEmpty ? AnyShapeStyle(Color.plInput) : AnyShapeStyle(LinearGradient.plPurple))
                         .frame(width: 40, height: 40)
                     Image(systemName: isLoading ? "stop.fill" : "arrow.up")
                         .font(.system(size: 14, weight: .bold))
@@ -337,7 +337,7 @@ struct ChatInputBar: View {
         }
         .padding(.horizontal, PlSpacing.s4)
         .padding(.vertical, PlSpacing.s3)
-        .background(.ultraThinMaterial)
+        .background(Color.plComp)
         .overlay(alignment: .top) { Divider() }
     }
 }
@@ -366,7 +366,7 @@ struct ChatDrawer: View {
                                     .lineLimit(1)
                                 Text("\(chat.messages.count) messages")
                                     .font(PlFont.caption())
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color.plForeground.opacity(0.5))
                             }
                             Spacer()
                             if activeChat?.id == chat.id {
@@ -375,7 +375,7 @@ struct ChatDrawer: View {
                             }
                         }
                     }
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color.plForeground)
                     .swipeActions {
                         Button("Delete", role: .destructive) { onDelete(chat) }
                     }

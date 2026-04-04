@@ -61,7 +61,7 @@ struct GenerateScheduleView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color(.secondarySystemBackground))
+                        .background(Color.plComp)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
 
@@ -203,13 +203,13 @@ struct AddTasksStageView: View {
                 TextEditor(text: $config.taskInputText)
                     .frame(minHeight: 140)
                     .padding(8)
-                    .background(Color(.secondarySystemBackground))
+                    .background(Color.plComp)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
 
                 if config.taskInputText.isEmpty {
                     Text("e.g. Write report for 2 hours, high priority, due Friday")
                         .font(PlFont.body())
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(Color.plForeground.opacity(0.3))
                         .padding(.top, 16)
                         .padding(.leading, 12)
                         .allowsHitTesting(false)
@@ -256,7 +256,7 @@ struct ReviewTasksStageView: View {
             if config.flexibleEvents.isEmpty {
                 Text("No tasks yet — go back and add some.")
                     .font(PlFont.body())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.plForeground.opacity(0.5))
             } else {
                 ForEach($config.flexibleEvents) { $event in
                     EventReviewCard(event: $event) {
@@ -306,7 +306,7 @@ struct EventReviewCard: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.plComp)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
@@ -325,7 +325,7 @@ struct BusyTimesStageView: View {
             if config.busyTimes.isEmpty {
                 Text("No busy times added.")
                     .font(PlFont.body())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.plForeground.opacity(0.5))
             } else {
                 ForEach(config.busyTimes) { busy in
                     HStack {
@@ -334,7 +334,7 @@ struct BusyTimesStageView: View {
                             Text(busy.startTime.display12 + " – " +
                                  busy.startTime.adding(minutes: busy.duration).display12)
                                 .font(PlFont.caption())
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.plForeground.opacity(0.5))
                         }
                         Spacer()
                         Button(action: {
@@ -342,7 +342,7 @@ struct BusyTimesStageView: View {
                         }) { Image(systemName: "xmark").foregroundStyle(.red) }
                     }
                     .padding()
-                    .background(Color(.secondarySystemBackground))
+                    .background(Color.plComp)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
             }
@@ -420,12 +420,12 @@ struct SummaryRow: View {
     let value: String
     var body: some View {
         HStack {
-            Text(label).font(PlFont.body()).foregroundStyle(.secondary)
+            Text(label).font(PlFont.body()).foregroundStyle(Color.plForeground.opacity(0.5))
             Spacer()
             Text(value).font(PlFont.body(.semibold))
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.plComp)
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
@@ -443,7 +443,7 @@ struct StageProgressBar: View {
                     Capsule()
                         .fill(stage.rawValue <= currentStage.rawValue
                               ? AnyShapeStyle(LinearGradient.plPurple)
-                              : AnyShapeStyle(Color(.tertiarySystemBackground)))
+                              : AnyShapeStyle(Color.plInput))
                         .frame(height: 4)
                 }
             }
@@ -454,7 +454,7 @@ struct StageProgressBar: View {
                 Spacer()
                 Text("Step \(currentStage.rawValue + 1) of \(total)")
                     .font(PlFont.caption())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.plForeground.opacity(0.5))
             }
         }
     }
@@ -477,7 +477,7 @@ struct StageSectionHeader: View {
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(PlFont.subHeading(.semibold))
-                Text(subtitle).font(PlFont.caption()).foregroundStyle(.secondary)
+                Text(subtitle).font(PlFont.caption()).foregroundStyle(Color.plForeground.opacity(0.5))
             }
         }
     }
@@ -491,7 +491,7 @@ struct StepperField: View {
 
     var body: some View {
         HStack {
-            Text(label).font(PlFont.body()).foregroundStyle(.secondary)
+            Text(label).font(PlFont.body()).foregroundStyle(Color.plForeground.opacity(0.5))
             Spacer()
             HStack(spacing: PlSpacing.s2) {
                 Button { value = max(range.lowerBound, value - step) }
@@ -504,7 +504,7 @@ struct StepperField: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.plComp)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
@@ -533,11 +533,11 @@ struct StrategyPill: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? AnyShapeStyle(LinearGradient.plPurple) : AnyShapeStyle(Color(.secondarySystemBackground)))
+            .background(isSelected ? AnyShapeStyle(LinearGradient.plPurple) : AnyShapeStyle(Color.plComp))
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color.clear : Color(.separator), lineWidth: 1)
+                    .stroke(isSelected ? Color.clear : Color.plForeground.opacity(0.12), lineWidth: 1)
             )
         }
     }

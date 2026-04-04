@@ -150,7 +150,7 @@ struct TimelineView: View {
                         HStack(spacing: 0) {
                             Text(hourLabel(hour))
                                 .font(.system(size: 11))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.plForeground.opacity(0.5))
                                 .frame(width: timeColumnWidth, alignment: .trailing)
                                 .padding(.trailing, 8)
                             Divider()
@@ -211,11 +211,11 @@ struct TimeBlockCell: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(block.name)
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color.plForeground)
                     .lineLimit(2)
                 Text(block.timeRangeDisplay)
                     .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.plForeground.opacity(0.5))
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
@@ -310,13 +310,13 @@ struct InfoRow: View {
         HStack {
             Label(label, systemImage: icon)
                 .font(PlFont.body())
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.plForeground.opacity(0.5))
             Spacer()
             Text(value)
                 .font(PlFont.body(.semibold))
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.plComp)
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
@@ -361,7 +361,7 @@ struct EmptyDayView: View {
                 .font(PlFont.heading())
             Text("No blocks for this day.")
                 .font(PlFont.body())
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.plForeground.opacity(0.5))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.top, 80)

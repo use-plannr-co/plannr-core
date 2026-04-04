@@ -75,11 +75,7 @@ struct ProductivityAnalyticsView: View {
                             .interpolationMethod(.catmullRom)
                         }
                         .chartYScale(domain: 0...1)
-                        .chartXAxis {
-                            AxisMarks(values: .stride(by: .day, count: 2)) { _ in
-                                AxisValueLabel(format: .dateTime.month().day())
-                            }
-                        }
+                        .chartXAxis(.hidden)
                         .frame(height: 160)
                     }
 
@@ -91,7 +87,7 @@ struct ProductivityAnalyticsView: View {
                                 y: .value("Rate", item.rate)
                             )
                             .foregroundStyle(
-                                item.rate > 0.7 ? .plGreen : item.rate > 0.4 ? .plGradientStart : .plOrange
+                                item.rate > 0.7 ? Color.plGreen : item.rate > 0.4 ? Color.plGradientStart : Color.plOrange
                             )
                             .cornerRadius(4)
                         }
@@ -116,7 +112,7 @@ struct ProductivityAnalyticsView: View {
                                     GeometryReader { geo in
                                         ZStack(alignment: .leading) {
                                             RoundedRectangle(cornerRadius: 4)
-                                                .fill(Color(.tertiarySystemBackground))
+                                                .fill(Color.plInput)
                                             RoundedRectangle(cornerRadius: 4)
                                                 .fill(Color.activityColor(for: item.type))
                                                 .frame(width: geo.size.width * item.rate)
@@ -156,12 +152,12 @@ struct ChartCard<Content: View>: View {
         VStack(alignment: .leading, spacing: PlSpacing.s3) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(PlFont.subHeading(.semibold))
-                Text(subtitle).font(PlFont.caption()).foregroundStyle(.secondary)
+                Text(subtitle).font(PlFont.caption()).foregroundStyle(Color.plForeground.opacity(0.5))
             }
             content()
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.plComp)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
@@ -188,11 +184,11 @@ struct MoodCheckinCard: View {
             if let m = mood {
                 Text("Logged: \(m.rawValue) for today")
                     .font(PlFont.caption())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.plForeground.opacity(0.5))
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground))
+        .background(Color.plComp)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
@@ -218,7 +214,7 @@ struct ProGate<Content: View>: View {
                     .font(PlFont.heading(.bold))
                 Text("Unlock detailed productivity analytics and more with Plannr Pro.")
                     .font(PlFont.body())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.plForeground.opacity(0.5))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, PlSpacing.s8)
                 PlButton(title: "Unlock Pro") { showPaywall = true }
