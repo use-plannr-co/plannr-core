@@ -198,7 +198,10 @@ export default function ChatScreen() {
             >
                 {displayMessages.length === 0 && !isStreaming && (
                     <View style={styles.emptyState}>
-                        <Image source={require('../../assets/planova/planova-default.png')} style={styles.emptyImage} />
+                        <Image
+                            source={require('../../assets/planova/planova-default.png')}
+                            style={styles.emptyImage}
+                        />
                         <Text style={[styles.emptyTitle, { color: theme.FOREGROUND }]}>
                             How can I help you plan today?
                         </Text>

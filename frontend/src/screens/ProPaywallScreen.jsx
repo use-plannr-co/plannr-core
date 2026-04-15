@@ -338,7 +338,10 @@ const ProPaywallScreen = ({ navigation, route }) => {
             {/* Scrollable content: badge, title, features, testimonials */}
             <ScrollView
                 style={{ flex: 1, width: '100%' }}
-                contentContainerStyle={[styles.subContainer, { paddingBottom: bottomSectionHeight }]}
+                contentContainerStyle={[
+                    styles.subContainer,
+                    { paddingBottom: bottomSectionHeight },
+                ]}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
@@ -510,14 +513,23 @@ const ProPaywallScreen = ({ navigation, route }) => {
                                     {annualMonthlyPrice}, Billed Annually
                                 </Text>
                             </View>
-                            <Text style={[styles.pricingDetails, { color: theme.FOREGROUND, opacity: 0.4 }]}>
+                            <Text
+                                style={[
+                                    styles.pricingDetails,
+                                    { color: theme.FOREGROUND, opacity: 0.4 },
+                                ]}
+                            >
                                 Get a free 1-week trial!
                             </Text>
                         </View>
                         <View
                             style={[
                                 styles.planCardLabelContainer,
-                                { backgroundColor: theme.GRADIENT_END, borderWidth: 2.5, borderColor: theme.GRADIENT_END },
+                                {
+                                    backgroundColor: theme.GRADIENT_END,
+                                    borderWidth: 2.5,
+                                    borderColor: theme.GRADIENT_END,
+                                },
                             ]}
                         >
                             <Text style={[styles.planCardLabelText, { color: '#FFFFFF' }]}>
@@ -561,7 +573,11 @@ const ProPaywallScreen = ({ navigation, route }) => {
                         <View
                             style={[
                                 styles.planCardLabelContainer,
-                                { backgroundColor: theme.GRADIENT_END, borderWidth: 2.5, borderColor: theme.GRADIENT_END },
+                                {
+                                    backgroundColor: theme.GRADIENT_END,
+                                    borderWidth: 2.5,
+                                    borderColor: theme.GRADIENT_END,
+                                },
                             ]}
                         >
                             <Text style={[styles.planCardLabelText, { color: '#FFFFFF' }]}>
@@ -598,7 +614,10 @@ const ProPaywallScreen = ({ navigation, route }) => {
                             colors={[theme.GRADIENT_START, theme.GRADIENT_END]}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
-                            style={[styles.upgradeButton, (isPro || !offerings) && { opacity: 0.7 }]}
+                            style={[
+                                styles.upgradeButton,
+                                (isPro || !offerings) && { opacity: 0.7 },
+                            ]}
                         >
                             {purchasing ? (
                                 <ActivityIndicator color="#FFFFFF" />
@@ -671,12 +690,7 @@ const TestimonialItem = ({ name, rating, quote, theme }) => {
             <Text style={[styles.testimonialName, { color: theme.FOREGROUND }]}>{name}</Text>
             <View style={{ flexDirection: 'row', marginVertical: 8 }}>
                 {[...Array(rating)].map((_, idx) => (
-                    <StarIcon
-                        key={idx}
-                        width={16}
-                        height={16}
-                        style={{ marginRight: 2 }}
-                    />
+                    <StarIcon key={idx} width={16} height={16} style={{ marginRight: 2 }} />
                 ))}
             </View>
             <Text style={[styles.testimonialQuote, { color: theme.FOREGROUND }]}>"{quote}"</Text>
